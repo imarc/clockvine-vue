@@ -44,15 +44,10 @@ export default class {
 
         this.mutations = {
             api_error(state, error) {
-                console.error("API", error);
-                if (error.response && error.response.status == 401) {
-                    // not logged in
-                    window.location = '/login';
-                }
+                //
             },
 
             setAll(state, response) {
-                console.log('setAll', response.data);
                 state.records = {};
                 for (let i = 0; i < response.data.length; i++) {
                     Vue.set(
@@ -85,7 +80,6 @@ export default class {
 
         this.actions = {
             index({commit, getters}, params) {
-                console.log('here', arguments);
                 return apiQueue.pushTask((resolve, reject) => {
                     if (getters.loaded) {
                         resolve();
