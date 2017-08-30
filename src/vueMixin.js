@@ -21,7 +21,13 @@ export default {
 
     methods: {
         handleErrors(error) {
-            this.errors = error.response.data;
+            let errors = error.response.data.errors;
+
+            if (Array.isArray(errors) && errors.length == 1) {
+                this.errors = errors[0];
+            } else {
+                this.errors = error.response.data.errors;
+            }
             throw error;
         },
 
