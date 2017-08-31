@@ -40,6 +40,11 @@ export default class {
             loaded(state) {
                 return Object.keys(state.records).length > 0;
             },
+            alphabeticalBy: state => field => {
+                return Object.keys(state.records)
+                    .map(key => state.records[key])
+                    .sort((a, b) => a[field].localeCompare(b[field]));
+            },
         };
 
         this.mutations = {
