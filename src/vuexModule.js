@@ -11,7 +11,7 @@ export default class {
     /**
      * The constructor here requires the base URL (relative) for API queries.
      */
-    constructor(indexUrl) {
+    constructor(indexUrl, primaryKey='id') {
 
         /**
          * This apiQueue uses simple-promise-queue to handle simple queuing
@@ -57,27 +57,27 @@ export default class {
                 for (let i = 0; i < response.data.length; i++) {
                     Vue.set(
                         state.records,
-                        response.data[i].id,
+                        response.data[i][primaryKey],
                         response.data[i]
                     );
                 }
             },
 
             set(state, response) {
-                if (typeof(response.data.id) != undefined) {
+                if (typeof(response.data[primaryKey]) != undefined) {
                     Vue.set(
                         state.records,
-                        response.data.id,
+                        response.data[primaryKey],
                         response.data
                     );
                 }
             },
 
             delete(state, response) {
-                if (typeof(response.data.id) != undefined) {
+                if (typeof(response.data[primaryKey]) != undefined) {
                     Vue.delete(
                         state.records,
-                        response.data.id
+                        response.data[primaryKey]
                     );
                 }
             },
@@ -108,14 +108,14 @@ export default class {
 
             show({commit, state}, params) {
                 return apiQueue.pushTask((resolve, reject) => {
-                    if (params.id in state.records) {
+                    if (params[primaryKey] in state.records) {
                         resolve();
                     } else {
                         let url = indexUrl;
                         if (params && typeof(params.urlParams) != 'undefined') {
                             url = buildUrl(url, params.urlParams);
                         }
-                        Axios.get(`${url}/${params.id}`)
+                        Axios.get(`${url}/${params[primaryKey]}`)
                             .then(response => {
                                 commit('set', response.data);
                                 resolve(response);
@@ -153,7 +153,7 @@ export default class {
                     if (params && typeof(params.urlParams) != 'undefined') {
                         url = buildUrl(url, params.urlParams);
                     }
-                    Axios.put(`${url}/${params.data.id}`, params.data)
+                    Axios.put(`${url}/${params.record[primaryKey]}`, params.data)
                         .then(response => {
                             commit('set', response.data);
                             resolve(response);
@@ -171,7 +171,7 @@ export default class {
                     if (params && typeof(params.urlParams) != 'undefined') {
                         url = buildUrl(url, params.urlParams);
                     }
-                    Axios.delete(`${url}/${params.id}`)
+                    Axios.delete(`${url}/${params[primaryKey]}`)
                         .then(response => {
                             commit('delete', response.data);
                             resolve(response);

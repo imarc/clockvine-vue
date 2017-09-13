@@ -7,15 +7,20 @@ export default {
 
     data: () => ({
         errors: {},
+        primaryKey: 'id',
     }),
 
     computed: {
         exists() {
-            return typeof(this.id) !== "undefined" && this.id !== null;
+            return typeof(this[this.primaryKey]) !== "undefined" && this[this.primaryKey] !== null;
+        },
+
+        unchangedRecord() {
+            return this.$store.state[this.type].records[this[this.primaryKey]] || this.baseRecord();
         },
 
         record() {
-            return this.$store.state[this.type].records[this.id] || this.baseRecord();
+            return this.unchangedRecord;
         },
     },
 
@@ -33,7 +38,7 @@ export default {
 
         save() {
             if (this.exists) {
-                return this.$store.dispatch(this.type +'/update', {data: this.record, urlParams: this.urlParams})
+                return this.$store.dispatch(this.type +'/update', {data: this.record, urlParams: this.urlParams, record: this.unchangedRecord})
                     .catch(this.handleErrors);
             } else {
                 return this.$store.dispatch(this.type + '/store', {data: this.record, urlParams: this.urlParams})
@@ -42,14 +47,14 @@ export default {
         },
 
         destroy() {
-            return this.$store.dispatch(this.type + '/destroy', {id: this.record.id, urlParams: this.urlParams})
+            return this.$store.dispatch(this.type + '/destroy', {[this.primaryKey]: this.record[this.primaryKey], urlParams: this.urlParams})
                 .catch(this.handleErrors);
         },
     },
 
     mounted() {
         if (this.exists) {
-            this.$store.dispatch(this.type + '/show', {id: this.id, urlParams: this.urlParams});
+            this.$store.dispatch(this.type + '/show', {[this.primaryKey]: this[this.primaryKey], urlParams: this.urlParams});
         }
     },
 };

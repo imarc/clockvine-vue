@@ -15,7 +15,7 @@ export default {
             if (this.localRecord) {
                 return this.localRecord;
             } else {
-                return this.$store.state[this.type].records[this.id] || this.baseRecord();
+                return this.unchangedRecord;
             }
         },
 
@@ -31,7 +31,7 @@ export default {
 
         save() {
             if (this.exists) {
-                return this.$store.dispatch(this.type  + '/update', {data: this.localRecord, urlParams: this.urlParams})
+                return this.$store.dispatch(this.type  + '/update', {data: this.localRecord, urlParams: this.urlParams, record: this.unchangedRecord})
                     .then(() => { this.localRecord = null })
                     .catch(this.handleErrors);
             } else {
