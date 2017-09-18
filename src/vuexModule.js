@@ -18,13 +18,20 @@ export default class {
          * around API requests to avoid repeating.
          */
         let apiQueue = new Queue({autoStart: true, concurrency: 1});
+        let mod = this;
 
-        let buildUrl = (str, params) => {
+        this.indexUrl = () => indexUrl;
+
+        this.getUrl = (action, params) => {
+            let url = this.indexUrl(action, params);
             for (let key in params) {
-                str = str.replace(`{${key}}`, params[key]);
+                url = url.replace(`{${key}}`, params[key]);
+            }
+            if (action == 'show' || action == 'update' || action == 'destroy') {
+                url += '/' + (params.record ? params.record[primaryKey] : params[primaryKey]);
             }
 
-            return str;
+            return url;
         };
 
         /**
@@ -33,13 +40,15 @@ export default class {
         this.namespaced = true;
 
         this.state = {
+            indexes: {},
             records: {},
         };
 
         this.getters = {
-            loaded(state) {
-                return Object.keys(state.records).length > 0;
+            indexLoaded: state => url => {
+                return typeof(state.indexes[url]) == 'object';
             },
+
             alphabeticalBy: state => field => {
                 return Object.keys(state.records)
                     .map(key => state.records[key])
@@ -49,7 +58,13 @@ export default class {
 
         this.mutations = {
             api_error(state, error) {
-                //
+                console.error('api_error', state, error);
+            },
+
+            setIndex(state, {url, data}) {
+                if (typeof(url) == 'object') {
+                }
+                Vue.set(state.indexes, url, data);
             },
 
             setAll(state, response) {
@@ -83,26 +98,38 @@ export default class {
             },
         };
 
+        let reindex = (url, commit, resolve, reject) => {
+            Axios.get(url)
+                .then(response => {
+                    commit('setAll', response.data);
+                    commit('setIndex', {url, data: response.data.data});
+                    resolve(response);
+                })
+                .catch(error => {
+                    commit('api_error', error)
+                    reject(error);
+                });
+        };
+
         this.actions = {
             index({commit, getters}, params) {
                 return apiQueue.pushTask((resolve, reject) => {
-                    if (getters.loaded) {
+                    let url = mod.getUrl('index', params);
+
+                    if (getters.indexLoaded(url)) {
                         resolve();
                     } else {
-                        let url = indexUrl;
-                        if (params && typeof(params.urlParams) != 'undefined') {
-                            url = buildUrl(url, params.urlParams);
-                        }
-                        Axios.get(url)
-                            .then(response => {
-                                commit('setAll', response.data);
-                                resolve(response);
-                            })
-                            .catch(error => {
-                                commit('api_error', error)
-                                reject(error);
-                            });
+                        reindex(url, commit, resolve, reject);
                     }
+                });
+            },
+
+            reindex({commit, getters}, params) {
+                return apiQueue.pushTask((resolve, reject) => {
+                    let flattened = Object.assign({}, params, params.record, params.data);
+                    let url = mod.getUrl('index', flattened);
+
+                    reindex(url, commit, resolve, reject);
                 });
             },
 
@@ -111,11 +138,9 @@ export default class {
                     if (params[primaryKey] in state.records) {
                         resolve();
                     } else {
-                        let url = indexUrl;
-                        if (params && typeof(params.urlParams) != 'undefined') {
-                            url = buildUrl(url, params.urlParams);
-                        }
-                        Axios.get(`${url}/${params[primaryKey]}`)
+                        let url = mod.getUrl('show', params);
+
+                        Axios.get(url)
                             .then(response => {
                                 commit('set', response.data);
                                 resolve(response);
@@ -130,14 +155,12 @@ export default class {
 
             store({commit, dispatch}, params) {
                 return apiQueue.pushTask((resolve, reject) => {
-                    let url = indexUrl;
-                    if (params && typeof(params.urlParams) != 'undefined') {
-                        url = buildUrl(url, params.urlParams);
-                    }
+                    let url = mod.getUrl('store', params);
+
                     Axios.post(url, params.data)
                         .then(response => {
                             commit('set', response.data);
-                            dispatch('index', params);
+                            dispatch('reindex', response.data);
                             resolve(response);
                         })
                         .catch(error => {
@@ -147,15 +170,13 @@ export default class {
                 });
             },
 
-            update({commit}, params) {
+            update({commit, dispatch}, params) {
                 return apiQueue.pushTask((resolve, reject) => {
-                    let url = indexUrl;
-                    if (params && typeof(params.urlParams) != 'undefined') {
-                        url = buildUrl(url, params.urlParams);
-                    }
-                    Axios.put(`${url}/${params.record[primaryKey]}`, params.data)
+                    let url = mod.getUrl('update', params);
+                    Axios.put(url, params.data)
                         .then(response => {
                             commit('set', response.data);
+                            dispatch('reindex', response.data);
                             resolve(response);
                         })
                         .catch(error => {
@@ -165,15 +186,14 @@ export default class {
                 });
             },
 
-            destroy({commit}, params) {
+            destroy({commit, dispatch}, params) {
                 return apiQueue.pushTask((resolve, reject) => {
-                    let url = indexUrl;
-                    if (params && typeof(params.urlParams) != 'undefined') {
-                        url = buildUrl(url, params.urlParams);
-                    }
-                    Axios.delete(`${url}/${params[primaryKey]}`)
+                    let url = mod.getUrl('destroy', params);
+
+                    Axios.delete(url)
                         .then(response => {
                             commit('delete', response.data);
+                            dispatch('reindex', response.data);
                             resolve(response);
                         })
                         .catch(error => {

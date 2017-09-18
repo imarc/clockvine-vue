@@ -38,23 +38,28 @@ export default {
 
         save() {
             if (this.exists) {
-                return this.$store.dispatch(this.type +'/update', {data: this.record, urlParams: this.urlParams, record: this.unchangedRecord})
+                let params = Object.assign({}, this.urlParams, {data: this.record, record: this.unchangedRecord});
+                params = Object.assign({}, params, {record: this.unchangedRecord});
+                return this.$store.dispatch(this.type + '/update', params)
                     .catch(this.handleErrors);
             } else {
-                return this.$store.dispatch(this.type + '/store', {data: this.record, urlParams: this.urlParams})
+                let params = Object.assign({}, this.urlParams, {data: this.record});
+                return this.$store.dispatch(this.type + '/store', params)
                     .catch(this.handleErrors);
             }
         },
 
         destroy() {
-            return this.$store.dispatch(this.type + '/destroy', {[this.primaryKey]: this.record[this.primaryKey], urlParams: this.urlParams})
+            let params = Object.assign({}, this.urlParams, {[this.primaryKey]: this.record[this.this.primaryKey]});
+            return this.$store.dispatch(this.type + '/destroy', params)
                 .catch(this.handleErrors);
         },
     },
 
     mounted() {
         if (this.exists) {
-            this.$store.dispatch(this.type + '/show', {[this.primaryKey]: this[this.primaryKey], urlParams: this.urlParams});
+            let params = Object.assign({}, this.urlParams, {[this.primaryKey]: this[this.primaryKey]});
+            this.$store.dispatch(this.type + '/show', params);
         }
     },
 };

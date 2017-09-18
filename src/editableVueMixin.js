@@ -31,11 +31,13 @@ export default {
 
         save() {
             if (this.exists) {
-                return this.$store.dispatch(this.type  + '/update', {data: this.localRecord, urlParams: this.urlParams, record: this.unchangedRecord})
+                let params = Object.assign({}, this.urlParams, {data: this.localRecord, record: this.unchangedRecord});
+                return this.$store.dispatch(this.type  + '/update', params)
                     .then(() => { this.localRecord = null })
                     .catch(this.handleErrors);
             } else {
-                return this.$store.dispatch(this.type  + '/store', {data: this.localRecord, urlParams: this.urlParams})
+                let params = Object.assign({}, this.urlParams, {data: this.record});
+                return this.$store.dispatch(this.type  + '/store', params)
                     .then(() => { this.localRecord = null })
                     .catch(this.handleErrors);
             }
