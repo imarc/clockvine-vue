@@ -50,7 +50,7 @@ export default {
         },
 
         destroy() {
-            let params = Object.assign({}, this.urlParams, {[this.primaryKey]: this.record[this.this.primaryKey]});
+            let params = Object.assign({}, this.urlParams, {[this.primaryKey]: this.record[this.primaryKey]});
             return this.$store.dispatch(this.type + '/destroy', params)
                 .catch(this.handleErrors);
         },
