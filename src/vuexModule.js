@@ -70,11 +70,13 @@ export default class {
             setAll(state, response) {
                 state.records = {};
                 for (let i = 0; i < response.data.length; i++) {
-                    Vue.set(
-                        state.records,
-                        response.data[i][primaryKey],
-                        response.data[i]
-                    );
+                    if (response.data[i] != null) {
+                        Vue.set(
+                            state.records,
+                            response.data[i][primaryKey],
+                            response.data[i]
+                        );
+                    }
                 }
             },
 
