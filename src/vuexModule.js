@@ -33,7 +33,18 @@ export default class {
         this.namespaced = true;
 
         this.state = {
+            recordsUrl: null,
             records: {},
+
+            current_page: null,
+            from: null,
+            last_page: null,
+            next_page_url: null,
+            path: null,
+            per_page: null,
+            prev_page_url: null,
+            to: null,
+            total: null,
         };
 
         this.getters = {
@@ -52,7 +63,8 @@ export default class {
                 //
             },
 
-            setAll(state, response) {
+            setAll(state, {url, response}) {
+                state.recordsUrl = url;
                 state.records = {};
                 for (let i = 0; i < response.data.length; i++) {
                     Vue.set(
@@ -60,6 +72,19 @@ export default class {
                         response.data[i][primaryKey],
                         response.data[i]
                     );
+                }
+
+                let paginationParams = [
+                    'current_page', 'from', 'last_page', 'next_page_url',
+                    'path', 'per_page', 'prev_page_url', 'to', 'total',
+                ];
+
+                for (let param of paginationParams) {
+                    if (param in response) {
+                        Vue.set(state, param, response[param]);
+                    } else if (param in state) {
+                        Vue.set(state, param, null);
+                    }
                 }
             },
 
@@ -84,18 +109,25 @@ export default class {
         };
 
         this.actions = {
-            index({commit, getters}, params) {
+            index({commit, getters, state}, params) {
                 return apiQueue.pushTask((resolve, reject) => {
-                    if (getters.loaded) {
+                    let url = indexUrl;
+                    console.log('index', params, 'url' in params);
+                    if (params && typeof(params.urlParams) != 'undefined') {
+                        url = buildUrl(url, params.urlParams);
+
+                    } else if (params && 'url' in params) {
+                        url = params.url;
+                    }
+
+                    console.log('ended with', url, state.recordsUrl);
+
+                    if (url == state.recordsUrl && getters.loaded) {
                         resolve();
                     } else {
-                        let url = indexUrl;
-                        if (params && typeof(params.urlParams) != 'undefined') {
-                            url = buildUrl(url, params.urlParams);
-                        }
                         Axios.get(url)
                             .then(response => {
-                                commit('setAll', response.data);
+                                commit('setAll', {url, response: response.data});
                                 resolve(response);
                             })
                             .catch(error => {
