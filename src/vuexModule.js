@@ -48,14 +48,23 @@ export default class {
         };
 
         this.getters = {
+
             loaded(state) {
                 return Object.keys(state.records).length > 0;
             },
+
             alphabeticalBy: state => field => {
                 return Object.keys(state.records)
                     .map(key => state.records[key])
                     .sort((a, b) => a[field].localeCompare(b[field]));
             },
+
+            nextPage: state => state.next_page_url,
+
+            prevPage: state => state.prev_page_url,
+
+            pageSummary: state => `Showing ${state.from}–${state.to} of ${page.total} resutlt${page.total == 1 ? '' : 's'}.`,
+
         };
 
         this.mutations = {
