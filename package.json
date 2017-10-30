@@ -1,22 +1,26 @@
 {
   "name": "clockvine-vue",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "",
   "author": "Kevin Hamer [kh] <kevin@imarc.com>",
   "license": "Apache-2.0",
-  "main": "./lib/clockvine.js",
+  "main": "./clockvine.dist.js",
   "dependencies": {
     "axios": "^0.16.2",
+    "babel-loader": "^7.1.2",
     "babel-preset-env": "^1.6.0",
+    "cross-env": "^5.1.1",
     "simple-promise-queue": "^0.1.7",
-    "vue": "^2.4.2"
+    "vue": "^2.4.2",
+    "webpack": "^3.8.1"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-preset-es2015": "^6.24.1"
   },
   "scripts": {
-    "build": "babel src --presets babel-preset-es2015 --out-dir lib",
+    "dev": "cross-env NODE_ENV=development webpack --progress --watch",
+    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules",
     "prepare": "npm run build"
   }
 }
