@@ -63,7 +63,7 @@ export default class {
 
             prevPage: state => state.prev_page_url,
 
-            pageSummary: state => `Showing ${state.from}–${state.to} of ${state.total} resutlt${state.total == 1 ? '' : 's'}.`,
+            pageSummary: state => `Showing ${state.from}–${state.to} of ${state.total} result${state.total == 1 ? '' : 's'}.`,
 
         };
 
