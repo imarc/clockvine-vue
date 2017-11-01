@@ -121,15 +121,12 @@ export default class {
             index({commit, getters, state}, params) {
                 return apiQueue.pushTask((resolve, reject) => {
                     let url = indexUrl;
-                    console.log('index', params, 'url' in params);
                     if (params && typeof(params.urlParams) != 'undefined') {
                         url = buildUrl(url, params.urlParams);
 
                     } else if (params && 'url' in params) {
                         url = params.url;
                     }
-
-                    console.log('ended with', url, state.recordsUrl);
 
                     if (url == state.recordsUrl && getters.loaded) {
                         resolve();
