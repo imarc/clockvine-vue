@@ -26,7 +26,7 @@ export default {
 
     methods: {
         reset() {
-            this.localRecord = JSON.parse(JSON.stringify(this.record));
+            this.localRecord = JSON.parse(JSON.stringify(this.unchangedRecord));
         },
 
         save() {
