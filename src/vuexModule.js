@@ -99,6 +99,13 @@ export default class {
 
             set(state, response) {
                 if (typeof(response.data[primaryKey]) != undefined) {
+
+                    /**
+                     * This is a HACK. For whatever reason, Vue.set alone
+                     * doesn't seem to trigger getters to update, whereas doing
+                     * this does.
+                     */
+                    Vue.delete(state.records, response.data[primaryKey]);
                     Vue.set(
                         state.records,
                         response.data[primaryKey],
