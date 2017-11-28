@@ -1,3 +1,5 @@
+import Vue from 'vue';
+
 /**
  * This is a base vue mixin meant to be used with components that are going to
  * connect to a clockvine API via RESTful methods.
@@ -8,20 +10,28 @@ export default {
     data: () => ({
         errors: {},
         primaryKey: 'id',
+        record: {},
     }),
 
     computed: {
         exists() {
-            return typeof(this[this.primaryKey]) !== "undefined" && this[this.primaryKey] !== null;
+            return this.record[this.primaryKey] !== undefined;
         },
 
-        unchangedRecord() {
-            return this.$store.state[this.type].records[this[this.primaryKey]] || this.baseRecord();
+        storedRecord() {
+            return this.$store.state[this.type].records[this.record[this.primaryKey]];
         },
+    },
 
-        record() {
-            return this.unchangedRecord;
-        },
+    created() {
+        this.record[this.primaryKey] = this[this.primaryKey];
+    },
+
+    mounted() {
+        if (this.exists) {
+            this.$store.dispatch(this.type + '/show', this.getPrimaryKeyParams())
+                .then(() => { this.record = this.storedRecord && JSON.parse(JSON.stringify(this.storedRecord)); })
+        }
     },
 
     methods: {
@@ -38,28 +48,27 @@ export default {
 
         save() {
             if (this.exists) {
-                let params = Object.assign({}, this.urlParams, {data: this.record, record: this.unchangedRecord});
-                params = Object.assign({}, params, {record: this.unchangedRecord});
-                return this.$store.dispatch(this.type + '/update', params)
+                return this.$store.dispatch(this.type + '/update', this.getRecordParams())
                     .catch(this.handleErrors);
             } else {
-                let params = Object.assign({}, this.urlParams, {data: this.record});
-                return this.$store.dispatch(this.type + '/store', params)
+                return this.$store.dispatch(this.type + '/store', this.getRecordParams())
+                    // don't love how this uses the actual response...
+                    .then((r) => { this.record[this.primaryKey] = r.data.data.id; })
                     .catch(this.handleErrors);
             }
         },
 
         destroy() {
-            let params = Object.assign({}, this.urlParams, {[this.primaryKey]: this.record[this.primaryKey]});
-            return this.$store.dispatch(this.type + '/destroy', params)
+            return this.$store.dispatch(this.type + '/destroy', this.getPrimaryKeyParams())
                 .catch(this.handleErrors);
         },
-    },
 
-    mounted() {
-        if (this.exists) {
-            let params = Object.assign({}, this.urlParams, {[this.primaryKey]: this[this.primaryKey]});
-            this.$store.dispatch(this.type + '/show', params);
-        }
+        getRecordParams() {
+            return { data: this.record };
+        },
+
+        getPrimaryKeyParams() {
+            return { [this.primaryKey]: this.record[this.primaryKey] };
+        },
     },
 };
