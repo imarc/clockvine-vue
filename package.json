@@ -8,6 +8,7 @@
   "dependencies": {
     "axios": "^0.16.2",
     "babel-preset-env": "^1.6.0",
+    "lodash": "^4.17.4",
     "simple-promise-queue": "^0.1.7",
     "vue": "^2.4.2"
   },
@@ -20,6 +21,6 @@
     "prepare": "npm run build"
   },
   "files": [
-      "clockvine.dist.js"
+    "clockvine.dist.js"
   ]
 }
