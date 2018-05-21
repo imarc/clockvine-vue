@@ -1,6 +1,6 @@
 {
   "name": "clockvine-vue",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "",
   "author": "Kevin Hamer [kh] <kevin@imarc.com>",
   "license": "Apache-2.0",
@@ -18,8 +18,5 @@
   "scripts": {
     "build": "babel src --presets babel-preset-es2015 --out-dir lib",
     "prepare": "npm run build"
-  },
-  "files": [
-      "clockvine.dist.js"
-  ]
+  }
 }
