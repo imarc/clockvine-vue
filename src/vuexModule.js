@@ -137,7 +137,6 @@ export default class {
             },
 
             setAll(state, response) {
-                state.records = {};
                 for (let i = 0; i < response.data.length; i++) {
                     if (response.data[i] != null) {
                         Vue.set(
