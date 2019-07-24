@@ -1,9 +1,5 @@
-import vueMixin from './vueMixin';
-import vuexModule from './vuexModule';
-import editableVueMixin from './editableVueMixin';
+import Module from './Module';
 
 export {
-    editableVueMixin,
-    vueMixin,
-    vuexModule,
-};
+    Module
+}
