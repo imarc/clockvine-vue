@@ -21,21 +21,32 @@ export default class {
      *
      */
     #createQueryUrl(params) {
-        let url = baseUrl;
-        if (typeof baseUrl === "function") {
-            url = baseUrl(params);
+        let url = this.#baseUrl;
+        if (typeof url === "function") {
+            url = url(params);
         }
 
         return url + this.#createQueryParams(params);
     }
 
+    #spliceAll(array, element) {
+        for (let i = array.length - 1; i >= 0; i--) {
+            if (array[i] == element) {
+                array.splice(i, 1);
+            }
+        }
+
+        return array;
+    }
+
     /**
      *
      */
+    #actionParameter;
+    #baseUrl;
     #httpQueue;
     #indexProperty;
     #pageParameter;
-    #actionParameter;
 
     /**
      *
@@ -46,6 +57,7 @@ export default class {
      *
      */
     state = {
+        indexes: {},
         elements: {},
     };
 
@@ -53,16 +65,13 @@ export default class {
      *
      */
     mutations = {
-        setIndex(state, {url, data}) {
+        setIndex: (state, {url, data}) => {
             Vue.set(state.indexes, url, data);
         },
 
-        setElement(state, {data = []}) {
-            if (Array.isArray(data)) {
-                const elements = data;
-            } else {
-                const elements = [data];
-            }
+        setElement: (state, {data = []}) => {
+            const elements = Array.isArray(data) ? data : [data];
+
             elements.forEach(element => {
                 if (element[this.#indexProperty] != undefined) {
                     Vue.set(
@@ -74,7 +83,7 @@ export default class {
             });
         },
 
-        deleteElement(state, {data = []}) {
+        deleteElement: (state, {data = []}) => {
             if (Array.isArray(data)) {
                 const elements = data;
             } else {
@@ -86,6 +95,10 @@ export default class {
                         state.elements,
                         element[this.#indexProperty]
                     );
+
+                    for (let index of Object.values(state.indexes)) {
+                        this.#spliceAll(index.data, element);
+                    }
                 }
             });
         },
@@ -95,20 +108,20 @@ export default class {
      *
      */
     actions = {
-        index({commit, getters}, params = {}) {
-            const url = this.#createQueryUrl({[actionParameter]: 'index', ...params});
+        index: ({commit, getters}, params = {}) => {
+            const url = this.#createQueryUrl({[this.#actionParameter]: 'index', ...params});
 
             return this.#httpQueue
                 .get(url)
                 .then(response => {
-                    commit("setIndex", {url, data: response.data.data});
+                    commit("setIndex", {url, data: response.data});
                     commit("setElement", response.data);
                     return response;
                 });
         },
 
-        show({commit}, params = {}) {
-            const url = this.#createQueryUrl({[actionParameter]: 'show', ...params});
+        show: ({commit}, params = {}) => {
+            const url = this.#createQueryUrl({[this.#actionParameter]: 'show', ...params});
 
             return this.#httpQueue
                 .get(url)
@@ -118,8 +131,8 @@ export default class {
                 });
         },
 
-        store({commit, dispatch}, params = {}) {
-            const url = this.#createQueryUrl({[actionParameter]: 'store', ...params});
+        store: ({commit, dispatch}, params = {}) => {
+            const url = this.#createQueryUrl({[this.#actionParameter]: 'store', ...params});
 
             return this.#httpQueue
                 .post(url, params)
@@ -128,8 +141,8 @@ export default class {
                     return response;
                 });
         },
-        update() {
-            const url = this.#createQueryUrl({[actionParameter]: 'update', ...params});
+        update: () => {
+            const url = this.#createQueryUrl({[this.#actionParameter]: 'update', ...params});
 
             return this.#httpQueue
                 .put(url, params)
@@ -138,8 +151,8 @@ export default class {
                     return response;
                 });
         },
-        destroy() {
-            const url = this.#createQueryUrl({[actionParameter]: 'destroy', ...params});
+        destroy: () => {
+            const url = this.#createQueryUrl({[this.#actionParameter]: 'destroy', ...params});
 
             return this.#httpQueue
                 .delete(url, params)
@@ -160,11 +173,12 @@ export default class {
             pageParameter = "page",
             pqueueOptions = {concurrency: 2},
             actionParameter = "action",
-        },
+        } = {},
     ) {
+        this.#actionParameter = actionParameter;
+        this.#baseUrl = baseUrl;
         this.#httpQueue = new HttpQueue({pqueueOptions});
         this.#indexProperty = indexProperty;
         this.#pageParameter = pageParameter;
-        this.#actionParameter = actionParameter;
     }
 }

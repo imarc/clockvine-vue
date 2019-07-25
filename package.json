@@ -4,7 +4,7 @@
   "description": "",
   "author": "Kevin Hamer [kh] <kevin@imarc.com>",
   "license": "Apache-2.0",
-  "main": "./lib/clockvine.js",
+  "main": "./lib/Clockvine.js",
   "dependencies": {
     "axios": "^0.19.0",
     "jest": "^24.8.0",
@@ -17,6 +17,7 @@
     "@babel/cli": "^7.5.5",
     "@babel/core": "^7.5.5",
     "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/plugin-proposal-private-methods": "^7.4.4",
     "@babel/polyfill": "^7.4.4",
     "@babel/preset-env": "^7.5.5",
     "babel-jest": "^24.8.0",
@@ -27,8 +28,6 @@
     "webpack-cli": "^3.3.6"
   },
   "scripts": {
-    "test": "jest",
-    "build": "babel src --out-dir lib --plugins @babel/plugin-proposal-class-properties",
-    "webpack": "webpack --progress --hide-modules --mode development"
+    "build": "babel src --out-dir lib --plugins @babel/plugin-proposal-class-properties,@babel/plugin-proposal-private-methods"
   }
 }
