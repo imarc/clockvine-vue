@@ -28,12 +28,10 @@ export default class {
             return this;
         },
         query(params) {
-            this.$store.dispatch(`${this.module}/index`, {...this.params, ...params})
+            return this.$store.dispatch(`${this.module}/index`, {...this.params, ...params})
                 .then(response => {
                     this.url = response.config.url;
                 });
-
-            return this;
         },
 
         nextPage() {
