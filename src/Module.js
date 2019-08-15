@@ -39,6 +39,10 @@ export default class {
         return array;
     }
 
+    #safelyGet(obj, path) {
+        return path.reduce((xs, x) => (xs && xs[x] ? xs[x] : null), obj);
+    }
+
     /**
      *
      */
@@ -59,6 +63,11 @@ export default class {
     state = {
         indexes: {},
         elements: {},
+    };
+
+    getters = {
+        elements: state => url => this.#safelyGet(state.indexes, [url, 'data']),
+        meta: state => url => this.#safelyGet(state.indexes, [url, 'meta']),
     };
 
     /**
