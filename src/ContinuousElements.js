@@ -1,6 +1,6 @@
 import Elements from './Elements';
 
-export default class extends Elements {
+export default class {
     data = () => ({
         module: null,
         params: {},
@@ -8,6 +8,13 @@ export default class extends Elements {
     });
 
     computed = {
+        page() {
+            if (this.params && this.params.page) {
+                return this.params.page;
+            } else {
+                return 1;
+            }
+        },
         elements() {
             if (this.urls.length) {
                 return [].concat(...this.urls.map(
@@ -16,14 +23,16 @@ export default class extends Elements {
             }
         },
 
-        hasMore() {
-            if (this.module && this.urls.length) {
+        meta() {
+            if (this.urls.length) {
                 const lastUrl = this.urls[this.urls.length - 1];
-                const {current_page, total_pages} = this.$store.getters[`${this.module}/meta`](lastUrl).pagination;
+                return this.$store.getters[`${this.module}/meta`](lastUrl);
+            }
+        },
 
-                console.log(current_page, total_pages);
-
-                return current_page < total_pages;
+        hasMore() {
+            if (this.meta) {
+                return this.meta.pagination.total_pages > this.page;
             }
         },
     };
@@ -46,4 +55,8 @@ export default class extends Elements {
             }
         }
     };
+
+    constructor(module) {
+        this.mixins = [new Elements(module)];
+    }
 }

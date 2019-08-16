@@ -28,30 +28,17 @@ export default class {
             return this;
         },
         query(params) {
-            return this.$store.dispatch(`${this.module}/index`, {...this.params, ...params})
+            params = {...this.params, ...params};
+
+            if (params.page === 1) {
+                delete params.page;
+            }
+
+            return this.$store.dispatch(`${this.module}/index`, params)
                 .then(response => {
                     this.url = response.config.url;
                 });
         },
-
-        nextPage() {
-            this.addParams({
-                page: (this.params.page || 1) + 1,
-            });
-
-            return this.query();
-        },
-        previousPage() {
-            if (this.params.page) {
-                this.addParams({
-                    page: this.params.page - 1,
-                });
-
-                return this.query();
-            }
-
-            return this;
-        }
     };
 
     constructor(module)
