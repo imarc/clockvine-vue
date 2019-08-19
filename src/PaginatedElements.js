@@ -1,45 +1,54 @@
 import Elements from './Elements';
 
 export default class {
-    computed = {
-        page() {
-            if (this.flattenedParams && this.flattenedParams.page) {
-                return this.flattenedParams.page;
-            } else {
-                return 1;
-            }
-        },
+  computed = {
+    page() {
+      if (this.flattenedParams && this.flattenedParams.page) {
+        return this.flattenedParams.page;
+      } else {
+        return 1;
+      }
+    },
 
-        firstPage() {
-            return this.page === 1;
-        },
+    firstPage() {
+      return this.page === 1;
+    },
 
-        lastPage() {
-            if (this.meta) {
-                return this.meta.pagination.total_pages <= this.page;
-            }
-        },
-    }
+    lastPage() {
+      if (this.meta) {
+        return this.meta.pagination.total_pages <= this.page;
+      }
+    },
 
-    methods = {
-        skipTo(page) {
-            return this.addParams({page}).query();
-        },
+    slotParams() {
+      let parentParams = this.$options.mixins[0].computed.slotParams.call(this);
+      return {
+        ...parentParams,
+        next: this.next,
+        previous: this.previous,
+      };
+    },
+  }
 
-        next() {
-            if (!this.lastPage) {
-                return this.skipTo(this.page + 1);
-            }
-        },
+  methods = {
+    skipTo(page) {
+      return this.addParams({page}).query();
+    },
 
-        previous() {
-            if (!this.firstPage) {
-                return this.skipTo(this.page - 1);
-            }
-        },
-    }
+    next() {
+      if (!this.lastPage) {
+        return this.skipTo(this.page + 1);
+      }
+    },
 
-    constructor(module) {
-        this.mixins = [new Elements(module)];
-    }
+    previous() {
+      if (!this.firstPage) {
+        return this.skipTo(this.page - 1);
+      }
+    },
+  }
+
+  constructor(module) {
+    this.mixins = [new Elements(module)];
+  }
 }
