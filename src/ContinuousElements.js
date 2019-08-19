@@ -1,16 +1,10 @@
 import Elements from './Elements';
 
 export default class {
-    data = () => ({
-        module: null,
-        params: {},
-        urls: [],
-    });
-
     computed = {
         page() {
-            if (this.params && this.params.page) {
-                return this.params.page;
+            if (this.flattenedParams && this.flattenedParams.page) {
+                return this.flattenedParams.page;
             } else {
                 return 1;
             }
@@ -39,7 +33,13 @@ export default class {
 
     methods = {
         query(params) {
-            return this.$store.dispatch(`${this.module}/index`, {...this.params, ...params})
+            params = {...this.flattenedParams, ...params};
+
+            if (params.page === 1) {
+                delete params.page;
+            }
+
+            return this.$store.dispatch(`${this.module}/index`, params)
                 .then(response => {
                     this.urls.push(response.config.url);
                 });
@@ -47,11 +47,7 @@ export default class {
 
         fetchMore() {
             if (this.hasMore) {
-                this.addParams({
-                    page: (this.params.page || 1) + 1,
-                });
-
-                this.query();
+                this.addParams({page: this.page + 1}).query();
             }
         }
     };

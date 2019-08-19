@@ -1,9 +1,28 @@
 export default class {
     data = () => ({
         module: null,
-        params: {},
         url: null,
+        internalParams: {},
     });
+
+    props = {
+        params: {
+            type: Object,
+            default: () => ({}),
+        },
+    }
+
+    render = function() {
+        return this.$scopedSlots.default({
+            elements: this.elements,
+            meta: this.meta,
+            firstPage: this.firstPage,
+            previous: this.previous,
+            lastPage: this.lastPage,
+            next: this.next,
+            query: this.query,
+        });
+    }
 
     computed = {
         elements() {
@@ -16,19 +35,39 @@ export default class {
                 return this.$store.getters[`${this.module}/meta`](this.url);
             }
         },
-    };
+        flattenedParams() {
+            return {...this.params, ...this.internalParams};
+        },
+    }
+
+    watch = {
+        params(newVal, oldVal) {
+            console.log(newVal, oldVal);
+        },
+    }
 
     methods = {
         addParams(params) {
-            this.params = {...this.params, ...params};
+            for (let key in params) {
+                this.$set(this.internalParams, key, params[key]);
+            }
+
+            if (!('page' in params)) {
+                this.$set(this.internalParams, 'page', 1);
+            }
+
+            console.log('here', this.internalParams);
+
             return this;
         },
         setParams(params) {
-            this.params = params;
+            this.internalParams = params;
             return this;
         },
         query(params) {
-            params = {...this.params, ...params};
+            params = {...this.flattenedParams, ...params};
+
+            console.log('querying with params', params);
 
             if (params.page === 1) {
                 delete params.page;
