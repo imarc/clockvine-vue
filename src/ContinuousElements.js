@@ -7,8 +7,8 @@ export default class {
   });
   computed = {
     page() {
-      if (this.flattenedParams && this.flattenedParams.page) {
-        return this.flattenedParams.page;
+      if (this.internalParams && this.internalParams.page) {
+        return this.internalParams.page;
       } else {
         return 1;
       }
@@ -48,7 +48,7 @@ export default class {
     query(params) {
       this.loading = true;
 
-      params = {...this.flattenedParams, ...params};
+      params = {...this.internalParams};
 
       if (params.page === 1) {
         delete params.page;

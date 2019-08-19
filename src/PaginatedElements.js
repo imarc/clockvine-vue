@@ -3,8 +3,8 @@ import Elements from './Elements';
 export default class {
   computed = {
     page() {
-      if (this.flattenedParams && this.flattenedParams.page) {
-        return this.flattenedParams.page;
+      if (this.internalParams && this.internalParams.page) {
+        return this.internalParams.page;
       } else {
         return 1;
       }

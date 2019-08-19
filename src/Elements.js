@@ -1,5 +1,3 @@
-import { deepEqual } from 'fast-equals';
-
 export default class {
   data = () => ({
     loading: true,
@@ -30,9 +28,6 @@ export default class {
         return this.$store.getters[`${this.module}/meta`](this.url);
       }
     },
-    flattenedParams() {
-      return {...this.params, ...this.internalParams};
-    },
 
     slotParams() {
       return {
@@ -47,10 +42,26 @@ export default class {
   }
 
   watch = {
-    flattenedParams(newVal, oldVal) {
-      if (!deepEqual(newVal, oldVal)) {
-        this.query();
-      }
+    params: {
+      deep: true,
+      handler(newVal) {
+        this.$set(this, 'internalParams', newVal);
+      },
+    },
+
+    internalParams: {
+      deep: true,
+      handler(newVal, oldVal) {
+        console.log('testing',
+          Object.keys(newVal),
+          Object.keys(oldVal)
+        );
+        console.log('watch internalParams', deepEqual(newVal, oldVal));
+        if (!deepEqual(excludeKeys(newVal, 'page'), excludeKeys(oldVal, 'page'))) {
+          this.$set(this.internalParams, 'page', 1);
+          this.query(newVal);
+        }
+      },
     },
   }
 
@@ -75,7 +86,7 @@ export default class {
     query(params, mustGet = false) {
       this.loading = true;
 
-      params = {...this.flattenedParams, ...params};
+      params = {...this.internalParams};
 
       if (params.page === 1) {
         delete params.page;
