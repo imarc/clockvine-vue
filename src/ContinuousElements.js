@@ -1,3 +1,4 @@
+import { deepEqual } from 'fast-equals';
 import Elements from './Elements';
 
 export default class {
@@ -45,6 +46,8 @@ export default class {
 
   methods = {
     query(params) {
+      this.loading = true;
+
       params = {...this.flattenedParams, ...params};
 
       if (params.page === 1) {
@@ -53,6 +56,7 @@ export default class {
 
       return this.$store.dispatch(`${this.module}/index`, params)
         .then(response => {
+          this.loading = false;
           this.urls.push(response.config.url);
         });
     },
