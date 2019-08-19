@@ -1,58 +1,70 @@
 import Elements from './Elements';
 
 export default class {
-    computed = {
-        page() {
-            if (this.flattenedParams && this.flattenedParams.page) {
-                return this.flattenedParams.page;
-            } else {
-                return 1;
-            }
-        },
-        elements() {
-            if (this.urls.length) {
-                return [].concat(...this.urls.map(
-                    url => this.$store.getters[`${this.module}/elements`](url)
-                ));
-            }
-        },
+  data = () => ({
+    urls: [],
+  });
+  computed = {
+    page() {
+      if (this.flattenedParams && this.flattenedParams.page) {
+        return this.flattenedParams.page;
+      } else {
+        return 1;
+      }
+    },
+    elements() {
+      if (this.urls.length) {
+        return [].concat(...this.urls.map(
+          url => this.$store.getters[`${this.module}/elements`](url)
+        ));
+      }
+    },
 
-        meta() {
-            if (this.urls.length) {
-                const lastUrl = this.urls[this.urls.length - 1];
-                return this.$store.getters[`${this.module}/meta`](lastUrl);
-            }
-        },
+    meta() {
+      if (this.urls.length) {
+        const lastUrl = this.urls[this.urls.length - 1];
+        return this.$store.getters[`${this.module}/meta`](lastUrl);
+      }
+    },
 
-        hasMore() {
-            if (this.meta) {
-                return this.meta.pagination.total_pages > this.page;
-            }
-        },
-    };
+    hasMore() {
+      if (this.meta) {
+        return this.meta.pagination.total_pages > this.page;
+      }
+    },
 
-    methods = {
-        query(params) {
-            params = {...this.flattenedParams, ...params};
+    slotParams() {
+      let parentParams = this.$options.mixins[0].computed.slotParams.call(this);
+      return {
+        ...parentParams,
+        hasMore: this.hasMore,
+        fetchMore: this.fetchMore,
+      };
+    },
+  };
 
-            if (params.page === 1) {
-                delete params.page;
-            }
+  methods = {
+    query(params) {
+      params = {...this.flattenedParams, ...params};
 
-            return this.$store.dispatch(`${this.module}/index`, params)
-                .then(response => {
-                    this.urls.push(response.config.url);
-                });
-        },
+      if (params.page === 1) {
+        delete params.page;
+      }
 
-        fetchMore() {
-            if (this.hasMore) {
-                this.addParams({page: this.page + 1}).query();
-            }
-        }
-    };
+      return this.$store.dispatch(`${this.module}/index`, params)
+        .then(response => {
+          this.urls.push(response.config.url);
+        });
+    },
 
-    constructor(module) {
-        this.mixins = [new Elements(module)];
+    fetchMore() {
+      if (this.hasMore) {
+        this.addParams({page: this.page + 1});
+      }
     }
+  };
+
+  constructor(module) {
+    this.mixins = [new Elements(module)];
+  }
 }
