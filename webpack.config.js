@@ -42,6 +42,8 @@ module.exports = {
 
   output: {
     filename: '[name].js',
+    library: 'Clockvine',
+    libraryTarget: 'umd',
     path: __dirname + '/lib',
   },
 };

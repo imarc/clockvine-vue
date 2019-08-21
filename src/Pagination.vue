@@ -1,4 +1,4 @@
-<developmenttemplate>
+<template>
     <nav class="pagination">
         <ul class="pagination__list">
             <li v-if="!onFirstPage" class="pagination__item -previous">
