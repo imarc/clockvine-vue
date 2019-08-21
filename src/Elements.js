@@ -1,18 +1,48 @@
+import { deepEqual } from 'fast-equals';
+
 export default class {
   data = () => ({
-    loading: true,
-    module: null,
+    /**
+     * Whether data is loading or not.
+     */
+    isLoading: true,
+
+    /**
+     * The vuex module this component is tied to.
+     * TODO - move this to $options
+     */
+    vuexModule: null,
+
+    /**
+     * The current URL for the data being shown for this component.
+     * TODO - maybe moev this to $options?
+     */
     url: null,
-    internalParams: {},
   });
 
   props = {
+    /**
+     * Query parameters.
+     */
     params: {
       type: Object,
       default: () => ({}),
     },
+
+    /**
+     * Query parameters to filter out.
+     */
+    ignoreParams: {
+      type: Object,
+      default: () => ({
+        page: 1,
+      }),
+    },
   }
 
+  /**
+   *
+   */
   render = function() {
     return this.$scopedSlots.default(this.slotParams);
   }
@@ -20,21 +50,38 @@ export default class {
   computed = {
     elements() {
       if (this.url) {
-        return this.$store.getters[`${this.module}/elements`](this.url);
+        return this.$store.getters[`${this.vuexModule}/elements`](this.url);
       }
     },
+
     meta() {
       if (this.url) {
-        return this.$store.getters[`${this.module}/meta`](this.url);
+        return this.$store.getters[`${this.vuexModule}/meta`](this.url);
       }
+    },
+
+    filteredParams() {
+      let params = {...this.params};
+
+      for (let key in this.ignoreParams) {
+        if (key in params) {
+          if (typeof this.ignoreParams[key] === 'function') {
+            if (this.ignoreParams[key](params[key])) {
+              delete params[key];
+            }
+          } else if (this.ignoreParams[key] === params[key]) {
+            delete params[key];
+          }
+        }
+      }
+
+      return params;
     },
 
     slotParams() {
       return {
         elements: this.elements,
-        firstPage: this.firstPage,
-        lastPage: this.lastPage,
-        loading: this.loading,
+        isLoading: this.isLoading,
         meta: this.meta,
         query: this.query,
       };
@@ -44,67 +91,29 @@ export default class {
   watch = {
     params: {
       deep: true,
-      handler(newVal) {
-        this.$set(this, 'internalParams', newVal);
-      },
-    },
-
-    internalParams: {
-      deep: true,
-      handler(newVal, oldVal) {
-        console.log('testing',
-          Object.keys(newVal),
-          Object.keys(oldVal)
-        );
-        console.log('watch internalParams', deepEqual(newVal, oldVal));
-        if (!deepEqual(excludeKeys(newVal, 'page'), excludeKeys(oldVal, 'page'))) {
-          this.$set(this.internalParams, 'page', 1);
-          this.query(newVal);
-        }
+      handler() {
+        this.query();
       },
     },
   }
 
   methods = {
-    addParams(params) {
-      for (let key in params) {
-        this.$set(this.internalParams, key, params[key]);
-      }
+    query({mustGet = false} = {}) {
+      this.isLoading = true;
 
-      if (!('page' in params)) {
-        this.$set(this.internalParams, 'page', 1);
-      }
-
-      return this;
-    },
-
-    setParams(params) {
-      this.internalParams = params;
-      return this;
-    },
-
-    query(params, mustGet = false) {
-      this.loading = true;
-
-      params = {...this.internalParams};
-
-      if (params.page === 1) {
-        delete params.page;
-      }
-
-      const action = this.module + '/' + (mustGet ? 'mustIndex' : 'index');
-      return this.$store.dispatch(action, params)
+      const action = this.vuexModule + '/' + (mustGet ? 'mustIndex' : 'index');
+      return this.$store.dispatch(action, this.filteredParams)
         .then(response => {
-          this.loading = false;
+          this.isLoading = false;
           this.url = response.config.url;
         });
     },
   };
 
-  constructor(module)
+  constructor(vuexModule)
   {
     this.mounted = function() {
-      this.module = module;
+      this.vuexModule = vuexModule;
       this.query();
     };
   }

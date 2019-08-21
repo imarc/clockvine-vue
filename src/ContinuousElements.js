@@ -1,4 +1,3 @@
-import { deepEqual } from 'fast-equals';
 import Elements from './Elements';
 
 export default class {
@@ -39,33 +38,20 @@ export default class {
       return {
         ...parentParams,
         hasMore: this.hasMore,
-        fetchMore: this.fetchMore,
       };
     },
   };
 
   methods = {
-    query(params) {
-      this.loading = true;
+    query({mustGet = false} = {}) {
+      let parentQuery = this.$options.mixins[0].methods.query;
 
-      params = {...this.internalParams};
-
-      if (params.page === 1) {
-        delete params.page;
-      }
-
-      return this.$store.dispatch(`${this.module}/index`, params)
+      return parentQuery.call(this, {mustGet})
         .then(response => {
-          this.loading = false;
+          console.log('TODO', response);
           this.urls.push(response.config.url);
         });
     },
-
-    fetchMore() {
-      if (this.hasMore) {
-        this.addParams({page: this.page + 1});
-      }
-    }
   };
 
   constructor(module) {

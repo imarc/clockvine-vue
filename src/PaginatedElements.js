@@ -3,18 +3,18 @@ import Elements from './Elements';
 export default class {
   computed = {
     page() {
-      if (this.internalParams && this.internalParams.page) {
-        return this.internalParams.page;
+      if (this.params && this.params.page) {
+        return this.params.page;
       } else {
         return 1;
       }
     },
 
-    firstPage() {
+    onFirstPage() {
       return this.page === 1;
     },
 
-    lastPage() {
+    onLastPage() {
       if (this.meta) {
         return this.meta.pagination.total_pages <= this.page;
       }
@@ -24,31 +24,14 @@ export default class {
       let parentParams = this.$options.mixins[0].computed.slotParams.call(this);
       return {
         ...parentParams,
-        next: this.next,
-        previous: this.previous,
+        onFirstPage: this.onFirstPage,
+        onLastPage: this.onLastPage,
+        page: this.page,
       };
     },
   }
 
-  methods = {
-    skipTo(page) {
-      return this.addParams({page}).query();
-    },
-
-    next() {
-      if (!this.lastPage) {
-        return this.skipTo(this.page + 1);
-      }
-    },
-
-    previous() {
-      if (!this.firstPage) {
-        return this.skipTo(this.page - 1);
-      }
-    },
-  }
-
-  constructor(module) {
-    this.mixins = [new Elements(module)];
+  constructor(vuexModule) {
+    this.mixins = [new Elements(vuexModule)];
   }
 }
