@@ -4,14 +4,14 @@ import Elements from './Elements';
 import Module from './Module';
 import Pagination from './Pagination.vue';
 import PaginatedElements from './PaginatedElements';
-import PaginationControls from './PaginationControls';
+import SyncWithUrlParameters from './SyncWithUrlParameters';
 
 export default {
   ContinuousElements,
   PaginatedElements,
   Pagination,
-  PaginationControls,
   ElementApiModule,
   Elements,
   Module,
+  SyncWithUrlParameters,
 };
