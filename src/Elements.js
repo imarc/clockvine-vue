@@ -36,6 +36,7 @@ export default class {
       type: Object,
       default: () => ({
         page: 1,
+        orderBy: 'title asc',
       }),
     },
   }

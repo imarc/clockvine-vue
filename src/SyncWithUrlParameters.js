@@ -1,5 +1,5 @@
 export default class {
-  constructor(property, ignoreParams = {page: 1})
+  constructor(property, ignoreParams = {page: 1, orderBy: 'title asc'})
   {
     this.syncingUrlProperty = property;
     this.syncingIgnoreParams = ignoreParams;

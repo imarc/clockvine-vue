@@ -49,7 +49,7 @@ export default class {
   #actionParameter;
   #baseUrl;
   #httpQueue;
-  #indexProperty;
+  #idProperty;
   #pageParameter;
 
   /**
@@ -68,6 +68,8 @@ export default class {
   getters = {
     elements: state => url => this.#safelyGet(state.indexes, [url, 'data']),
     meta: state => url => this.#safelyGet(state.indexes, [url, 'meta']),
+
+    element: state => id => state.elements[id],
   };
 
   /**
@@ -82,10 +84,10 @@ export default class {
       const elements = Array.isArray(data) ? data : [data];
 
       elements.forEach(element => {
-        if (element[this.#indexProperty] != undefined) {
+        if (element[this.#idProperty] != undefined) {
           Vue.set(
             state.elements,
-            element[this.#indexProperty],
+            element[this.#idProperty],
             element
           );
         }
@@ -99,10 +101,10 @@ export default class {
         const elements = [data];
       }
       elements.forEach(element => {
-        if (element[this.#indexProperty] != undefined) {
+        if (element[this.#idProperty] != undefined) {
           Vue.delete(
             state.elements,
-            element[this.#indexProperty]
+            element[this.#idProperty]
           );
 
           for (let index of Object.values(state.indexes)) {
@@ -148,7 +150,7 @@ export default class {
       return this.#httpQueue
         .get(url)
         .then(response => {
-          commit("set", response.data);
+          commit("setElement", response);
           return response;
         });
     },
@@ -159,7 +161,7 @@ export default class {
       return this.#httpQueue
         .mustGet(url)
         .then(response => {
-          commit("set", response.data);
+          commit("setElement", response.data);
           return response;
         });
     },
@@ -170,7 +172,7 @@ export default class {
       return this.#httpQueue
         .post(url, params)
         .then(response => {
-          commit("set", response.data);
+          commit("setElement", response.data);
           return response;
         });
     },
@@ -202,7 +204,7 @@ export default class {
   constructor(
     baseUrl,
     {
-      indexProperty = "id",
+      idProperty = "id",
       pageParameter = "page",
       pqueueOptions = {concurrency: 2},
       actionParameter = "action",
@@ -211,7 +213,7 @@ export default class {
     this.#actionParameter = actionParameter;
     this.#baseUrl = baseUrl;
     this.#httpQueue = new HttpQueue({pqueueOptions});
-    this.#indexProperty = indexProperty;
+    this.#idProperty = idProperty;
     this.#pageParameter = pageParameter;
   }
 }
