@@ -6,6 +6,7 @@ export default class {
 
     this.props = {
       [idProperty]: {required: true},
+      noFetching: {type: Boolean, default: false},
     };
 
     this.mounted = function() {
@@ -37,6 +38,9 @@ export default class {
 
   methods = {
     show({mustGet = false } = {}) {
+      if (this.noFetching) {
+        return;
+      }
       this.isLoading = true;
 
       const action = this.$options.vuexModule + '/' + (mustGet ? 'mustShow' : 'show');
