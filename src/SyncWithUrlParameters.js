@@ -19,27 +19,32 @@ export default class {
   }
 
   methods = {
-    onParamsChange() {
-      let urlParams = new URLSearchParams, historyParams = {};
+    generateURL(paramChanges = {}) {
+      let urlParams = new URLSearchParams;
 
-      for (let [key, val] of Object.entries(this[this.$options.syncingUrlProperty])) {
+      let params = {...this[this.$options.syncingUrlProperty], ...paramChanges};
+
+      for (let [key, val] of Object.entries(params)) {
         if (!(key in this.$options.syncingIgnoreParams) || val !== this.$options.syncingIgnoreParams[key]) {
-          if (val !== undefined && val !== null) {
-            historyParams[key] = val;
+          if (val !== undefined && val !== null && val !== '') {
             urlParams.append(key, val);
           }
         }
       }
 
-      let urlStr = urlParams.toString();
+      const urlStr = urlParams.toString();
       if (urlStr.length) {
-        urlStr = '?' + urlStr;
+        return '?' + urlStr;
       } else {
-        urlStr = location.pathname;
+        return location.pathname;
       }
-
-      history.replaceState(historyParams, document.title, urlStr);
     },
+
+    onParamsChange() {
+      const urlStr = this.generateURL();
+      history.replaceState(this[this.$options.syncingUrlProperty], document.title, urlStr);
+    },
+
     onHashChange({newURL}) {
       const {searchParams} = new URL(newURL);
       const props = this[this.$options.syncingUrlProperty];

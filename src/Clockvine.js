@@ -4,6 +4,7 @@ import Elements from './Elements';
 import Element from './Element';
 import Module from './Module';
 import Pagination from './Pagination.vue';
+import Search from './Search.vue';
 import PaginatedElements from './PaginatedElements';
 import SyncWithUrlParameters from './SyncWithUrlParameters';
 
@@ -16,4 +17,5 @@ export default {
   Element,
   Module,
   SyncWithUrlParameters,
+  Search,
 };

@@ -100,12 +100,12 @@ export default class {
 
   methods = {
     query({mustGet = false} = {}) {
-      this.isLoading = true;
+      this.$emit('isLoading', this.isLoading = true);
 
       const action = this.vuexModule + '/' + (mustGet ? 'mustIndex' : 'index');
       return this.$store.dispatch(action, this.filteredParams)
         .then(response => {
-          this.isLoading = false;
+          this.$emit('isLoading', this.isLoading = false);
           this.url = response.config.url;
         });
     },
