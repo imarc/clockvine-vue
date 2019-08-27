@@ -1,21 +1,23 @@
 import ContinuousElements from './ContinuousElements';
+import Element from './Element';
 import ElementApiModule from './ElementApiModule';
 import Elements from './Elements';
-import Element from './Element';
 import Module from './Module';
-import Pagination from './Pagination.vue';
-import Search from './Search.vue';
 import PaginatedElements from './PaginatedElements';
+import Pagination from './Pagination.vue';
+import ResetsPageOnChanges from './ResetsPageOnChanges';
+import Search from './Search.vue';
 import SyncWithUrlParameters from './SyncWithUrlParameters';
 
 export default {
   ContinuousElements,
-  PaginatedElements,
-  Pagination,
+  Element,
   ElementApiModule,
   Elements,
-  Element,
   Module,
-  SyncWithUrlParameters,
+  PaginatedElements,
+  Pagination,
+  ResetsPageOnChanges,
   Search,
+  SyncWithUrlParameters,
 };
