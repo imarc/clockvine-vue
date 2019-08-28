@@ -28,7 +28,7 @@ export default class {
             delete cloneVal[prop];
           }
 
-          if (!isEqual(cloneVal, this.previousValue)) {
+          if (this.previousValue !== undefined && !isEqual(cloneVal, this.previousValue)) {
             for (let [prop, value] of Object.entries(resetProperties)) {
               val[prop] = value;
             }
@@ -37,6 +37,8 @@ export default class {
               onReset.call(this, val, this.previousValue);
             }
 
+            this.previousValue = cloneVal;
+          } else if (this.previousValue === undefined) {
             this.previousValue = cloneVal;
           }
         },
