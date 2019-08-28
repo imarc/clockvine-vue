@@ -1,3 +1,4 @@
+import isEqual from 'lodash/isEqual';
 import Elements from './Elements';
 
 export default class {
@@ -13,6 +14,10 @@ export default class {
 
 
   data = () => ({
+    /**
+     * Common parameters to all active URLs, to determine whether to empty the urls array.
+     */
+    commonParams: {},
     /**
      * Array of current URLs.
      */
@@ -93,8 +98,17 @@ export default class {
      *
      * @return {promise}
      */
-    query({mustGet = false, clearExisting = false} = {}) {
+    query({mustGet = false} = {}) {
+      let clonedParams = {...this.filteredParams};
+      let clearExisting = false;
       let parentQuery = this.$options.mixins[0].methods.query;
+
+      delete clonedParams.page;
+
+      if (!isEqual(clonedParams, this.commonParams)) {
+        clearExisting = true;
+        this.commonParams = clonedParams;
+      }
 
       return parentQuery.call(this, {mustGet})
         .then(response => {
