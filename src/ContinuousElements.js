@@ -43,7 +43,7 @@ export default class {
     elements() {
       if (this.urls.length) {
         return [].concat(...this.urls.map(
-          url => this.$store.getters[`${this.module}/elements`](url)
+          url => this.$store.getters[`${this.vuexModule}/elements`](url)
         ));
       }
     },
@@ -56,7 +56,7 @@ export default class {
     meta() {
       if (this.urls.length) {
         const lastUrl = this.urls[this.urls.length - 1];
-        return this.$store.getters[`${this.module}/meta`](lastUrl);
+        return this.$store.getters[`${this.vuexModule}/meta`](lastUrl);
       }
     },
 
@@ -93,13 +93,17 @@ export default class {
      *
      * @return {promise}
      */
-    query({mustGet = false} = {}) {
+    query({mustGet = false, clearExisting = false} = {}) {
       let parentQuery = this.$options.mixins[0].methods.query;
 
       return parentQuery.call(this, {mustGet})
         .then(response => {
           console.log('TODO', response);
-          this.urls.push(response.config.url);
+          if (clearExisting) {
+            this.urls = [response.config.url];
+          } else {
+            this.urls.push(response.config.url);
+          }
         });
     },
   };
