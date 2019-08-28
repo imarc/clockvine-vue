@@ -1,5 +1,3 @@
-import { deepEqual } from 'fast-equals';
-
 export default class {
   data = () => ({
     /**

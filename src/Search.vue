@@ -3,7 +3,7 @@
 </template>
 <script>
 import Vue from 'vue';
-import {debounce} from 'lodash';
+import debounce from 'lodash/debounce';
 
 export default {
     data: () => ({
@@ -28,7 +28,6 @@ export default {
         },
     },
     mounted() {
-        console.log('mounted', this.value);
         this.internalValue = this.value;
     },
 

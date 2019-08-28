@@ -21,7 +21,6 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            //presets: ['@babel/preset-env'],
             plugins: [
               '@babel/plugin-proposal-private-methods',
               '@babel/plugin-proposal-class-properties'
@@ -31,6 +30,17 @@ module.exports = {
       },
     ],
   },
+
+  /*
+  externals: {
+    vue: {
+      commonjs: 'vue',
+      amd: 'vue',
+      commonjs2: 'vue',
+      root: 'Vue'
+    }
+  },
+  */
 
   plugins: [
     new VueLoaderPlugin(),

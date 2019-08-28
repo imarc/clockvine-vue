@@ -1,5 +1,4 @@
-import Vue from "vue";
-import {stringify} from "qs";
+import Vue from 'vue';
 import HttpQueue from './HttpQueue';
 
 export default class {
@@ -7,14 +6,19 @@ export default class {
    *
    */
   #createQueryParams(params) {
-    const str = stringify(params, {
-      sort: (a, b) => a.localeCompare(b),
-      filter(key, value) {
-        return value == null || value === "" ? undefined : value;
+    let urlParams = new URLSearchParams;
+    for (let [key, val] of Object.entries(params)) {
+      if (val != undefined && val !== null && val !== '') {
+        urlParams.append(key, val);
       }
-    });
+    }
 
-    return str.length ? `?${str}` : "";
+    const urlStr = urlParams.toString();
+    if (urlStr.length) {
+      return '?' + urlStr;
+    } else {
+      return '';
+    }
   }
 
   /**
