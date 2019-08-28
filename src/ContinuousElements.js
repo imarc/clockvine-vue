@@ -112,7 +112,6 @@ export default class {
 
       return parentQuery.call(this, {mustGet})
         .then(response => {
-          console.log('TODO', response);
           if (clearExisting) {
             this.urls = [response.config.url];
           } else {

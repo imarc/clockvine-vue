@@ -40,7 +40,6 @@ export default {
 
     watch: {
         value(value) {
-            console.log('watch value', value);
             this.internalValue = value;
         },
     },
