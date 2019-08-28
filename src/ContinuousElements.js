@@ -1,17 +1,45 @@
 import Elements from './Elements';
 
 export default class {
+
+  /**
+   * Construct a new Vue component associated with the Vuex Module vuexModule. It is similar to Elements, but supports displaying the results from multiple URLs as a single array.
+   *
+   * @param {string} vuexModule
+   */
+  constructor(vuexModule) {
+    this.mixins = [new Elements(vuexModule)];
+  }
+
+
   data = () => ({
+    /**
+     * Array of current URLs.
+     */
     urls: [],
   });
+
+
   computed = {
+    /**
+     * Return the current page.
+     *
+     * @return {number}
+     */
     page() {
-      if (this.internalParams && this.internalParams.page) {
-        return this.internalParams.page;
+      if (this.params && this.params.page) {
+        return this.params.page;
       } else {
         return 1;
       }
     },
+
+    /**
+     * Override the elements property from Elements with one that combines the
+     * results from all URLs in the urls property.
+     *
+     * @return {array}
+     */
     elements() {
       if (this.urls.length) {
         return [].concat(...this.urls.map(
@@ -20,6 +48,11 @@ export default class {
       }
     },
 
+    /**
+     * Return the meta information for the last URL.
+     *
+     * @return {object}
+     */
     meta() {
       if (this.urls.length) {
         const lastUrl = this.urls[this.urls.length - 1];
@@ -27,12 +60,22 @@ export default class {
       }
     },
 
+    /**
+     * Return whether there's more elements to fetch.
+     *
+     * @return {boolean}
+     */
     hasMore() {
       if (this.meta) {
         return this.meta.pagination.total_pages > this.page;
       }
     },
 
+    /**
+     * Only these properties are exposed to the slot template. First we fetch
+     * the 'parentParams' - params that are exposed by Elements - and then add
+     * in the ones specific to this class.
+     */
     slotParams() {
       let parentParams = this.$options.mixins[0].computed.slotParams.call(this);
       return {
@@ -43,6 +86,13 @@ export default class {
   };
 
   methods = {
+    /**
+     * Queries the Vuex Module (triggers an index or mustIndex.)
+     *
+     * @param {boolean} mustGet - if true, forces a new HTTP request. Default false
+     *
+     * @return {promise}
+     */
     query({mustGet = false} = {}) {
       let parentQuery = this.$options.mixins[0].methods.query;
 
@@ -53,8 +103,4 @@ export default class {
         });
     },
   };
-
-  constructor(module) {
-    this.mixins = [new Elements(module)];
-  }
 }

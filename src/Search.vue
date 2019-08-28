@@ -5,11 +5,16 @@
 import Vue from 'vue';
 import debounce from 'lodash/debounce';
 
+/**
+ * Search is a Vue Component for a live search field.
+ */
 export default {
+
     data: () => ({
         internalValue: null,
         isTyping: false,
     }),
+
     methods: {
         input({target: {value}}) {
             this.internalValue = value;
@@ -21,12 +26,14 @@ export default {
             return this.$emit('input', value);
         }, 300),
     },
+
     props: {
         value: {
             type: String,
             required: true,
         },
     },
+
     mounted() {
         this.internalValue = this.value;
     },

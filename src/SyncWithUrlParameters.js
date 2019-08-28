@@ -1,4 +1,11 @@
 export default class {
+
+  /**
+   * Constructs a vue mixin that will keep query string parameters in sync with a vue property.
+   *
+   * @param {string} property
+   * @param {object} ignoreParams - parameters with values to ignore
+   */
   constructor(property, ignoreParams = {page: 1, orderBy: 'title asc'})
   {
     this.syncingUrlProperty = property;
@@ -19,6 +26,16 @@ export default class {
   }
 
   methods = {
+
+    /**
+     * Generates a URL based on the current parameters.
+     *
+     * @param {object} paramChanges - optionally overlay some parameter changes
+     *                                before generating the URL without
+     *                                affecting the current params
+     *
+     * @return {string}
+     */
     generateURL(paramChanges = {}) {
       let urlParams = new URLSearchParams;
 
@@ -40,11 +57,19 @@ export default class {
       }
     },
 
+    /**
+     * Called when params change.
+     */
     onParamsChange() {
       const urlStr = this.generateURL();
-      history.replaceState(this[this.$options.syncingUrlProperty], document.title, urlStr);
+      if (location.search != urlStr) {
+        history.replaceState(this[this.$options.syncingUrlProperty], document.title, urlStr);
+      }
     },
 
+    /**
+     * Called on window "hashchange" events.
+     */
     onHashChange({newURL}) {
       const {searchParams} = new URL(newURL);
       const props = this[this.$options.syncingUrlProperty];

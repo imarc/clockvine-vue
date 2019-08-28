@@ -1,9 +1,26 @@
 import Module from './Module';
 
+/**
+ * Construct a new Vuex Module that's meant to work with a
+ * craft-cms/element-api endpoint.
+ *
+ * @extends Module
+ */
 export default class extends Module {
   #baseUrl;
   #actionParameter;
 
+  /**
+   * Constructor. Only difference from Module is baseUrl must be a string, as
+   * this class creates a wrapper function that matches typical element-api
+   * conventions.
+   *
+   * @param {string} baseUrl         - String for the baseURL
+   * @param {string} idProperty      - Property to use for IDs; default "id"
+   * @param {string} pageParameter   - Property to use for pages; default "page"
+   * @param {object} pqueueOptions   - Override PQueue options; default {concurrency: 2}
+   * @param {string} actionParameter - Property that indicates action: default "action"
+   */
   constructor(
     baseUrl,
     {
