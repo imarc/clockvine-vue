@@ -11,8 +11,7 @@ export default class {
   */
   constructor(vuexModule) {
     this.mixins = [new ElementsComponent(vuexModule)];
-  }
-
+  };
 
   computed = {
 
