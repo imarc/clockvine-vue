@@ -1,4 +1,4 @@
-import Module from './Module';
+import Module from './ApiModule';
 
 /**
  * Construct a new Vuex Module that's meant to work with a

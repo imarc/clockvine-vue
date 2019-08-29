@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import HttpQueue from './HttpQueue';
+import HttpQueue from '../HttpQueue';
 
 /**
  * Base Vuex Module for that communicates with a JSON-based, REST API endpoint.

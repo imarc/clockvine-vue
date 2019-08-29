@@ -1,5 +1,5 @@
 import isEqual from 'lodash/isEqual';
-import Elements from './Elements';
+import ElementsComponent from './ElementsComponent';
 
 export default class {
 
@@ -9,7 +9,7 @@ export default class {
    * @param {string} vuexModule
    */
   constructor(vuexModule) {
-    this.mixins = [new Elements(vuexModule)];
+    this.mixins = [new ElementsComponent(vuexModule)];
   }
 
 

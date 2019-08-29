@@ -1,13 +1,13 @@
-import ContinuousElements from './ContinuousElements';
-import Element from './Element';
-import ElementApiModule from './ElementApiModule';
-import Elements from './Elements';
-import Module from './Module';
-import PaginatedElements from './PaginatedElements';
-import Pagination from './Pagination.vue';
-import ResetsPageOnChanges from './ResetsPageOnChanges';
-import LiveSearch from './LiveSearch.vue';
-import SyncWithUrlParameters from './SyncWithUrlParameters';
+import ElementComponent from "./components/ElementComponent";
+import ElementsComponent from "./components/ElementsComponent";
+import ContinuousElementsComponent from "./components/ContinuousElementsComponent";
+import PaginatedElementsComponent from "./components/PaginatedElementsComponent";
+import LiveSearch from "./components/LiveSearch.vue";
+import PaginationNav from "./components/PaginationNav.vue";
+import ApiModule from "./modules/ApiModule";
+import ElementApiModule from "./modules/ElementApiModule";
+import ResetsPage from "./mixins/ResetsPage";
+import SyncsWithUrl from "./mixins/SyncsWithUrl";
 
 export default {
 
