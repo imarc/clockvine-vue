@@ -6,18 +6,36 @@ import Module from './Module';
 import PaginatedElements from './PaginatedElements';
 import Pagination from './Pagination.vue';
 import ResetsPageOnChanges from './ResetsPageOnChanges';
-import Search from './Search.vue';
+import LiveSearch from './LiveSearch.vue';
 import SyncWithUrlParameters from './SyncWithUrlParameters';
 
 export default {
-  ContinuousElements,
-  Element,
+
+  /**
+   * Components
+   */
+  ElementComponent,
+
+  ElementsComponent,
+  ContinuousElementsComponent,
+  PaginatedElementsComponent,
+
+  LiveSearch,
+  PaginationNav,
+
+
+
+  /**
+   * Vuex Modules
+   */
+  ApiModule,
   ElementApiModule,
-  Elements,
-  Module,
-  PaginatedElements,
-  Pagination,
-  ResetsPageOnChanges,
-  Search,
-  SyncWithUrlParameters,
+
+
+
+  /**
+   * Mixins
+   */
+  ResetsPage,
+  SyncsWithUrl,
 };

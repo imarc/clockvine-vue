@@ -6,7 +6,7 @@ import Vue from 'vue';
 import debounce from 'lodash/debounce';
 
 /**
- * Search is a Vue Component for a live search field.
+ * LiveSearch is a Vue Component for a live search field.
  */
 export default {
 
