@@ -1,11 +1,12 @@
+import ApiModule from "./modules/ApiModule";
+import ContinuousElementsComponent from "./components/ContinuousElementsComponent";
+import ElementApiModule from "./modules/ElementApiModule";
 import ElementComponent from "./components/ElementComponent";
 import ElementsComponent from "./components/ElementsComponent";
-import ContinuousElementsComponent from "./components/ContinuousElementsComponent";
-import PaginatedElementsComponent from "./components/PaginatedElementsComponent";
+import HttpQueue from "./HttpQueue";
 import LiveSearch from "./components/LiveSearch.vue";
+import PaginatedElementsComponent from "./components/PaginatedElementsComponent";
 import PaginationNav from "./components/PaginationNav.vue";
-import ApiModule from "./modules/ApiModule";
-import ElementApiModule from "./modules/ElementApiModule";
 import ResetsPage from "./mixins/ResetsPage";
 import SyncsWithUrl from "./mixins/SyncsWithUrl";
 
@@ -38,4 +39,10 @@ export default {
    */
   ResetsPage,
   SyncsWithUrl,
+
+
+  /**
+   * Miscellaneous
+   */
+  HttpQueue,
 };
