@@ -40,139 +40,139 @@
 /**
  * Pagination is a Vue Component for pagination controls.
  */
-export default {
-    props: {
+    export default {
+        props: {
 
-        /**
-         * The number of total pages.
-         */
-        totalPages: {
-            type: Number,
-            required: true,
+            /**
+             * The number of total pages.
+             */
+            totalPages: {
+                type: Number,
+                required: true,
+            },
+
+            /**
+             * The current page. Generally wouldn't specify this directly, but instead use v-model.
+             */
+            value: {
+                type: Number,
+                required: true,
+            },
+
+            /**
+             * The number of links to try to show on either side of the current page. Default 3
+             */
+            radius: {
+                type: Number,
+                default: 3,
+            },
+
+            /**
+             * The parameter used to specify page. Needed to generate accurate URLs
+             * for the pagination links. Default "page"
+             */
+            pageParameter: {
+                type: String,
+                default: 'page',
+            },
+
+            /**
+             * Optional parameter to provide a callback for URL generation.
+             * Defaults to using the current URL and just appending/adjusting the
+             * query parameter pageParameter.
+             */
+            makeUrl: {
+                type: Function,
+                default(page) {
+                    let {searchParams} = new URL(location.href);
+                    if (page === 1) {
+                        searchParams.delete(this.pageParameter);
+                    } else {
+                        searchParams.set(this.pageParameter, page);
+                    }
+
+                    const urlStr = searchParams.toString();
+                    if (urlStr.length) {
+                        return '?' + urlStr;
+                    } else {
+                        return location.pathname;
+                    }
+                }
+            }
         },
+        computed: {
+            /**
+             * Whether you're on the first page.
+             *
+             * @return {boolean}
+             */
+            onFirstPage() {
+                return this.value === 1;
+            },
 
-        /**
-         * The current page. Generally wouldn't specify this directly, but instead use v-model.
-         */
-        value: {
-            type: Number,
-            required: true,
-        },
+            /**
+             * Whether you're on the last page.
+             *
+             * @return {boolean}
+             */
+            onLastPage() {
+                return this.value >= this.totalPages;
+            },
 
-        /**
-         * The number of links to try to show on either side of the current page. Default 3
-         */
-        radius: {
-            type: Number,
-            default: 3,
-        },
+            /**
+             * An array of pages to include links to. Based off of the current
+             * page, radius, and total pages.
+             *
+             * @return {array}
+             */
+            pages() {
+                const firstLink = Math.max(this.value - this.radius, 2);
+                const lastLink = Math.min(
+                    firstLink + this.radius * 2 + 1,
+                    this.totalPages - 1
+                );
 
-        /**
-         * The parameter used to specify page. Needed to generate accurate URLs
-         * for the pagination links. Default "page"
-         */
-        pageParameter: {
-            type: String,
-            default: 'page',
-        },
+                let pages = [];
 
-        /**
-         * Optional parameter to provide a callback for URL generation.
-         * Defaults to using the current URL and just appending/adjusting the
-         * query parameter pageParameter.
-         */
-        makeUrl: {
-            type: Function,
-            default(page) {
-                let {searchParams} = new URL(location.href);
-                if (page === 1) {
-                    searchParams.delete(this.pageParameter);
-                } else {
-                    searchParams.set(this.pageParameter, page);
+                if (firstLink == 3) {
+                    pages.unshift(2);
+                }
+                for (let i = firstLink; i <= lastLink; i++) {
+                    pages.push(i);
                 }
 
-                const urlStr = searchParams.toString();
-                if (urlStr.length) {
-                    return '?' + urlStr;
-                } else {
-                    return location.pathname;
+                return pages;
+            },
+        },
+
+
+        methods: {
+
+            /**
+             * Go to the previous page.
+             */
+            previous() {
+                this.gotoPage(this.value - 1);
+            },
+
+            /**
+             * Go to the next page.
+             */
+            next() {
+                this.gotoPage(this.value + 1);
+            },
+
+            /**
+             * Jump to a specific page.
+             *
+             * @param {number} page
+             */
+            gotoPage(page) {
+                page = Math.max(1, Math.min(page, this.totalPages));
+                if (page != this.value) {
+                    this.$emit("input", page);
                 }
-            }
-        }
-    },
-    computed: {
-        /**
-         * Whether you're on the first page.
-         *
-         * @return {boolean}
-         */
-        onFirstPage() {
-            return this.value === 1;
+            },
         },
-
-        /**
-         * Whether you're on the last page.
-         *
-         * @return {boolean}
-         */
-        onLastPage() {
-            return this.value >= this.totalPages;
-        },
-
-        /**
-         * An array of pages to include links to. Based off of the current
-         * page, radius, and total pages.
-         *
-         * @return {array}
-         */
-        pages() {
-            const firstLink = Math.max(this.value - this.radius, 2);
-            const lastLink = Math.min(
-                firstLink + this.radius * 2 + 1,
-                this.totalPages - 1
-            );
-
-            let pages = [];
-
-            if (firstLink == 3) {
-                pages.unshift(2);
-            }
-            for (let i = firstLink; i <= lastLink; i++) {
-                pages.push(i);
-            }
-
-            return pages;
-        },
-    },
-
-
-    methods: {
-
-        /**
-         * Go to the previous page.
-         */
-        previous() {
-            this.gotoPage(this.value - 1);
-        },
-
-        /**
-         * Go to the next page.
-         */
-        next() {
-            this.gotoPage(this.value + 1);
-        },
-
-        /**
-         * Jump to a specific page.
-         *
-         * @param {number} page
-         */
-        gotoPage(page) {
-            page = Math.max(1, Math.min(page, this.totalPages));
-            if (page != this.value) {
-                this.$emit("input", page);
-            }
-        },
-    },
-}
+    }
 </script>

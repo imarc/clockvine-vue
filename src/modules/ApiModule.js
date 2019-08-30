@@ -6,348 +6,348 @@ import HttpQueue from '../HttpQueue';
  */
 export default class {
 
-  /**
-   * Constructor.
-   *
-   * @param {string|function} baseUrl - String or function for the baseURL
-   * @param {string} idProperty      - Property to use for IDs; default "id"
-   * @param {string} pageParameter   - Property to use for pages; default "page"
-   * @param {object} pqueueOptions   - Override PQueue options; default {concurrency: 2}
-   * @param {string} actionParameter - Property that indicates action: default "action"
-   */
-  constructor(
-    baseUrl,
-    {
-      idProperty = "id",
-      pageParameter = "page",
-      pqueueOptions = {concurrency: 2},
-      actionParameter = "action",
-    } = {},
-  ) {
-    this.#actionParameter = actionParameter;
-    this.#baseUrl = baseUrl;
-    this.#httpQueue = new HttpQueue({pqueueOptions});
-    this.#idProperty = idProperty;
-    this.#pageParameter = pageParameter;
-  }
-
-  /**
-   * Internal use. Builds a quey string from an object of params.
-   *
-   * @param {object} params - The object to parameters
-   * @return {string}
-   */
-  #createQueryParams(params) {
-    let urlParams = new URLSearchParams;
-    for (let [key, val] of Object.entries(params)) {
-      if (val != undefined && val !== null && val !== '') {
-        urlParams.append(key, val);
-      }
-    }
-
-    const urlStr = urlParams.toString();
-    if (urlStr.length) {
-      return '?' + urlStr;
-    } else {
-      return '';
-    }
-  }
-
-  /**
-   * Internal use. Builds the URL for the API endpoint. It will use the
-   * 'baseURL' callback if it's passed in.
-   *
-   * @param {object} params - The object of parameters
-   * @return {string}
-   */
-  #createQueryUrl(params) {
-    let url = this.#baseUrl;
-    if (typeof url === "function") {
-      url = url(params);
-    }
-
-    return url + this.#createQueryParams(params);
-  }
-
-  /**
-   * Internal use. Removes all instances of element from an array.
-   *
-   * @param {array} array - Array to modify.
-   * @param {mixed} element - element to look for and remove
-   * @return {array}
-   */
-  #spliceAll(array, element) {
-    for (let i = array.length - 1; i >= 0; i--) {
-      if (array[i] === element) {
-        array.splice(i, 1);
-      }
-    }
-
-    return array;
-  }
-
-  /**
-   * Internal use. retrieves a nested property from obj, using each element
-   * within path as a key, but will always return null instead of throwing any
-   * errors.
-   *
-   * @param {object} obj - Object to descending into
-   * @param {array} path - Array of keys
-   * @return {mixed}
-   */
-  #safelyGet(obj, path) {
-    return path.reduce((xs, x) => (xs && xs[x] ? xs[x] : null), obj);
-  }
-
-  /**
-   * Parameter that the module will set to the action being taken. Valid values it may pass are
-   * index, show, store, update, and destroy.
-   */
-  #actionParameter;
-
-  /**
-   * baseUrl for this endpoint, set by the constructor. If it's a string, query
-   * params are just appended to this URL. If it's a function, it will be
-   * passed the params object and expected to return a string.
-   */
-  #baseUrl;
-
-  /**
-   * The HttpQueue instance.
-   */
-  #httpQueue;
-
-  /**
-   * Parameter used for identifying models. Default is "id".
-   */
-  #idProperty;
-
-  /**
-   * Parameter used for specifying pages. Default is "page".
-   */
-  #pageParameter;
-
-  /**
-   * Flag that this Vuex Module should be namespaced.
-   */
-  namespaced = true;
-
-
-  state = {
     /**
-     * Indexes stores URLs that reference index requests with arrays inside of
-     * them that reference the individual element objects.
-     */
-    indexes: {},
-
-    /**
-     * Elements stores references to the elements themselves, keyed by their
-     * idProperty.
-     */
-    elements: {},
-  };
-
-
-  getters = {
-    /**
-     * Elements is a getter than returns a function to get an array of elements
-     * for a URL.
-     */
-    elements: state => url => this.#safelyGet(state.indexes, [url, 'data']),
-
-    /**
-     * Meta is a getter that returns a function to get meta information for a
-     * URL.
-     */
-    meta: state => url => this.#safelyGet(state.indexes, [url, 'meta']),
-
-    /**
-     * Element is a getter that returns a function get a single element by its
-     * idProperty.
-     */
-    element: state => id => state.elements[id],
-  };
-
-
-  mutations = {
-    /**
-     * setIndex sets an index within the module's store.
-     */
-    setIndex: (state, {url, data}) => {
-      Vue.set(state.indexes, url, data);
-    },
-
-    /**
-     * setElement sets one or more elements within the store. If data is an
-     * array, it will act as if setElement was called for each element within
-     * the array.
+     * Constructor.
      *
-     * @param {object|array} data - element(s) to add to the module's store.
+     * @param {string|function} baseUrl - String or function for the baseURL
+     * @param {string} idProperty      - Property to use for IDs; default "id"
+     * @param {string} pageParameter   - Property to use for pages; default "page"
+     * @param {object} pqueueOptions   - Override PQueue options; default {concurrency: 2}
+     * @param {string} actionParameter - Property that indicates action: default "action"
      */
-    setElement: (state, {data = []}) => {
-      const elements = Array.isArray(data) ? data : [data];
+    constructor(
+        baseUrl,
+        {
+            idProperty = "id",
+            pageParameter = "page",
+            pqueueOptions = {concurrency: 2},
+            actionParameter = "action",
+        } = {},
+    ) {
+        this.#actionParameter = actionParameter;
+        this.#baseUrl = baseUrl;
+        this.#httpQueue = new HttpQueue({pqueueOptions});
+        this.#idProperty = idProperty;
+        this.#pageParameter = pageParameter;
+    }
 
-      elements.forEach(element => {
-        if (element[this.#idProperty] != undefined) {
-          Vue.set(
-            state.elements,
-            element[this.#idProperty],
-            element
-          );
+    /**
+     * Internal use. Builds a quey string from an object of params.
+     *
+     * @param {object} params - The object to parameters
+     * @return {string}
+     */
+    #createQueryParams(params) {
+        let urlParams = new URLSearchParams;
+        for (let [key, val] of Object.entries(params)) {
+            if (val != undefined && val !== null && val !== '') {
+                urlParams.append(key, val);
+            }
         }
-      });
-    },
 
-    /**
-     * deleteElement removes one or more elements from the store. If data is an
-     * array, it will act as if deleteElement was called for each object within
-     * the array.
-     *
-     * @param {object|array} data - element(s)to remove from the module's store.
-     */
-    deleteElement: (state, {data = []}) => {
-      if (Array.isArray(data)) {
-        const elements = data;
-      } else {
-        const elements = [data];
-      }
-      elements.forEach(element => {
-        if (element[this.#idProperty] != undefined) {
-          Vue.delete(
-            state.elements,
-            element[this.#idProperty]
-          );
-
-          for (let index of Object.values(state.indexes)) {
-            this.#spliceAll(index.data, element);
-          }
+        const urlStr = urlParams.toString();
+        if (urlStr.length) {
+            return '?' + urlStr;
+        } else {
+            return '';
         }
-      });
-    },
-  };
-
-
-  actions = {
+    }
 
     /**
-     * Gets an index of elements. If previously fetched, uses the cached value.
+     * Internal use. Builds the URL for the API endpoint. It will use the
+     * 'baseURL' callback if it's passed in.
      *
-     * @param {object} params - parameters to pass
-     * @return {promise}
+     * @param {object} params - The object of parameters
+     * @return {string}
      */
-    index: ({commit, getters}, params = {}) => {
-      const url = this.#createQueryUrl({[this.#actionParameter]: 'index', ...params});
+    #createQueryUrl(params) {
+        let url = this.#baseUrl;
+        if (typeof url === "function") {
+            url = url(params);
+        }
 
-      return this.#httpQueue
-        .get(url)
-        .then(response => {
-          commit("setIndex", {url, data: response.data});
-          commit("setElement", response.data);
-          return response;
-        });
-    },
+        return url + this.#createQueryParams(params);
+    }
 
     /**
-     * Gets an index of elements. Always bypasses the cache.
+     * Internal use. Removes all instances of element from an array.
      *
-     * @param {object} params - parameters to pass
-     * @return {promise}
+     * @param {array} array - Array to modify.
+     * @param {mixed} element - element to look for and remove
+     * @return {array}
      */
-    mustIndex: ({commit, getters}, params = {}) => {
-      const url = this.#createQueryUrl({[this.#actionParameter]: 'index', ...params});
+    #spliceAll(array, element) {
+        for (let i = array.length - 1; i >= 0; i--) {
+            if (array[i] === element) {
+                array.splice(i, 1);
+            }
+        }
 
-      return this.#httpQueue
-        .mustGet(url)
-        .then(response => {
-          commit("setIndex", {url, data: response.data});
-          commit("setElement", response.data);
-          return response;
-        });
-    },
+        return array;
+    }
 
     /**
-     * Gets a single element. If previously fetched, uses the cached value.
+     * Internal use. retrieves a nested property from obj, using each element
+     * within path as a key, but will always return null instead of throwing any
+     * errors.
      *
-     * @param {object} params - parameters to pass
-     * @return {promise}
+     * @param {object} obj - Object to descending into
+     * @param {array} path - Array of keys
+     * @return {mixed}
      */
-    show: ({commit}, params = {}) => {
-      const url = this.#createQueryUrl({[this.#actionParameter]: 'show', ...params});
-
-      return this.#httpQueue
-        .get(url)
-        .then(response => {
-          commit("setElement", response);
-          return response;
-        });
-    },
+    #safelyGet(obj, path) {
+        return path.reduce((xs, x) => (xs && xs[x] ? xs[x] : null), obj);
+    }
 
     /**
-     * Gets a single element. Always bypasses the cache.
-     *
-     * @param {object} params - parameters to pass
-     * @return {promise}
+     * Parameter that the module will set to the action being taken. Valid values it may pass are
+     * index, show, store, update, and destroy.
      */
-    mustShow: ({commit}, params = {}) => {
-      const url = this.#createQueryUrl({[this.#actionParameter]: 'show', ...params});
-
-      return this.#httpQueue
-        .mustGet(url)
-        .then(response => {
-          commit("setElement", response.data);
-          return response;
-        });
-    },
+    #actionParameter;
 
     /**
-     * Stores a new element.
-     *
-     * @param {object} params - parameters to pass
-     * @return {promise}
+     * baseUrl for this endpoint, set by the constructor. If it's a string, query
+     * params are just appended to this URL. If it's a function, it will be
+     * passed the params object and expected to return a string.
      */
-    store: ({commit, dispatch}, params = {}) => {
-      const url = this.#createQueryUrl({[this.#actionParameter]: 'store', ...params});
-
-      return this.#httpQueue
-        .post(url, params)
-        .then(response => {
-          commit("setElement", response.data);
-          return response;
-        });
-    },
+    #baseUrl;
 
     /**
-     * Updates an existing element.
-     *
-     * @param {object} params - parameters to pass
-     * @return {promise}
+     * The HttpQueue instance.
      */
-    update: () => {
-      const url = this.#createQueryUrl({[this.#actionParameter]: 'update', ...params});
-
-      return this.#httpQueue
-        .put(url, params)
-        .then(response => {
-          commit("setElement", response.data);
-          return response;
-        });
-    },
+    #httpQueue;
 
     /**
-     * Destroys (deletes) an existing element.
-     *
-     * @param {object} params - parameters to pass
-     * @return {promise}
+     * Parameter used for identifying models. Default is "id".
      */
-    destroy: () => {
-      const url = this.#createQueryUrl({[this.#actionParameter]: 'destroy', ...params});
+    #idProperty;
 
-      return this.#httpQueue
-        .delete(url, params)
-        .then(response => {
-          commit("deleteElement", response.data);
-          return response;
-        });
-    },
-  };
+    /**
+     * Parameter used for specifying pages. Default is "page".
+     */
+    #pageParameter;
+
+    /**
+     * Flag that this Vuex Module should be namespaced.
+     */
+    namespaced = true;
+
+
+    state = {
+        /**
+         * Indexes stores URLs that reference index requests with arrays inside of
+         * them that reference the individual element objects.
+         */
+        indexes: {},
+
+        /**
+         * Elements stores references to the elements themselves, keyed by their
+         * idProperty.
+         */
+        elements: {},
+    };
+
+
+    getters = {
+        /**
+         * Elements is a getter than returns a function to get an array of elements
+         * for a URL.
+         */
+        elements: state => url => this.#safelyGet(state.indexes, [url, 'data']),
+
+        /**
+         * Meta is a getter that returns a function to get meta information for a
+         * URL.
+         */
+        meta: state => url => this.#safelyGet(state.indexes, [url, 'meta']),
+
+        /**
+         * Element is a getter that returns a function get a single element by its
+         * idProperty.
+         */
+        element: state => id => state.elements[id],
+    };
+
+
+    mutations = {
+        /**
+         * setIndex sets an index within the module's store.
+         */
+        setIndex: (state, {url, data}) => {
+            Vue.set(state.indexes, url, data);
+        },
+
+        /**
+         * setElement sets one or more elements within the store. If data is an
+         * array, it will act as if setElement was called for each element within
+         * the array.
+         *
+         * @param {object|array} data - element(s) to add to the module's store.
+         */
+        setElement: (state, {data = []}) => {
+            const elements = Array.isArray(data) ? data : [data];
+
+            elements.forEach(element => {
+                if (element[this.#idProperty] != undefined) {
+                    Vue.set(
+                        state.elements,
+                        element[this.#idProperty],
+                        element
+                    );
+                }
+            });
+        },
+
+        /**
+         * deleteElement removes one or more elements from the store. If data is an
+         * array, it will act as if deleteElement was called for each object within
+         * the array.
+         *
+         * @param {object|array} data - element(s)to remove from the module's store.
+         */
+        deleteElement: (state, {data = []}) => {
+            if (Array.isArray(data)) {
+                const elements = data;
+            } else {
+                const elements = [data];
+            }
+            elements.forEach(element => {
+                if (element[this.#idProperty] != undefined) {
+                    Vue.delete(
+                        state.elements,
+                        element[this.#idProperty]
+                    );
+
+                    for (let index of Object.values(state.indexes)) {
+                        this.#spliceAll(index.data, element);
+                    }
+                }
+            });
+        },
+    };
+
+
+    actions = {
+
+        /**
+         * Gets an index of elements. If previously fetched, uses the cached value.
+         *
+         * @param {object} params - parameters to pass
+         * @return {promise}
+         */
+        index: ({commit, getters}, params = {}) => {
+            const url = this.#createQueryUrl({[this.#actionParameter]: 'index', ...params});
+
+            return this.#httpQueue
+                .get(url)
+                .then(response => {
+                    commit("setIndex", {url, data: response.data});
+                    commit("setElement", response.data);
+                    return response;
+                });
+        },
+
+        /**
+         * Gets an index of elements. Always bypasses the cache.
+         *
+         * @param {object} params - parameters to pass
+         * @return {promise}
+         */
+        mustIndex: ({commit, getters}, params = {}) => {
+            const url = this.#createQueryUrl({[this.#actionParameter]: 'index', ...params});
+
+            return this.#httpQueue
+                .mustGet(url)
+                .then(response => {
+                    commit("setIndex", {url, data: response.data});
+                    commit("setElement", response.data);
+                    return response;
+                });
+        },
+
+        /**
+         * Gets a single element. If previously fetched, uses the cached value.
+         *
+         * @param {object} params - parameters to pass
+         * @return {promise}
+         */
+        show: ({commit}, params = {}) => {
+            const url = this.#createQueryUrl({[this.#actionParameter]: 'show', ...params});
+
+            return this.#httpQueue
+                .get(url)
+                .then(response => {
+                    commit("setElement", response);
+                    return response;
+                });
+        },
+
+        /**
+         * Gets a single element. Always bypasses the cache.
+         *
+         * @param {object} params - parameters to pass
+         * @return {promise}
+         */
+        mustShow: ({commit}, params = {}) => {
+            const url = this.#createQueryUrl({[this.#actionParameter]: 'show', ...params});
+
+            return this.#httpQueue
+                .mustGet(url)
+                .then(response => {
+                    commit("setElement", response.data);
+                    return response;
+                });
+        },
+
+        /**
+         * Stores a new element.
+         *
+         * @param {object} params - parameters to pass
+         * @return {promise}
+         */
+        store: ({commit, dispatch}, params = {}) => {
+            const url = this.#createQueryUrl({[this.#actionParameter]: 'store', ...params});
+
+            return this.#httpQueue
+                .post(url, params)
+                .then(response => {
+                    commit("setElement", response.data);
+                    return response;
+                });
+        },
+
+        /**
+         * Updates an existing element.
+         *
+         * @param {object} params - parameters to pass
+         * @return {promise}
+         */
+        update: () => {
+            const url = this.#createQueryUrl({[this.#actionParameter]: 'update', ...params});
+
+            return this.#httpQueue
+                .put(url, params)
+                .then(response => {
+                    commit("setElement", response.data);
+                    return response;
+                });
+        },
+
+        /**
+         * Destroys (deletes) an existing element.
+         *
+         * @param {object} params - parameters to pass
+         * @return {promise}
+         */
+        destroy: () => {
+            const url = this.#createQueryUrl({[this.#actionParameter]: 'destroy', ...params});
+
+            return this.#httpQueue
+                .delete(url, params)
+                .then(response => {
+                    commit("deleteElement", response.data);
+                    return response;
+                });
+        },
+    };
 }

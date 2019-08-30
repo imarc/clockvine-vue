@@ -19,9 +19,9 @@ export default {
         input({target: {value}}) {
             this.internalValue = value;
             this.$emit('isTyping', this.isTyping = true);
-            return this.debouncedInput(value);
+            return this.$_liveSearch_debouncedInput(value);
         },
-        debouncedInput: debounce(function(value) {
+        $_liveSearch_debouncedInput: debounce(function(value) {
             this.$emit('isTyping', this.isTyping = false);
             return this.$emit('input', value);
         }, 300),

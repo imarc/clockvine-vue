@@ -1,6 +1,7 @@
 export default class {
     /**
-     * Construct a new Vue component associated with a single element in a vuexModule.
+     * Construct a new Vue component associated with a single element in a
+     * vuexModule.
      *
      * @param {string} vuexModule
      * @param {string} idProperty  default "id"
@@ -17,8 +18,8 @@ export default class {
             [idProperty]: {required: true},
 
             /**
-             * This disables making API requests for this element, and instead will
-             * only return whatever is already within Vuex.
+             * This disables making API requests for this element, and instead
+             * will only return whatever is already within Vuex.
              */
             noFetching: {type: Boolean, default: false},
         };
