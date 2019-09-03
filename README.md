@@ -1,18 +1,45 @@
 Clockvine
 =========
 
-This is a vue package meant to be paired with [imarc/clockvine](https://packagist.org/packages/imarc/clockvine), a tiny PHP lib for Laravel.
+Clockvine is a JavaScript library that provides some CRUD-like functionality
+for collections and models on top of a JSON-based API. Currently it supports
+RESTful JSON endpoints, such as those provided by craftcms/element-api.
 
-This is **enormously a work in progress** - it's a long ways from being ready to be adopted outside of Imarc.
+There is a PHP package,
+[imarc/clockvine](https://packagist.org/packages/imarc/clockvine), that's a
+middleware designed to normalize responses from Laravel to be compatible, but
+that library is currently out of date.
 
-Overview
---------
+0.4 is currently an **alpha** - we're using the existing functionality, but
+there's still additional functionality planned for completion before the next
+stable release and backwards-compatibility breaks may be introduced between any
+versions.
 
-Clockvine-vue is an opinionated library that handles communicating between a RESTful API for CRUD actions and Vuex.
 
-It has two main pieces – vuexModule and vueMixin. For each API endpoint (controller) you should instantiate a vuexModule and add it to your vuex store.
+Exports
+-------
 
-Each vue component that you'd like to communicate with these vuexModules should include vueMixin (or editableVueMixin) as a mixin.
+Clockvine provides constructors for Vuex modules, constructors for Vue components, and regular Vue components.
+
+
+**Modules**
+
+* ApiModule (previously vuexModule) - class used to construct Vuex modules that are backed by a RESTful API endpoint.
+* ElementApiModule - subclass of ApiModule configured specifically for craftcms/element-api endpoints.
+
+**Components**
+
+* ElementComponent (previously vueMixin) - used for a single element.
+* ElementsComponent - used for a collection of elements.
+* PaginatedElementsComponent - subclass of ElementsComponent that is built for paginated elements.
+* ContinuousElementsComponent - subclass of ElementsComponent that is built for paginated elements displayed as a 'growing list' (Load More buttons, etc) instead of page by page.
+* LiveSearch - constructs a Vue component for a live search field.
+* PaginationNav - constructors a Vue component for pagination.
+
+**Mixins**
+
+* ResetsPage - Watches a data property (`params`) and resets properties within it (`params.page`) when other properties change.
+* SyncsWithUrl - Syncs URL params back and forth with a data property.
 
 
 Expected API
@@ -77,7 +104,12 @@ Example response:
     "phone": null,
     "deleted_at": null,
     "role": "User"
-  }]
+  }],
+  "meta": {
+    "pagination": {
+      "total_pages": 5
+    }
+  }
 }
 ```
 
@@ -92,96 +124,35 @@ Example response:
 
 ```json
 {
-  "data": {
-    "id": 1,
-    "name": "Imarc",
-    "email": "info@imarc.com",
-    "created_at": "2017-10-27 22:09:36",
-    "updated_at": "2017-10-27 22:09:36",
-    "phone": null,
-    "deleted_at": null,
-    "role": "Administrator"
-  }
+  "id": 1,
+  "name": "Imarc",
+  "email": "info@imarc.com",
+  "created_at": "2017-10-27 22:09:36",
+  "updated_at": "2017-10-27 22:09:36",
+  "phone": null,
+  "deleted_at": null,
+  "role": "Administrator"
 }
-
 ```
-
-#### STORE
-
-A store action is a `POST` request to `indexUrl`. This is used to store new models. All of the attributes of the model object within Vue are sent as parameters. Typically, no value for a primary key is sent, but that's only convention - you could have users or vue specify the primary key and send it along as long as your API supports that.
-
-The response back is the same as a show action for the new model and should have at least the primary key filled in.
-
-
-#### UPDATE
-
-An update action is a `PUT` request to `indexUrl`/`primary key`, where `primary key` is the primary key of the model you'd like to update. Like store, all of the attributes of the model object are sent as parameters to the API.
-
-**Note:** the primary key within the model object and within the URL may be different. This happens when trying to change the primary key. Serverside, you should always use the primary key *within the URL* to determine which model to update, and the value within the parameters as the desired new value for the primary key.
-
-The response back is the same as a show action for the model and should reflect the updated attributes.
-
-
-#### DESTROY
-
-A destroy action is a `DELETE` request to `indexUrl`/`primary key`, where `primary key` is the primary key of the the model you'd like to delete. No additional parameters are necessarily sent.
-
-The response back is the same as a show or update action for the deleted model.
-
-
-## vuexModule
-
-Each CRUD endpoint for your API should have it's own vuexModule.
-
-### constructor(indexUrl, primaryKey='id', concurrency=8)
-
-**indexUrl** is the base URL for this endpoint. indexUrl can also contain placeholders, surronded by {}, that can be populated by passing params when dispatching actions. For example,
-
-```javascript
-// When instantiating the vuexModule -
-
-let categories = new vuexModule('/api/teams/{team}/categories');
-
-// When dispatching vuex actions from within a component -
-
-this.$store.dispatch('categories/index', {team: 4});
-```
-
-Lastly, there is untested support for passing in a function instead of a string for indexUrl as well. This function is passed two arguments, `action` and `params`, where action is the action dispatched (index, show, etc.) and params are simply the params that were originally dispatched.
-
-**primaryKey** let's you specify whether you'd like to use a different field than "id" for as your primary key. (Clockvine doesn't support multi-field primary keys directly, but it may be possible to emulate this behavior by using a generated primary key that clockvine can use to communicate with the API.)
-
-**concurrency** (0.3 only) let's you specify how many requests to run in concurrently. In 0.2, only one request per endpoint is run at a time, but 0.3 supports running multiple. It defaults to 8.
-
-
-### Overrideable Methods
-
-The following methods can be overloaded after instantiating a vuexModule.
-
-#### indexUrl
-
-Overloading this method is the same as passing in a function for indexUrl in the constructor.
-
-
-#### getters.indexLoaded
-
-This is called internally to determine whether or not to ignore a request. It takes one argument, `url`, which is the URL of the index it's checking. If you want to always fetch data (no caching), you can override this like this:
-
-```js
-someModule.getters.indexLoaded = () => false;
-```
-
-
-
-## vueMixin
-
-
-
-## editableVueMixin
 
 
 Release Notes
 -------------
+
+### 0.4.0-alpha.3
+
+This has backwards compatibility breaks with alpha.2.
+
+* Bug fixes and adopting airbnb and vue style guide conventions
+* Rename nearly all classes and mixins for clarity and consistency
+
+
+### 0.4.0-alpha.2
+
+This has backwards compatibility breaks with 0.3.
+
+* Read only functionality is mostly complete; tested primarily with ElementApi.
+
 
 ### 0.3
 
