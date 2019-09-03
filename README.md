@@ -55,20 +55,35 @@ as you build a compatible API.
 The last two requirements are inspired by JSONAPI, and primarily meant to allow
 for flexibility in the future.
 
-A clockvine vuexModule requires two arguments, `indexUrl` and `primaryKey`.
+A clockvine vuexModule requires two arguments, `baseUrl` and `primaryKey`.
 Based on these, this is what it expects for the following REST actions.
 
-| Action  | Method | URL Format              | Example URL  |
-| ------- | ------ | ----------------------- | ------------ |
-| index   | GET    | `indexUrl`              | /api/users   |
-| show    | GET    | `indexUrl`/`primary key` | /api/users/1 |
-| store   | POST   | `indexUrl`              | /api/users   |
-| update  | PUT    | `indexUrl`/`primary key` | /api/users/1 |
-| destroy | DELETE | `indexUrl`/`primary key` | /api/users/1 |
+| Action  | Method | URL Format               | Example URL  |
+| ------- | ------ | ------------------------ | ------------ |
+| index   | GET    | `baseUrl`                | /api/users   |
+| show    | GET    | `baseUrl`/`primary key`  | /api/users/1 |
+| store   | POST   | `baseUrl`                | /api/users   |
+| update  | PUT    | `baseUrl`/`primary key`  | /api/users/1 |
+| destroy | DELETE | `baseUrl`/`primary key`  | /api/users/1 |
+
+### Expected API for ElementApi endpoints
+
+For Element API, the default behavior is slightly different. It's assumed that
+`baseUrl` ends with `.json` and that needs to be stripped off. For the table
+below, `baseNoSuffix` refers to `baseUrl` with the suffix stripped.
+
+| Action  | Method | URL Format                         | Example URL  |
+| ------- | ------ | ---------------------------------- | ------------ |
+| index   | GET    | `baseUrl`                          | /api/users   |
+| show    | GET    | `baseNoSuffix`/`primary key`.json  | /api/users/1 |
+| store   | POST   | `baseUrl`                          | /api/users   |
+| update  | PUT    | `baseNoSuffix`/`primary key`.json  | /api/users/1 |
+| destroy | DELETE | `baseNoSuffix`/`primary key`.json  | /api/users/1 |
+
 
 #### INDEX
 
-An index action is a `GET` request to `indexUrl`. The primary content of the
+An index action is a `GET` request to `baseUrl`. The primary content of the
 response must be an array of object, with each object representing a single
 model for this endpoint.
 
