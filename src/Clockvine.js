@@ -1,6 +1,7 @@
 import ApiModule from "./modules/ApiModule";
 import ContinuousElementsComponent from "./components/ContinuousElementsComponent";
 import ElementApiModule from "./modules/ElementApiModule";
+import LaravelApiModule from "./modules/LaravelApiModule";
 import ElementComponent from "./components/ElementComponent";
 import ElementsComponent from "./components/ElementsComponent";
 import HttpQueue from "./HttpQueue";
@@ -12,37 +13,38 @@ import SyncsWithUrl from "./mixins/SyncsWithUrl";
 
 export default {
 
-  /**
-   * Components
-   */
-  ElementComponent,
+    /**
+     * Components
+     */
+    ElementComponent,
 
-  ElementsComponent,
-  ContinuousElementsComponent,
-  PaginatedElementsComponent,
+    ElementsComponent,
+    ContinuousElementsComponent,
+    PaginatedElementsComponent,
 
-  LiveSearch,
-  PaginationNav,
-
-
-
-  /**
-   * Vuex Modules
-   */
-  ApiModule,
-  ElementApiModule,
+    LiveSearch,
+    PaginationNav,
 
 
 
-  /**
-   * Mixins
-   */
-  ResetsPage,
-  SyncsWithUrl,
+    /**
+     * Vuex Modules
+     */
+    ApiModule,
+    ElementApiModule,
+    LaravelApiModule,
 
 
-  /**
-   * Miscellaneous
-   */
-  HttpQueue,
+
+    /**
+     * Mixins
+     */
+    ResetsPage,
+    SyncsWithUrl,
+
+
+    /**
+     * Miscellaneous
+     */
+    HttpQueue,
 };
