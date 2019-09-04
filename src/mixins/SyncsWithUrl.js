@@ -37,8 +37,8 @@ export default class {
          * @return {string}
          */
         generateURL(paramChanges = {}) {
-            const property = this.$_syncsWithUrl_Property,
-                ignoreParams = this.$_syncsWithUrl_ignoreParams;
+            const property = this.$options.$_syncsWithUrl_Property,
+                ignoreParams = this.$options.$_syncsWithUrl_ignoreParams;
             let urlParams = new URLSearchParams;
 
             let params = {...this[property], ...paramChanges};
@@ -63,7 +63,7 @@ export default class {
          * Called when params change.
          */
         onParamsChange() {
-            const property = this.$_syncsWithUrl_Property,
+            const property = this.$options.$_syncsWithUrl_Property,
                 urlStr = this.generateURL();
             if (location.search != urlStr) {
                 history.replaceState(this[property], document.title, urlStr);

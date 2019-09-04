@@ -1,8 +1,10 @@
 <template>
-    <input type="search" :value="internalValue" @input="input" @click="$emit('input', value)" :class="{'-isTyping': isTyping}" />
+    <input type="search" :value="internalValue" :class="{'-isTyping': isTyping}"
+        @input="input"
+        @keyup.enter="$_liveSearch_debouncedInput"
+        @click="$_liveSearch_debouncedInput">
 </template>
 <script>
-import Vue from 'vue';
 import debounce from 'lodash/debounce';
 
 /**
@@ -16,11 +18,13 @@ export default {
     }),
 
     methods: {
+
         input({target: {value}}) {
             this.internalValue = value;
             this.$emit('isTyping', this.isTyping = true);
             return this.$_liveSearch_debouncedInput(value);
         },
+
         $_liveSearch_debouncedInput: debounce(function(value) {
             this.$emit('isTyping', this.isTyping = false);
             return this.$emit('input', value);
