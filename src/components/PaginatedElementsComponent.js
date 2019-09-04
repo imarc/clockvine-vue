@@ -29,26 +29,6 @@ export default class {
         },
 
         /**
-         * Return whether you're on the first page.
-         *
-         * @return {boolean}
-         */
-        onFirstPage() {
-            return this.page === 1;
-        },
-
-        /**
-         * Return whether you're on the last page.
-         *
-         * @return {boolean}
-         */
-        onLastPage() {
-            if (this.meta) {
-                return this.meta.pagination.total_pages <= this.page;
-            }
-        },
-
-        /**
          * Only these properties are exposed to the slot template. First we fetch
          * the 'parentParams' - params that are exposed by Elements - and then add
          * in the ones specific to this class.
@@ -59,8 +39,6 @@ export default class {
             let parentParams = this.$options.mixins[0].computed.slotParams.call(this);
             return {
                 ...parentParams,
-                onFirstPage: this.onFirstPage,
-                onLastPage: this.onLastPage,
                 page: this.page,
             };
         },

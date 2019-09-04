@@ -64,30 +64,6 @@ export default class {
                 return this.$store.getters[`${this.vuexModule}/meta`](lastUrl);
             }
         },
-
-        /**
-         * Return whether there's more elements to fetch.
-         *
-         * @return {boolean}
-         */
-        hasMore() {
-            if (this.meta) {
-                return this.meta.pagination.total_pages > this.page;
-            }
-        },
-
-        /**
-         * Only these properties are exposed to the slot template. First we fetch
-         * the 'parentParams' - params that are exposed by Elements - and then add
-         * in the ones specific to this class.
-         */
-        slotParams() {
-            let parentParams = this.$options.mixins[0].computed.slotParams.call(this);
-            return {
-                ...parentParams,
-                hasMore: this.hasMore,
-            };
-        },
     };
 
     methods = {
