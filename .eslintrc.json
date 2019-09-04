@@ -1,5 +1,4 @@
 {
-  "extends": ["airbnb/base", "prettier"],
-  "plugins": ["eslint-plugin-vue", "private-props", "prettier"],
-  "rules": {}
+  "extends": ["airbnb/base", "plugin:vue/base", "prettier"],
+  "plugins": ["eslint-plugin-vue", "private-props", "prettier"]
 }
