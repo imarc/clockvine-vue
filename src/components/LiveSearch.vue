@@ -1,8 +1,8 @@
 <template>
     <input type="search" :value="internalValue" :class="{'-isTyping': isTyping}"
         @input="input"
-        @keyup.enter="$_liveSearch_debouncedInput"
-        @click="$_liveSearch_debouncedInput">
+        @keyup.enter="$emit('input', value)"
+        @click="$emit('input', value)">
 </template>
 <script>
 import debounce from 'lodash/debounce';
