@@ -8,7 +8,9 @@ export default class {
     constructor(vuexModule)
     {
         this.mounted = function() {
-            this.vuexModule = vuexModule;
+            if (vuexModule) {
+                this.vuexModule = vuexModule;
+            }
             this.query();
         };
     };

@@ -25,6 +25,12 @@ export default class {
         addEventListener('hashchange', this.methods.onHashChange.bind(this));
     }
 
+    computed = {
+        ignoreParams() {
+            return this.$options.$_syncsWithUrl_ignoreParams;
+        }
+    };
+
     methods = {
 
         /**
@@ -38,7 +44,7 @@ export default class {
          */
         generateURL(paramChanges = {}) {
             const property = this.$options.$_syncsWithUrl_Property,
-                ignoreParams = this.$options.$_syncsWithUrl_ignoreParams;
+                ignoreParams = this.ignoreParams;
             let urlParams = new URLSearchParams;
 
             let params = {...this[property], ...paramChanges};
