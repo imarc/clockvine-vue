@@ -1,5 +1,0 @@
-{
-  "extends": ["airbnb/base", "plugin:vue/base", "prettier"],
-  "plugins": ["eslint-plugin-vue", "private-props", "prettier"],
-  "parser": "babel-eslint"
-}
