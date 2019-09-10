@@ -75,7 +75,7 @@ export default class {
             }
             this.isLoading = true;
 
-            const action = this.$options.vuexModule + '/' + (mustGet ? 'mustShow' : 'show');
+            const action = `${this.$options.vuexModule  }/${  mustGet ? 'mustShow' : 'show'}`;
             return this.$store.dispatch(action, {[this.$options.idProperty]: this[this.$options.idProperty]})
                 .then(response => {
                     this.isLoading = false;
@@ -91,8 +91,8 @@ export default class {
     render = function() {
         if (this.element) {
             return this.$scopedSlots.default(this.slotParams);
-        } else {
+        } 
             return '';
-        }
+        
     };
 }

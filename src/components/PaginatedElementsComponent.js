@@ -23,9 +23,9 @@ export default class {
         page() {
             if (this.params && this.params.page) {
                 return this.params.page;
-            } else {
+            } 
                 return 1;
-            }
+            
         },
 
         /**
@@ -36,7 +36,7 @@ export default class {
          * @return {object}
          */
         slotParams() {
-            let parentParams = this.$options.mixins[0].computed.slotParams.call(this);
+            const parentParams = this.$options.mixins[0].computed.slotParams.call(this);
             return {
                 ...parentParams,
                 page: this.page,

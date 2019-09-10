@@ -34,9 +34,9 @@ export default class {
         page() {
             if (this.params && this.params.page) {
                 return this.params.page;
-            } else {
+            } 
                 return 1;
-            }
+            
         },
 
         /**
@@ -75,9 +75,9 @@ export default class {
          * @return {promise}
          */
         query({mustGet = false} = {}) {
-            let clonedParams = {...this.filteredParams};
+            const clonedParams = {...this.filteredParams};
             let clearExisting = false;
-            let parentQuery = this.$options.mixins[0].methods.query;
+            const parentQuery = this.$options.mixins[0].methods.query;
 
             delete clonedParams.page;
 

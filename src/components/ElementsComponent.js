@@ -103,9 +103,9 @@ export default class {
          * @return {object}
          */
         filteredParams() {
-            let params = {...this.params};
+            const params = {...this.params};
 
-            for (let key in this.ignoreParams) {
+            for (const key in this.ignoreParams) {
                 if (key in params) {
                     if (typeof this.ignoreParams[key] === 'function') {
                         if (this.ignoreParams[key](params[key])) {
@@ -160,7 +160,7 @@ export default class {
         query({mustGet = false} = {}) {
             this.$emit('isLoading', this.isLoading = true);
 
-            const action = this.vuexModule + '/' + (mustGet ? 'mustIndex' : 'index');
+            const action = `${this.vuexModule  }/${  mustGet ? 'mustIndex' : 'index'}`;
             return this.$store.dispatch(action, this.filteredParams)
                 .then(response => {
                     this.$emit('isLoading', this.isLoading = false);

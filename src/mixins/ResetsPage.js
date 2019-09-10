@@ -23,14 +23,14 @@ export default class {
             [paramsProperty]: {
                 deep: true,
                 handler(val) {
-                    let cloneVal = {...val};
-                    for (let prop of ignoreProperties) {
+                    const cloneVal = {...val};
+                    for (const prop of ignoreProperties) {
                         delete cloneVal[prop];
                     }
 
                     if (this.$_resetsPage_previousValue !== undefined
                         && !isEqual(cloneVal, this.$_resetsPage_previousValue)) {
-                        for (let [prop, value] of Object.entries(resetProperties)) {
+                        for (const [prop, value] of Object.entries(resetProperties)) {
                             val[prop] = value;
                         }
 

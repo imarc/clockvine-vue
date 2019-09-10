@@ -43,13 +43,13 @@ export default class {
          * @return {string}
          */
         generateURL(paramChanges = {}) {
-            const property = this.$options.$_syncsWithUrl_Property,
-                ignoreParams = this.ignoreParams;
-            let urlParams = new URLSearchParams;
+            const property = this.$options.$_syncsWithUrl_Property;
+                const {ignoreParams} = this;
+            const urlParams = new URLSearchParams;
 
-            let params = {...this[property], ...paramChanges};
+            const params = {...this[property], ...paramChanges};
 
-            for (let [key, val] of Object.entries(params)) {
+            for (const [key, val] of Object.entries(params)) {
                 if (!(key in ignoreParams) || val !== ignoreParams[key]) {
                     if (val !== undefined && val !== null && val !== '') {
                         urlParams.append(key, val);
@@ -59,18 +59,18 @@ export default class {
 
             const urlStr = urlParams.toString();
             if (urlStr.length) {
-                return '?' + urlStr;
-            } else {
+                return `?${  urlStr}`;
+            } 
                 return location.pathname;
-            }
+            
         },
 
         /**
          * Called when params change.
          */
         onParamsChange() {
-            const property = this.$options.$_syncsWithUrl_Property,
-                urlStr = this.generateURL();
+            const property = this.$options.$_syncsWithUrl_Property;
+                const urlStr = this.generateURL();
             if (location.search != urlStr) {
                 history.replaceState(this[property], document.title, urlStr);
             }

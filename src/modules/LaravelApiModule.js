@@ -8,6 +8,7 @@ import Module from './ApiModule';
  */
 export default class extends Module {
     #baseUrl;
+
     #actionParameter;
 
     /**
@@ -37,11 +38,11 @@ export default class extends Module {
 
             if (['index', 'store'].includes(action)) {
                 return this.#baseUrl;
-            } else {
+            } 
                 const id = params[idProperty];
                 delete params[idProperty];
-                return this.#baseUrl + `/${id}`;
-            }
+                return `${this.#baseUrl  }/${id}`;
+            
         };
 
         super(buildUrl, {

@@ -6,6 +6,7 @@ import PQueue from "p-queue";
  */
 export default class HttpQueue {
     #queue;
+
     #urls = {};
 
     /**
