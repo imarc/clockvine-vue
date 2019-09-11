@@ -1,59 +1,50 @@
 import isEqual from 'lodash/isEqual';
 
-export default {
+export default class {
+    $_resetsPage_previousValue;
 
-    data: () => ({
-        $_resetsPage_previousValue: undefined,
-    }),
+    /**
+     * Constucts a vue mixin that will reset the page number (or other parameters) on changes.
+     *
+     * @param {string} paramsProperty - property to watch and modify.
+     * @param {array} ignoreProperties - array of properties to ignore changes to.
+     * @param {object} resetProperties - Object of properties to 'reset' when a change is detected.
+     */
+    constructor({
+        paramsProperty = 'params',
+        ignoreProperties = ['page'],
+        resetProperties = {page: 1},
+        onReset = null,
+    } = {}) {
+        this.paramsProperty = paramsProperty;
+        this.ignoreProperties = ignoreProperties;
 
-    props: {
-        paramsProperty: {
-            type: String,
-            required: true,
-        },
-        ignoreProperties: {
-            type: Array,
-            default: () => ['page'],
-        },
-        resetProperties: {
-            type: Object,
-            default: () => ({page: 1}),
-        },
-        onReset: {
-            type: Function,
-        }
-    },
-
-    created() {
-        this.$watch(this.paramsProperty, {
-            deep: true,
-            handler(val) {
-                const cloneVal = {...val};
-                for (const prop of this.ignoreProperties) {
-                    delete cloneVal[prop];
-                }
-
-                if (this.$_resetsPage_previousValue === undefined) {
-                    this.$_resetsPage_previousValue = cloneVal;
-                    return;
-                }
-
-                if (isEqual(cloneVal, this.$_resetsPage_previousValue)) {
-                    return;
-                }
-
-                if (this.$_resetsPage_previousValue !== undefined) {
-                    for (const [prop, value] of Object.entries(this.resetProperties)) {
-                        val[prop] = value;
+        this.watch = {
+            [paramsProperty]: {
+                deep: true,
+                handler(val) {
+                    const cloneVal = {...val};
+                    for (const prop of ignoreProperties) {
+                        delete cloneVal[prop];
                     }
 
-                    if (typeof onReset === 'function' && this) {
-                        onReset.call(this, val, this.$_resetsPage_previousValue);
-                    }
-                }
+                    if (this.$_resetsPage_previousValue !== undefined
+                        && !isEqual(cloneVal, this.$_resetsPage_previousValue)) {
+                        for (const [prop, value] of Object.entries(resetProperties)) {
+                            val[prop] = value;
+                        }
 
-                this.$_resetsPage_previousValue = cloneVal;
+                        if (typeof onReset === 'function' && this) {
+                            onReset.call(this, val, this.$_resetsPage_previousValue);
+                        }
+
+                        this.$_resetsPage_previousValue = cloneVal;
+
+                    } else if (this.$_resetsPage_previousValue === undefined) {
+                        this.$_resetsPage_previousValue = cloneVal;
+                    }
+                },
             },
-        });
+        };
     }
 }
