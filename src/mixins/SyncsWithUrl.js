@@ -29,7 +29,7 @@ export default class {
         ignoreParams() {
             return this.$options.$_syncsWithUrl_ignoreParams;
         }
-    };
+    }
 
     methods = {
 
@@ -60,9 +60,9 @@ export default class {
             const urlStr = urlParams.toString();
             if (urlStr.length) {
                 return `?${  urlStr}`;
-            } 
+            }
                 return location.pathname;
-            
+
         },
 
         /**

@@ -40,7 +40,7 @@ export default class {
     #createQueryParams(params) {
         let urlParams = new URLSearchParams;
         for (let [key, val] of Object.entries(params)) {
-            if (val != undefined && val !== null && val !== '') {
+            if (val != undefined && val !== null && val !== '' && key !== this.#actionParameter) {
                 urlParams.append(key, val);
             }
         }
