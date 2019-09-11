@@ -1,19 +1,11 @@
 import isEqual from 'lodash/isEqual';
 import ElementsComponent from './ElementsComponent';
 
-export default class {
+export default {
 
-    /**
-     * Construct a new Vue component associated with the Vuex Module vuexModule. It is similar to Elements, but supports displaying the results from multiple URLs as a single array.
-     *
-     * @param {string} vuexModule
-     */
-    constructor(vuexModule) {
-        this.mixins = [new ElementsComponent(vuexModule)];
-    };
+    mixins: [ElementsComponent],
 
-
-    data = () => ({
+    data: () => ({
         /**
          * Common parameters to all active URLs, to determine whether to empty the urls array.
          */
@@ -22,10 +14,10 @@ export default class {
          * Array of current URLs.
          */
         urls: [],
-    });
+    }),
 
 
-    computed = {
+    computed: {
         /**
          * Return the current page.
          *
@@ -34,9 +26,9 @@ export default class {
         page() {
             if (this.params && this.params.page) {
                 return this.params.page;
-            } 
+            }
                 return 1;
-            
+
         },
 
         /**
@@ -64,9 +56,9 @@ export default class {
                 return this.$store.getters[`${this.vuexModule}/meta`](lastUrl);
             }
         },
-    };
+    },
 
-    methods = {
+    methods: {
         /**
          * Queries the Vuex Module (triggers an index or mustIndex.)
          *
@@ -95,5 +87,5 @@ export default class {
                     }
                 });
         },
-    };
+    },
 }

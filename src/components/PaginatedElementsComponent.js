@@ -1,19 +1,10 @@
 import ElementsComponent from './ElementsComponent';
 
-export default class {
+export default {
 
-    /**
-     * Construct a new Vue component associated with Vuex Module vuexModule. It is
-     * similar to Elements, but provides some minor sugar for working with
-     * paginated elements. It uses Elements as a mixin.
-     *
-     * @param {string} vuexModule
-     */
-    constructor(vuexModule) {
-        this.mixins = [new ElementsComponent(vuexModule)];
-    };
+    mixins: [ElementsComponent],
 
-    computed = {
+    computed: {
 
         /**
          * Return the current page.
@@ -23,9 +14,9 @@ export default class {
         page() {
             if (this.params && this.params.page) {
                 return this.params.page;
-            } 
+            }
                 return 1;
-            
+
         },
 
         /**
@@ -42,5 +33,5 @@ export default class {
                 page: this.page,
             };
         },
-    }
+    },
 }

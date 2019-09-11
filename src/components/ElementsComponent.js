@@ -1,41 +1,29 @@
-export default class {
+export default {
 
-    /**
-     * Construct a new Vue component associated with the Vuex Module vuexModule.
-     *
-     * @param {string} vuexModule
-     */
-    constructor(vuexModule)
-    {
-        this.mounted = function() {
-            if (vuexModule) {
-                this.vuexModule = vuexModule;
-            }
-            this.query();
-        };
-    };
+    mounted() {
+        this.query();
+    },
 
-    data = () => ({
+    data: () => ({
         /**
          * Whether data is loading or not.
          */
         isLoading: true,
 
         /**
-         * The vuex module this component is tied to.
-         * TODO - move this to $options
-         */
-        vuexModule: null,
-
-        /**
          * The current URL for the data being shown for this component.
          * TODO - maybe moev this to $options?
          */
         url: null,
-    });
+    }),
 
 
-    props = {
+    props: {
+        vuexModule: {
+            type: String,
+            required: true,
+        },
+
         /**
          * Query parameters.
          */
@@ -61,19 +49,19 @@ export default class {
                 orderBy: 'title asc',
             }),
         },
-    }
+    },
 
 
     /**
      * Render function. This is a renderless component that just uses the default
      * slot for everything.
      */
-    render = function() {
+    render() {
         return this.$scopedSlots.default(this.slotParams);
-    }
+    },
 
 
-    computed = {
+    computed: {
 
         /**
          * Returns the elements from Vuex for the current URL.
@@ -133,10 +121,9 @@ export default class {
                 query: this.query,
             };
         }
-    };
+    },
 
-
-    watch = {
+    watch: {
         /**
          * This watcher triggers new queries when the parameters change.
          */
@@ -146,10 +133,9 @@ export default class {
                 this.query();
             },
         },
-    };
+    },
 
-
-    methods = {
+    methods: {
         /**
          * Queries the Vuex Module (triggers an index or mustIndex.)
          *
@@ -169,5 +155,5 @@ export default class {
                     return response;
                 });
         },
-    };
+    },
 }
