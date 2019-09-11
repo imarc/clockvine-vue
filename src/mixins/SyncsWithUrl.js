@@ -1,38 +1,29 @@
-export default class {
-
-    /**
-     * Constructs a vue mixin that will keep query string parameters in sync with a vue property.
-     *
-     * @param {string} property
-     * @param {object} ignoreParams - parameters with values to ignore
-     */
-    constructor(property, ignoreParams = {page: 1, orderBy: 'title asc'})
-    {
-        this.$_syncsWithUrl_Property = property;
-        this.$_syncsWithUrl_ignoreParams = ignoreParams;
-
-        this.created = function() {
-            this.$options.methods.onHashChange.call(this, {newURL: location.href});
-        };
-
-        this.watch = {
-            [property]: {
-                deep: true,
-                handler: this.methods.onParamsChange,
-            },
-        };
-
-        addEventListener('hashchange', this.methods.onHashChange.bind(this));
-    }
-
-    computed = {
-        ignoreParams() {
-            return this.$options.$_syncsWithUrl_ignoreParams;
+export default {
+    props: {
+        urlProperty: {
+            type: String,
+            default: 'params'
+        },
+        ignoreParams: {
+            type: Object,
+            default: {page: 1, orderBy: 'title asc'}
         }
-    }
+    },
 
-    methods = {
+    created() {
+        this.onHashChange({newURL: location.href});
 
+        this.$watch(this.urlProperty, {
+            deep: true,
+            handler() {
+                this.onParamsChange();
+            }
+        });
+
+        addEventListener('hashchange', this.onHashChange.bind(this));
+    },
+
+    methods: {
         /**
          * Generates a URL based on the current parameters.
          *
@@ -43,8 +34,8 @@ export default class {
          * @return {string}
          */
         generateURL(paramChanges = {}) {
-            const property = this.$options.$_syncsWithUrl_Property;
-                const {ignoreParams} = this;
+            const property = this.urlProperty,
+                {ignoreParams} = this;
             const urlParams = new URLSearchParams;
 
             const params = {...this[property], ...paramChanges};
@@ -69,8 +60,8 @@ export default class {
          * Called when params change.
          */
         onParamsChange() {
-            const property = this.$options.$_syncsWithUrl_Property;
-                const urlStr = this.generateURL();
+            const property = this.urlProperty;
+            const urlStr = this.generateURL();
             if (location.search != urlStr) {
                 history.replaceState(this[property], document.title, urlStr);
             }
@@ -81,7 +72,7 @@ export default class {
          */
         onHashChange({newURL}) {
             const {searchParams} = new URL(newURL);
-            const props = this[this.$options.$_syncsWithUrl_Property];
+            const props = this[this.urlProperty];
 
             for (let key of searchParams.keys()) {
                 let val = searchParams.getAll(key);

@@ -1,43 +1,34 @@
-export default class {
-    /**
-     * Construct a new Vue component associated with a single element in a
-     * vuexModule.
-     *
-     * @param {string} vuexModule
-     * @param {string} idProperty  default "id"
-     */
-    constructor(vuexModule, idProperty = 'id')
-    {
-        this.vuexModule = vuexModule;
-        this.idProperty = idProperty;
+export default {
 
-        this.props = {
-            /**
-             * The idProperty is required.
-             */
-            [idProperty]: {required: true},
+    props: {
+        vuexModule: {
+            type: String,
+            required: true,
+        },
 
-            /**
-             * This disables making API requests for this element, and instead
-             * will only return whatever is already within Vuex.
-             */
-            noFetching: {type: Boolean, default: false},
-        };
+        id: {
+            required: true,
+        },
 
-        this.mounted = function() {
-            this.show();
-        };
+        noFetching: {
+            type: Boolean,
+            default: false,
+        }
+    },
 
-        this.watch = {
-            [idProperty](newVal, oldVal) {
-                if (newVal !== oldVal) {
-                    this.show();
-                }
+    mounted() {
+        this.show();
+    },
+
+    watch: {
+        id(newVal, oldVal) {
+            if (newVal !== oldVal) {
+                this.show();
             }
-        };
-    };
+        }
+    },
 
-    computed = {
+    computed: {
         /**
          * Returns the current element from Vuex.
          *
@@ -59,9 +50,9 @@ export default class {
                 element: this.element,
             };
         },
-    }
+    },
 
-    methods = {
+    methods: {
         /**
          * Queries the Vuex module for this element.
          *
@@ -82,17 +73,17 @@ export default class {
                     this.url = response.config.url;
                 });
         }
-    };
+    },
 
     /**
      * Render function. This is a renderless component that just uses the default
      * slot for everything.
      */
-    render = function() {
+    render() {
         if (this.element) {
             return this.$scopedSlots.default(this.slotParams);
-        } 
+        }
             return '';
-        
-    };
+
+    },
 }
