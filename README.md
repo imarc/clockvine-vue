@@ -154,6 +154,22 @@ Example response:
 Release Notes
 -------------
 
+### 0.4.0-alpha.6
+
+This has backwards compatibility breaks with alpha.5.
+
+* Rework Vue Components so they're no longer JS classes. This was necessary because there were assumptions made about how instances work that were wrong.
+* Make store/update/destroy work.
+
+### 0.4.0-alpha.5
+
+* Make it so that vuex module can be passed as a param
+
+### 0.4.0-alpha.4
+
+* Add LaravelApiModule
+* Bug fixes for LiveSearch and SyncsWithUrl
+
 ### 0.4.0-alpha.3
 
 This has backwards compatibility breaks with alpha.2.
