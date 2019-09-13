@@ -101,6 +101,12 @@ export default {
             return this.$store.dispatch(action, this.element)
                 .then(response => {
                     this.isLoading = false;
+
+                    if (typeof this.newElement === 'function') {
+                        this.internalElement = this.newElement();
+                    } else {
+                        this.internalElement = {...this.newElement};
+                    }
                 });
         },
 
