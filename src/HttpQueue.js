@@ -57,7 +57,7 @@ export default class HttpQueue {
      * @return {Promise}
      */
     post(url, params) {
-        this.#queue.add(() => Axios.post(url, params));
+        return this.#queue.add(() => Axios.post(url, params));
     }
 
     /**
@@ -69,7 +69,7 @@ export default class HttpQueue {
      * @return {Promise}
      */
     put(url, params) {
-        this.#queue.add(() => Axios.put(url, params));
+        return this.#queue.add(() => Axios.put(url, params));
     }
 
     /**
@@ -81,6 +81,6 @@ export default class HttpQueue {
      * @return {Promise}
      */
     delete(url, params) {
-        this.#queue.add(() => Axios.delete(url, params));
+        return this.#queue.add(() => Axios.delete(url, params));
     }
 }

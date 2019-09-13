@@ -6,17 +6,30 @@ export default {
             required: true,
         },
 
-        id: {
-            required: true,
-        },
+        id: {},
 
         noFetching: {
             type: Boolean,
             default: false,
-        }
+        },
+
+        newElement: {
+            type: Object,
+        },
     },
 
-    mounted() {
+    data: () => ({
+        internalElement: null,
+    }),
+
+    created() {
+        if (!this.id && this.newElement) {
+            if (typeof this.newElement === 'function') {
+                this.internalElement = this.newElement();
+            } else {
+                this.internalElement = {...this.newElement};
+            }
+        }
         this.show();
     },
 
@@ -35,8 +48,10 @@ export default {
          * @return {object}
          */
         element() {
-            if (this[this.$options.idProperty]) {
-                return this.$store.getters[`${this.$options.vuexModule}/element`](this[this.$options.idProperty]);
+            if (this.id) {
+                return this.$store.getters[`${this.vuexModule}/element`](this.id);
+            } else if (this.internalElement) {
+                return this.internalElement;
             }
         },
 
@@ -48,6 +63,12 @@ export default {
         slotParams() {
             return {
                 element: this.element,
+                refresh() {
+                    this.show({mustGet: true});
+                },
+                store: this.store,
+                update: this.update,
+                destroy: this.destroy
             };
         },
     },
@@ -66,13 +87,40 @@ export default {
             }
             this.isLoading = true;
 
-            const action = `${this.$options.vuexModule  }/${  mustGet ? 'mustShow' : 'show'}`;
-            return this.$store.dispatch(action, {[this.$options.idProperty]: this[this.$options.idProperty]})
+            const action = `${this.vuexModule}/${mustGet ? 'mustShow' : 'show'}`;
+            return this.$store.dispatch(action, {id: this.id})
                 .then(response => {
                     this.isLoading = false;
                     this.url = response.config.url;
                 });
-        }
+        },
+
+        store() {
+            this.isLoading = true;
+            const action = `${this.vuexModule}/store`;
+            return this.$store.dispatch(action, this.element)
+                .then(response => {
+                    this.isLoading = false;
+                });
+        },
+
+        update() {
+            this.isLoading = true;
+            const action = `${this.vuexModule}/update`;
+            return this.$store.dispatch(action, this.element)
+                .then(response => {
+                    this.isLoading = false;
+                });
+        },
+
+        destroy() {
+            this.isLoading = true;
+            const action = `${this.vuexModule}/destroy`;
+            return this.$store.dispatch(action, this.element)
+                .then(response => {
+                    this.isLoading = false;
+                });
+        },
     },
 
     /**

@@ -61,12 +61,17 @@ export default class {
      * @return {string}
      */
     #createQueryUrl(params) {
+        const action = params[this.#actionParameter];
         let url = this.#baseUrl;
         if (typeof url === "function") {
             url = url(params);
         }
 
-        return url + this.#createQueryParams(params);
+        if (action === 'show' || action === 'index') {
+            return url + this.#createQueryParams(params);
+        } else {
+            return url;
+        }
     }
 
     /**
@@ -174,7 +179,7 @@ export default class {
          * setIndex sets an index within the module's store.
          */
         setIndex: (state, {url, data}) => {
-            Vue.set(state.indexes, url, data);
+            state.indexes = { ...state.indexes, [url]: data };
         },
 
         /**
@@ -206,11 +211,8 @@ export default class {
          * @param {object|array} data - element(s)to remove from the module's store.
          */
         deleteElement: (state, {data = []}) => {
-            if (Array.isArray(data)) {
-                const elements = data;
-            } else {
-                const elements = [data];
-            }
+            const elements = Array.isArray(data) ? data : [data];
+
             elements.forEach(element => {
                 if (element[this.#idProperty] != undefined) {
                     Vue.delete(
@@ -265,6 +267,18 @@ export default class {
                 });
         },
 
+        refreshIndexes: ({state, commit, getters}, params = {}) => {
+            for (const url in state.indexes) {
+                this.#httpQueue
+                    .mustGet(url)
+                    .then(response => {
+                        commit("setIndex", {url, data: response.data});
+                        commit("setElement", response.data);
+                        return response;
+                    });
+            }
+        },
+
         /**
          * Gets a single element. If previously fetched, uses the cached value.
          *
@@ -312,6 +326,7 @@ export default class {
                 .post(url, params)
                 .then(response => {
                     commit("setElement", response.data);
+                    dispatch("refreshIndexes");
                     return response;
                 });
         },
@@ -322,15 +337,17 @@ export default class {
          * @param {object} params - parameters to pass
          * @return {promise}
          */
-        update: () => {
+        update: ({commit}, params = {}) => {
             const url = this.#createQueryUrl({[this.#actionParameter]: 'update', ...params});
 
-            return this.#httpQueue
+            let foo = this.#httpQueue
                 .put(url, params)
                 .then(response => {
                     commit("setElement", response.data);
                     return response;
                 });
+
+            return foo;
         },
 
         /**
@@ -339,13 +356,14 @@ export default class {
          * @param {object} params - parameters to pass
          * @return {promise}
          */
-        destroy: () => {
+        destroy: ({commit, dispatch}, params = {}) => {
             const url = this.#createQueryUrl({[this.#actionParameter]: 'destroy', ...params});
 
             return this.#httpQueue
                 .delete(url, params)
                 .then(response => {
                     commit("deleteElement", response.data);
+                    dispatch("refreshIndexes");
                     return response;
                 });
         },
