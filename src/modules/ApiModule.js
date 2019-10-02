@@ -170,11 +170,6 @@ export default class {
          * idProperty.
          */
         element: state => id => state.elements[id],
-
-        namespace: (state, getters, rootState) => {
-            const [name] = Object.entries(rootState).find(([name, nameState]) => nameState === state);
-            return name;
-        },
     };
 
 
