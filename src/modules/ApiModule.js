@@ -137,7 +137,6 @@ export default class {
      */
     namespaced = true;
 
-
     state = {
         /**
          * Indexes stores URLs that reference index requests with arrays inside of
@@ -171,6 +170,11 @@ export default class {
          * idProperty.
          */
         element: state => id => state.elements[id],
+
+        namespace: (state, getters, rootState) => {
+            const [name] = Object.entries(rootState).find(([name, nameState]) => nameState === state);
+            return name;
+        },
     };
 
 
@@ -230,6 +234,43 @@ export default class {
 
 
     actions = {
+        decorate: ({dispatch}, obj = []) => {
+            const elements = Array.isArray(obj) ? obj : [obj];
+            elements.forEach(element => {
+
+                if (typeof element === 'function') {
+                    element = element();
+                }
+
+                const methods = ['show', 'mustShow', 'update', 'store', 'destroy'];
+
+                for (const method of methods) {
+                    if (!element.hasOwnProperty('$' + method)) {
+                        Object.defineProperty(element, '$' + method, {
+                            enumerable: false,
+                            value: () => dispatch(method, element),
+                        });
+                    }
+                }
+            });
+
+            return obj;
+        },
+
+        decorateIndex: ({dispatch}, index = []) => {
+            const methods = ['index', 'mustIndex', 'show', 'mustShow', 'update', 'store', 'destroy'];
+
+            for (const method of methods) {
+                if (!index.hasOwnProperty('$' + method)) {
+                    Object.defineProperty(index, '$' + method, {
+                        enumerable: false,
+                        value: (...params) => dispatch(method, params),
+                    });
+                }
+            }
+
+            return index;
+        },
 
         /**
          * Gets an index of elements. If previously fetched, uses the cached value.
@@ -237,12 +278,14 @@ export default class {
          * @param {object} params - parameters to pass
          * @return {promise}
          */
-        index: ({commit, getters}, params = {}) => {
+        index: ({commit, dispatch}, params = {}) => {
             const url = this.#createQueryUrl({[this.#actionParameter]: 'index', ...params});
 
             return this.#httpQueue
                 .get(url)
                 .then(response => {
+                    dispatch('decorate', response.data.data);
+                    dispatch('decorateIndex', response.data.data);
                     commit("setIndex", {url, data: response.data});
                     commit("setElement", response.data);
                     return response;
@@ -255,23 +298,27 @@ export default class {
          * @param {object} params - parameters to pass
          * @return {promise}
          */
-        mustIndex: ({commit, getters}, params = {}) => {
+        mustIndex: ({commit, dispatch}, params = {}) => {
             const url = this.#createQueryUrl({[this.#actionParameter]: 'index', ...params});
 
             return this.#httpQueue
                 .mustGet(url)
                 .then(response => {
+                    dispatch("decorate", response.data.data);
+                    dispatch('decorateIndex', response.data.data);
                     commit("setIndex", {url, data: response.data});
                     commit("setElement", response.data);
                     return response;
                 });
         },
 
-        refreshIndexes: ({state, commit, getters}, params = {}) => {
+        refreshIndexes: ({state, commit, dispatch}, params = {}) => {
             for (const url in state.indexes) {
                 this.#httpQueue
                     .mustGet(url)
                     .then(response => {
+                        dispatch("decorate", response.data.data)
+                        dispatch('decorateIndex', response.data.data);
                         commit("setIndex", {url, data: response.data});
                         commit("setElement", response.data);
                         return response;
@@ -285,12 +332,13 @@ export default class {
          * @param {object} params - parameters to pass
          * @return {promise}
          */
-        show: ({commit}, params = {}) => {
+        show: ({commit, dispatch}, params = {}) => {
             const url = this.#createQueryUrl({[this.#actionParameter]: 'show', ...params});
 
             return this.#httpQueue
                 .get(url)
                 .then(response => {
+                    dispatch("decorate", response);
                     commit("setElement", response);
                     return response;
                 });
@@ -302,12 +350,13 @@ export default class {
          * @param {object} params - parameters to pass
          * @return {promise}
          */
-        mustShow: ({commit}, params = {}) => {
+        mustShow: ({commit, dispatch}, params = {}) => {
             const url = this.#createQueryUrl({[this.#actionParameter]: 'show', ...params});
 
             return this.#httpQueue
                 .mustGet(url)
                 .then(response => {
+                    dispatch("decorate", response);
                     commit("setElement", response.data);
                     return response;
                 });
@@ -325,6 +374,7 @@ export default class {
             return this.#httpQueue
                 .post(url, params)
                 .then(response => {
+                    dispatch("decorate", response);
                     commit("setElement", response.data);
                     dispatch("refreshIndexes");
                     return response;
@@ -337,12 +387,13 @@ export default class {
          * @param {object} params - parameters to pass
          * @return {promise}
          */
-        update: ({commit}, params = {}) => {
+        update: ({commit, dispatch}, params = {}) => {
             const url = this.#createQueryUrl({[this.#actionParameter]: 'update', ...params});
 
             let foo = this.#httpQueue
                 .put(url, params)
                 .then(response => {
+                    dispatch("decorate", response);
                     commit("setElement", response.data);
                     return response;
                 });

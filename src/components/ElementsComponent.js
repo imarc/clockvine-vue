@@ -70,8 +70,7 @@ export default {
          */
         elements() {
             if (this.url) {
-                return this.$store.state[this.vuexModule].indexes[this.url].data;
-                //return this.$store.getters[`${this.vuexModule}/elements`](this.url);
+                return this.$store.getters[`${this.vuexModule}/elements`](this.url);
             }
         },
 
@@ -82,8 +81,7 @@ export default {
          */
         meta() {
             if (this.url) {
-                return this.$store.state[this.vuexModule].indexes[this.url].meta;
-                //return this.$store.getters[`${this.vuexModule}/meta`](this.url);
+                return this.$store.getters[`${this.vuexModule}/meta`](this.url);
             }
         },
 

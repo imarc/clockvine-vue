@@ -23,14 +23,16 @@ export default {
     }),
 
     created() {
-        if (!this.id && this.newElement) {
-            if (typeof this.newElement === 'function') {
-                this.internalElement = this.newElement();
-            } else {
-                this.internalElement = {...this.newElement};
-            }
+        if (this.id) {
+            return this.show();
         }
-        this.show();
+
+        if (this.newElement) {
+            this.$store.dispatch(`${this.vuexModule}/decorate`, this.newElement)
+                .then(obj => {
+                    this.internalElement = obj;
+                });
+        }
     },
 
     watch: {
@@ -97,16 +99,12 @@ export default {
 
         store() {
             this.isLoading = true;
-            const action = `${this.vuexModule}/store`;
-            return this.$store.dispatch(action, this.element)
-                .then(response => {
-                    this.isLoading = false;
-
-                    if (typeof this.newElement === 'function') {
-                        this.internalElement = this.newElement();
-                    } else {
-                        this.internalElement = {...this.newElement};
-                    }
+            this.element.$store()
+                .then(() => this.isLoading = false)
+                .then(() => this.$store.dispatch(`${this.vuexModule}/decorate`, this.newElement))
+                .then(obj => {
+                    console.log('made it', obj);
+                    this.internalElement = obj;
                 });
         },
 
