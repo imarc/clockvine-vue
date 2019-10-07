@@ -154,6 +154,17 @@ Example response:
 Release Notes
 -------------
 
+### 0.4.0-alpha.8
+
+This has backwards compatibility breaks with alpha.7.
+
+* Change implementation to decoate elements (objects) returned by clockvine with methods/properties. These include `$show`, `$mustShow`, `$update`, `$store`, `$destroy`, `$index`, `$mustIndex`, and `$exists` for different objects.
+* Add `syncsWithUrl` property to disable URL syncing for ElementsComponent.
+
+### 0.4.0-alpha.7
+
+* Add functionality to 'clear out' data using `newElement` after triggering a `store`
+
 ### 0.4.0-alpha.6
 
 This has backwards compatibility breaks with alpha.5.
