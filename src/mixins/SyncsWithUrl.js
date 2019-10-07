@@ -11,6 +11,13 @@ export default class {
         this.$_syncsWithUrl_Property = property;
         this.$_syncsWithUrl_ignoreParams = ignoreParams;
 
+        this.props = {
+            syncsWithUrl: {
+                type: Boolean,
+                default: true
+            }
+        };
+
         this.created = function() {
             this.$options.methods.onHashChange.call(this, {newURL: location.href});
         };
@@ -69,6 +76,9 @@ export default class {
          * Called when params change.
          */
         onParamsChange() {
+            if (!this.syncsWithUrl) {
+                return;
+            }
             const property = this.$options.$_syncsWithUrl_Property;
                 const urlStr = this.generateURL();
             if (location.search != urlStr) {
@@ -80,6 +90,9 @@ export default class {
          * Called on window "hashchange" events.
          */
         onHashChange({newURL}) {
+            if (!this.syncsWithUrl) {
+                return;
+            }
             const {searchParams} = new URL(newURL);
             const props = this[this.$options.$_syncsWithUrl_Property];
 
