@@ -229,7 +229,7 @@ export default class {
 
 
     actions = {
-        decorate: ({dispatch}, obj = []) => {
+        decorate: ({dispatch, state}, obj = []) => {
             const elements = Array.isArray(obj) ? obj : [obj];
             elements.forEach(element => {
 
@@ -244,6 +244,13 @@ export default class {
                         Object.defineProperty(element, '$' + method, {
                             enumerable: false,
                             value: () => dispatch(method, element),
+                        });
+                    }
+
+                    if (!element.hasOwnProperty('$exists')) {
+                        Object.defineProperty(element, '$exists', {
+                            enumerable: false,
+                            get: () => element[this.#idProperty] in state.elements,
                         });
                     }
                 }
