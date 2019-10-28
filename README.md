@@ -154,6 +154,14 @@ Example response:
 Release Notes
 -------------
 
+### 0.4.0-alpha.11
+
+* Fix bug with .store promise
+
+### 0.4.0-alpha.10
+
+* Add require-params prop
+
 ### 0.4.0-alpha.8
 
 This has backwards compatibility breaks with alpha.7.
