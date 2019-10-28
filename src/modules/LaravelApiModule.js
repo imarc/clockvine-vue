@@ -38,11 +38,11 @@ export default class extends Module {
 
             if (['index', 'store'].includes(action)) {
                 return this.#baseUrl;
-            } 
-                const id = params[idProperty];
-                delete params[idProperty];
-                return `${this.#baseUrl  }/${id}`;
-            
+            }
+
+            const id = params[idProperty];
+            delete params[idProperty];
+            return `${this.#baseUrl  }/${id}`;
         };
 
         super(buildUrl, {

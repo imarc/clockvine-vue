@@ -179,6 +179,8 @@ export default class {
          */
         setIndex: (state, {url, data}) => {
             state.indexes = { ...state.indexes, [url]: data };
+
+            return state.indexes[url];
         },
 
         /**
@@ -188,7 +190,7 @@ export default class {
          *
          * @param {object|array} data - element(s) to add to the module's store.
          */
-        setElement: (state, {data = []}) => {
+        setElement: (state, data = []) => {
             const elements = Array.isArray(data) ? data : [data];
 
             elements.forEach(element => {
@@ -200,6 +202,8 @@ export default class {
                     );
                 }
             });
+
+            return elements;
         },
 
         /**
@@ -224,6 +228,8 @@ export default class {
                     }
                 }
             });
+
+            return elements;
         },
     };
 
@@ -289,7 +295,7 @@ export default class {
                     dispatch('decorate', response.data.data);
                     dispatch('decorateIndex', response.data.data);
                     commit("setIndex", {url, data: response.data});
-                    commit("setElement", response.data);
+                    commit("setElement", response.data.data);
                     return response;
                 });
         },
@@ -309,7 +315,7 @@ export default class {
                     dispatch("decorate", response.data.data);
                     dispatch('decorateIndex', response.data.data);
                     commit("setIndex", {url, data: response.data});
-                    commit("setElement", response.data);
+                    commit("setElement", response.data.data);
                     return response;
                 });
         },
@@ -322,7 +328,7 @@ export default class {
                         dispatch("decorate", response.data.data)
                         dispatch('decorateIndex', response.data.data);
                         commit("setIndex", {url, data: response.data});
-                        commit("setElement", response.data);
+                        commit("setElement", response.data.data);
                         return response;
                     });
             }
@@ -340,8 +346,8 @@ export default class {
             return this.#httpQueue
                 .get(url)
                 .then(response => {
-                    dispatch("decorate", response);
-                    commit("setElement", response);
+                    dispatch("decorate", response.data.data);
+                    commit("setElement", response.data.data);
                     return response;
                 });
         },
@@ -358,8 +364,8 @@ export default class {
             return this.#httpQueue
                 .mustGet(url)
                 .then(response => {
-                    dispatch("decorate", response);
-                    commit("setElement", response.data);
+                    dispatch("decorate", response.data.data);
+                    commit("setElement", response.data.data);
                     return response;
                 });
         },
@@ -375,11 +381,11 @@ export default class {
 
             return this.#httpQueue
                 .post(url, params)
-                .then(response => {
-                    dispatch("decorate", response);
-                    commit("setElement", response.data);
+                .then(response => dispatch("decorate", response.data.data))
+                .then(element => {
+                    commit('setElement', element);
                     dispatch("refreshIndexes");
-                    return response;
+                    return element;
                 });
         },
 
@@ -392,15 +398,13 @@ export default class {
         update: ({commit, dispatch}, params = {}) => {
             const url = this.#createQueryUrl({[this.#actionParameter]: 'update', ...params});
 
-            let foo = this.#httpQueue
+            return this.#httpQueue
                 .put(url, params)
                 .then(response => {
-                    dispatch("decorate", response);
-                    commit("setElement", response.data);
+                    dispatch("decorate", response.data.data);
+                    commit("setElement", response.data.data);
                     return response;
                 });
-
-            return foo;
         },
 
         /**
@@ -415,7 +419,7 @@ export default class {
             return this.#httpQueue
                 .delete(url, params)
                 .then(response => {
-                    commit("deleteElement", response.data);
+                    commit("deleteElement", response.data.data);
                     dispatch("refreshIndexes");
                     return response;
                 });
