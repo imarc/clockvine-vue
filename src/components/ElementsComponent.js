@@ -148,13 +148,13 @@ export default {
          * @return {promise}
          */
         query({mustGet = false} = {}) {
-            this.$emit('isLoading', this.isLoading = true);
-
             if (!mustGet && this.requireParams) {
                 if (Object.keys(this.filteredParams).length === 0) {
                     return Promise.resolve();
                 }
             }
+
+            this.$emit('isLoading', this.isLoading = true);
 
             const action = `${this.vuexModule  }/${  mustGet ? 'mustIndex' : 'index'}`;
             return this.$store.dispatch(action, this.filteredParams)
