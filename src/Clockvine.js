@@ -10,7 +10,7 @@ import PaginatedElementsComponent from "./components/PaginatedElementsComponent"
 import PaginationNav from "./components/PaginationNav.vue";
 import ResetsPage from "./mixins/ResetsPage";
 import SyncsWithUrl from "./mixins/SyncsWithUrl";
-import withProps from "./helpers/withProps";
+import withHelper from "./helpers/with";
 
 export default {
 
@@ -48,5 +48,5 @@ export default {
      * Miscellaneous
      */
     HttpQueue,
-    withProps,
+    with: withHelper,
 };

@@ -16,44 +16,30 @@ export default class extends Module {
      * this class creates a wrapper function that matches typical element-api
      * conventions.
      *
-     * @param {string} baseUrl         - String for the baseURL
-     * @param {string} idProperty      - Property to use for IDs; default "id"
-     * @param {string} pageParameter   - Property to use for pages; default "page"
-     * @param {object} pqueueOptions   - Override PQueue options; default {concurrency: 2}
-     * @param {string} actionParameter - Property that indicates action: default "action"
+     * All options are passed through to ApiModule.
+     *
+     * @param {string} baseUrl                 - String for the baseURL
+     * @param {string} options.idProperty      - Property to use for IDs; default "id"
+     * @param {string} options.actionParameter - Property that indicates action: default "action"
      */
-    constructor(
-        baseUrl,
-        {
-            idProperty = "id",
-            pageParameter = "page",
-            pqueueOptions = {concurrency: 2},
-            actionParameter = "action",
-        } = {},
-    ) {
-
+    constructor(baseUrl, options = {}) {
         const buildUrl = params => {
             const action = params[this.#actionParameter];
             delete params[this.#actionParameter];
 
             if (['index', 'store'].includes(action)) {
                 return this.#baseUrl;
-            } 
-                const id = params[idProperty];
-                delete params[idProperty];
+            }
+                const id = params[options.idProperty];
+                delete params[options.idProperty];
                 return `${this.#baseUrl.replace(/\.json$/i, '')
                      }/${id}.json`;
-            
+
         };
 
-        super(buildUrl, {
-            idProperty,
-            pageParameter,
-            pqueueOptions,
-            actionParameter
-        });
+        super(buildUrl, options);
 
-        this.#actionParameter = actionParameter;
+        this.#actionParameter = options.actionParameter;
         this.#baseUrl = baseUrl;
     }
 }

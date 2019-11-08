@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import HttpQueue from '../HttpQueue';
+import Debounce from 'debounce-promise';
 
 /**
  * Base Vuex Module for that communicates with a JSON-based, REST API endpoint.
@@ -22,6 +23,8 @@ export default class {
             pageParameter = "page",
             pqueueOptions = {concurrency: 2},
             actionParameter = "action",
+            debounce = 0,
+            debounceOptions = {},
         } = {},
     ) {
         this.#actionParameter = actionParameter;
@@ -29,6 +32,10 @@ export default class {
         this.#httpQueue = new HttpQueue({pqueueOptions});
         this.#idProperty = idProperty;
         this.#pageParameter = pageParameter;
+        this.#debounce = debounce;
+        this.#debounceOptions = debounceOptions;
+
+        this.actions.index = Debounce(this.index, this.#debounce, this.#debounceOptions);
     }
 
     /**
@@ -105,6 +112,26 @@ export default class {
     }
 
     /**
+     * Gets an index of elements. If previously fetched, uses the cached value.
+     *
+     * @param {object} params - parameters to pass
+     * @return {promise}
+     */
+    index = ({commit, dispatch}, params = {}) => {
+        const url = this.#createQueryUrl({[this.#actionParameter]: 'index', ...params});
+
+        return this.#httpQueue
+            .get(url)
+            .then(response => {
+                dispatch('decorate', response.data.data);
+                dispatch('decorateIndex', response.data.data);
+                commit("setIndex", {url, data: response.data});
+                commit("setElement", response.data.data);
+                return response;
+            });
+    };
+
+    /**
      * Parameter that the module will set to the action being taken. Valid values it may pass are
      * index, show, store, update, and destroy.
      */
@@ -121,6 +148,14 @@ export default class {
      * The HttpQueue instance.
      */
     #httpQueue;
+
+    #debounce;
+    #debounceOptions;
+
+    /**
+     * Update debouncing callbacks.
+     */
+    #debouncedUpdates;
 
     /**
      * Parameter used for identifying models. Default is "id".
@@ -281,26 +316,6 @@ export default class {
         },
 
         /**
-         * Gets an index of elements. If previously fetched, uses the cached value.
-         *
-         * @param {object} params - parameters to pass
-         * @return {promise}
-         */
-        index: ({commit, dispatch}, params = {}) => {
-            const url = this.#createQueryUrl({[this.#actionParameter]: 'index', ...params});
-
-            return this.#httpQueue
-                .get(url)
-                .then(response => {
-                    dispatch('decorate', response.data.data);
-                    dispatch('decorateIndex', response.data.data);
-                    commit("setIndex", {url, data: response.data});
-                    commit("setElement", response.data.data);
-                    return response;
-                });
-        },
-
-        /**
          * Gets an index of elements. Always bypasses the cache.
          *
          * @param {object} params - parameters to pass
@@ -396,15 +411,22 @@ export default class {
          * @return {promise}
          */
         update: ({commit, dispatch}, params = {}) => {
+            const key = params[this.#idProperty];
             const url = this.#createQueryUrl({[this.#actionParameter]: 'update', ...params});
 
-            return this.#httpQueue
-                .put(url, params)
-                .then(response => {
-                    dispatch("decorate", response.data.data);
-                    commit("setElement", response.data.data);
-                    return response;
-                });
+            if (!this.#debouncedUpdates[key]) {
+                this.#debouncedUpdates[key] = Debounce((url, params) => {
+                    return this.#httpQueue
+                        .put(url, params)
+                        .then(response => {
+                            dispatch("decorate", response.data.data);
+                            commit("setElement", response.data.data);
+                            return response;
+                        });
+                }, this.#debounce, this.#debounceOptions);
+            }
+
+            return this.#debouncedUpdates[key](url, params);
         },
 
         /**

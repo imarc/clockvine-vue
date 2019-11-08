@@ -16,11 +16,11 @@ export default class extends Module {
      * this class creates a wrapper function that matches typical Laravel
      * conventions.
      *
-     * @param {string} baseUrl         - String for the baseURL
-     * @param {string} idProperty      - Property to use for IDs; default "id"
-     * @param {string} pageParameter   - Property to use for pages; default "page"
-     * @param {object} pqueueOptions   - Override PQueue options; default {concurrency: 2}
-     * @param {string} actionParameter - Property that indicates action: default "action"
+     * All options are passed through to ApiModule.
+     *
+     * @param {string} baseUrl                 - String for the baseURL
+     * @param {string} options.idProperty      - Property to use for IDs; default "id"
+     * @param {string} options.actionParameter - Property that indicates action: default "action"
      */
     constructor(
         baseUrl,
