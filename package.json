@@ -61,6 +61,11 @@
         ],
         "parserOptions": {
             "parser": "babel-eslint"
+        },
+        "rules": {
+            "private-props/no-unused-or-undeclared": [2, {
+                "privateMatchers": ["^#"]
+            }]
         }
     },
     "babel": {
