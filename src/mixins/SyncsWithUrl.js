@@ -18,8 +18,8 @@ export default class {
             }
         };
 
-        this.created = function() {
-            this.$options.methods.onHashChange.call(this, {newURL: location.href});
+        this.created = function created() {
+            this.$options.methods.onHashChange.call(this, {newURL: window.location.href});
         };
 
         this.watch = {
@@ -29,7 +29,7 @@ export default class {
             },
         };
 
-        addEventListener('hashchange', this.methods.onHashChange.bind(this));
+        window.addEventListener('hashchange', this.methods.onHashChange.bind(this));
     }
 
     computed = {
@@ -56,19 +56,19 @@ export default class {
 
             const params = {...this[property], ...paramChanges};
 
-            for (const [key, val] of Object.entries(params)) {
-                if (!(key in ignoreParams) || val !== ignoreParams[key]) {
-                    if (val !== undefined && val !== null && val !== '') {
-                        urlParams.append(key, val);
-                    }
-                }
-            }
+            Object.entries(params)
+                .filter(([key, val]) => {
+                    return (!(key in ignoreParams) || !(val !== ignoreParams[key]))
+                        && val !== undefined && val !== null && val !== '';
+                }).forEach(([key, val]) => {
+                    urlParams.append(key, val);
+                });
 
             const urlStr = urlParams.toString();
             if (urlStr.length) {
                 return `?${  urlStr}`;
             }
-                return location.pathname;
+                return window.location.pathname;
 
         },
 
@@ -81,8 +81,8 @@ export default class {
             }
             const property = this.$options.$_syncsWithUrl_Property;
                 const urlStr = this.generateURL();
-            if (location.search != urlStr) {
-                history.replaceState(this[property], document.title, urlStr);
+            if (window.location.search !== urlStr) {
+                window.history.replaceState(this[property], document.title, urlStr);
             }
         },
 
@@ -96,25 +96,25 @@ export default class {
             const {searchParams} = new URL(newURL);
             const props = this[this.$options.$_syncsWithUrl_Property];
 
-            for (let key of searchParams.keys()) {
+            searchParams.keys().forEach(key => {
                 let val = searchParams.getAll(key);
 
-                if (Array.isArray(val) && val.length == 1 && !(/\[\]$/.test(key))) {
-                    val = val[0];
+                if (Array.isArray(val) && val.length === 1 && !(/\[\]$/.test(key))) {
+                    [val] = val;
                 }
 
                 if (/\[\]$/.test(key)) {
                     key = key.replace(/\[\]$/, '');
                 }
 
-                if (!(key in props) || props[key] != val) {
+                if (!(key in props) || props[key] !== val) {
                     if (key in props && typeof(props[key]) === 'number') {
                         val = parseFloat(val);
                     }
 
                     this.$set(props, key, val);
                 }
-            }
+            });
         }
     }
 }

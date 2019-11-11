@@ -28,11 +28,13 @@ export default {
         }
 
         if (this.newElement) {
-            this.$store.dispatch(`${this.vuexModule}/decorate`, this.newElement)
+            return this.$store.dispatch(`${this.vuexModule}/decorate`, this.newElement)
                 .then(obj => {
                     this.internalElement = obj;
                 });
         }
+
+        return undefined;
     },
 
     watch: {
@@ -52,9 +54,11 @@ export default {
         element() {
             if (this.id) {
                 return this.$store.getters[`${this.vuexModule}/element`](this.id);
-            } else if (this.internalElement) {
+            } if (this.internalElement) {
                 return this.internalElement;
             }
+
+            return undefined;
         },
 
         /**
@@ -85,44 +89,45 @@ export default {
          */
         show({mustGet = false } = {}) {
             if (!mustGet && this.noFetching) {
-                return;
+                return undefined;
             }
-            this.isLoading = true;
+
+            this.$emit('isLoading', this.isLoading = true);
 
             const action = `${this.vuexModule}/${mustGet ? 'mustShow' : 'show'}`;
             return this.$store.dispatch(action, {id: this.id})
                 .then(response => {
-                    this.isLoading = false;
+                    this.$emit('isLoading', this.isLoading = false);
                     this.url = response.config.url;
                 });
         },
 
         store() {
-            this.isLoading = true;
+            this.$emit('isLoading', this.isLoading = true);
             this.element.$store()
-                .then(() => this.isLoading = false)
-                .then(() => this.$store.dispatch(`${this.vuexModule}/decorate`, this.newElement))
+                .then(() => {
+                    this.$emit('isLoading', this.isLoading = false);
+                }).then(() => this.$store.dispatch(`${this.vuexModule}/decorate`, this.newElement))
                 .then(obj => {
-                    console.log('made it', obj);
                     this.internalElement = obj;
                 });
         },
 
         update() {
-            this.isLoading = true;
+            this.$emit('isLoading', this.isLoading = true);
             const action = `${this.vuexModule}/update`;
             return this.$store.dispatch(action, this.element)
-                .then(response => {
-                    this.isLoading = false;
+                .then(() => {
+                    this.$emit('isLoading', this.isLoading = false);
                 });
         },
 
         destroy() {
-            this.isLoading = true;
+            this.$emit('isLoading', this.isLoading = true);
             const action = `${this.vuexModule}/destroy`;
             return this.$store.dispatch(action, this.element)
-                .then(response => {
-                    this.isLoading = false;
+                .then(() => {
+                    this.$emit('isLoading', this.isLoading = false);
                 });
         },
     },

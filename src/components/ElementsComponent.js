@@ -97,17 +97,17 @@ export default {
         filteredParams() {
             const params = {...this.params};
 
-            for (const key in this.ignoreParams) {
+            Object.entries(this.ignoreParams).forEach(([key, value]) => {
                 if (key in params) {
-                    if (typeof this.ignoreParams[key] === 'function') {
-                        if (this.ignoreParams[key](params[key])) {
+                    if (typeof value === 'function') {
+                        if (value(params[key])) {
                             delete params[key];
                         }
-                    } else if (this.ignoreParams[key] === params[key]) {
+                    } else if (value === params[key]) {
                         delete params[key];
                     }
                 }
-            }
+            });
 
             return params;
         },
