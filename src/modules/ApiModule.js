@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import HttpQueue from '../HttpQueue';
 import Debounce from 'debounce-promise';
+import { populateStr, safelyGet, spliceAll } from '../helpers/functions';
 
 /**
  * Base Vuex Module for that communicates with a JSON-based, REST API endpoint.
@@ -81,36 +82,6 @@ export default class {
         } else {
             return url;
         }
-    }
-
-    /**
-     * Internal use. Removes all instances of element from an array.
-     *
-     * @param {array} array - Array to modify.
-     * @param {mixed} element - element to look for and remove
-     * @return {array}
-     */
-    #spliceAll(array, element) {
-        for (let i = array.length - 1; i >= 0; i--) {
-            if (array[i] === element) {
-                array.splice(i, 1);
-            }
-        }
-
-        return array;
-    }
-
-    /**
-     * Internal use. retrieves a nested property from obj, using each element
-     * within path as a key, but will always return null instead of throwing any
-     * errors.
-     *
-     * @param {object} obj - Object to descending into
-     * @param {array} path - Array of keys
-     * @return {mixed}
-     */
-    #safelyGet(obj, path) {
-        return path.reduce((xs, x) => (xs && xs[x] ? xs[x] : null), obj);
     }
 
     /**
@@ -196,13 +167,13 @@ export default class {
          * Elements is a getter than returns a function to get an array of elements
          * for a URL.
          */
-        elements: state => url => this.#safelyGet(state.indexes, [url, 'data']),
+        elements: state => url => safelyGet(state.indexes, [url, 'data']),
 
         /**
          * Meta is a getter that returns a function to get meta information for a
          * URL.
          */
-        meta: state => url => this.#safelyGet(state.indexes, [url, 'meta']),
+        meta: state => url => safelyGet(state.indexes, [url, 'meta']),
 
         /**
          * Element is a getter that returns a function get a single element by its
@@ -263,7 +234,7 @@ export default class {
                     );
 
                     for (let index of Object.values(state.indexes)) {
-                        this.#spliceAll(index.data, element);
+                        spliceAll(index.data, element);
                     }
                 }
             });

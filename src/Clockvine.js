@@ -13,7 +13,6 @@ import SyncsWithUrl from "./mixins/SyncsWithUrl";
 import withHelper from "./helpers/with";
 
 export default {
-
     /**
      * Components
      */
@@ -49,4 +48,43 @@ export default {
      */
     HttpQueue,
     with: withHelper,
+};
+
+export {
+
+    /**
+     * Components
+     */
+    ElementComponent,
+
+    ElementsComponent,
+    ContinuousElementsComponent,
+    PaginatedElementsComponent,
+
+    LiveSearch,
+    PaginationNav,
+
+
+
+    /**
+     * Vuex Modules
+     */
+    ApiModule,
+    ElementApiModule,
+    LaravelApiModule,
+
+
+
+    /**
+     * Mixins
+     */
+    ResetsPage,
+    SyncsWithUrl,
+
+
+    /**
+     * Miscellaneous
+     */
+    HttpQueue,
+    withHelper as with,
 };

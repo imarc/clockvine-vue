@@ -1,3 +1,4 @@
+import { populateStr } from '../helpers/functions';
 import Module from './ApiModule';
 
 /**
@@ -31,12 +32,10 @@ export default class extends Module {
             delete params[actionParameter];
 
             if (['index', 'store'].includes(action)) {
-                return baseUrl;
+                return populateStr(baseUrl, params);
             }
 
-            const id = params[idProperty];
-            delete params[idProperty];
-            return `${baseUrl}/${id}`;
+            return populateStr(`${baseUrl}{/${idProperty}}`, params);
         };
 
         super(buildUrl, options);

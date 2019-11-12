@@ -19,6 +19,7 @@
         "lodash.isequal": "^4.5.0",
         "lodash.merge": "^4.6.2",
         "p-queue": "^6.1.1",
+        "pluralize": "^8.0.0",
         "vue": "^2.6.10",
         "vue-loader": "^15.7.1",
         "vue-style-loader": "^4.1.2",

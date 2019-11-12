@@ -1,3 +1,5 @@
+import withHelper from '../helpers/with';
+
 export default {
 
     mounted() {
@@ -165,5 +167,26 @@ export default {
                     return response;
                 });
         },
+    },
+
+    for(vuexModule) {
+        return withHelper(this, {
+            computed: {
+                vuexModule: () => vuexModule,
+                slotParams() {
+                    return {
+                        [vuexModule]: this.elements,
+                        elements: this.elements,
+                        isLoading: this.isLoading,
+                        meta: this.meta,
+                        query: this.query,
+                    };
+                },
+            },
+        });
+    },
+
+    with(overrides) {
+        return withHelper(this, overrides);
     },
 }

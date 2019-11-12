@@ -1,3 +1,6 @@
+import {singular} from 'pluralize';
+import withHelper from '../helpers/with';
+
 export default {
 
     props: {
@@ -142,5 +145,29 @@ export default {
         }
             return '';
 
+    },
+
+    for(vuexModule) {
+        return withHelper(this, {
+            computed: {
+                vuexModule: () => vuexModule,
+                slotParams() {
+                    return {
+                        [singular(vuexModule)]: this.element,
+                        element: this.element,
+                        refresh() {
+                            this.show({mustGet: true});
+                        },
+                        store: this.store,
+                        update: this.update,
+                        destroy: this.destroy
+                    };
+                },
+            },
+        });
+    },
+
+    with(overrides) {
+        return withHelper(this, overrides);
     },
 }
