@@ -154,6 +154,20 @@ Example response:
 Release Notes
 -------------
 
+### 0.4.0-alpha.13
+
+This has backwards compatibility breaks with alpha.12.
+
+* Fix issue so that you can `import { ElementComponent} from 'clockvine-vue'`
+  now instead of having to import the whole object every time.
+* Add ElementComponent.with, ElementComponent.for, ElementsComponent.with, ElementsComponent.for
+* Add debouncing in between vuex events and API requests for store, update, and index calls
+* Add support a pseudo template string format to LaraevlApiModule (may change more)
+
+### 0.4.0-alpha.12
+
+* Fix bug with isLoading events
+
 ### 0.4.0-alpha.11
 
 * Fix bug with .store promise
