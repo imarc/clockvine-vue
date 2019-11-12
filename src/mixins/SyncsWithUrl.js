@@ -96,7 +96,9 @@ export default class {
             const {searchParams} = new URL(newURL);
             const props = this[this.$options.$_syncsWithUrl_Property];
 
-            searchParams.keys().forEach(key => {
+            /* this is because searchParams.entries() is an iterable but not an array. */
+            /* eslint no-restricted-syntax: [0] */
+            for (let key of searchParams.keys()) {
                 let val = searchParams.getAll(key);
 
                 if (Array.isArray(val) && val.length === 1 && !(/\[\]$/.test(key))) {
@@ -114,7 +116,7 @@ export default class {
 
                     this.$set(props, key, val);
                 }
-            });
+            };
         }
     }
 }
