@@ -11,10 +11,12 @@ export default class {
      * Constructor.
      *
      * @param {string|function} baseUrl - String or function for the baseURL
-     * @param {string} idProperty      - Property to use for IDs; default "id"
-     * @param {string} pageParameter   - Property to use for pages; default "page"
-     * @param {object} pqueueOptions   - Override PQueue options; default {concurrency: 2}
-     * @param {string} actionParameter - Property that indicates action: default "action"
+     * @param {string} idProperty       - Property to use for IDs; default "id"
+     * @param {string} pageParameter    - Property to use for pages; default "page"
+     * @param {object} pqueueOptions    - Override PQueue options; default {concurrency: 2}
+     * @param {string} actionParameter  - Property that indicates action; default "action"
+     * @param {number} debounce         - Set a debounce in between events; default 0
+     * @param {object} debounceOptions  - Override Debouce options; default {}
      */
     constructor(
         baseUrl,
