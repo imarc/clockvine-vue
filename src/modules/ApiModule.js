@@ -35,7 +35,7 @@ export default class {
         this.#debounce = debounce;
         this.#debounceOptions = debounceOptions;
 
-        this.actions.index = Debounce(this.index, this.#debounce, this.#debounceOptions);
+        this.actions.index = Debounce((...args) => this.#index(...args), this.#debounce, this.#debounceOptions);
     }
 
     /**
@@ -117,7 +117,7 @@ export default class {
      * @param {object} params - parameters to pass
      * @return {promise}
      */
-    index = ({commit, dispatch}, params = {}) => {
+    #index({commit, dispatch}, params = {}) {
         const url = this.#createQueryUrl({[this.#actionParameter]: 'index', ...params});
 
         return this.#httpQueue
@@ -155,7 +155,9 @@ export default class {
     /**
      * Update debouncing callbacks.
      */
-    #debouncedUpdates;
+    #debouncedUpdates = {};
+
+    #debouncedStores = [];
 
     /**
      * Parameter used for identifying models. Default is "id".
@@ -394,14 +396,40 @@ export default class {
         store: ({commit, dispatch}, params = {}) => {
             const url = this.#createQueryUrl({[this.#actionParameter]: 'store', ...params});
 
-            return this.#httpQueue
-                .post(url, params)
-                .then(response => dispatch("decorate", response.data.data))
-                .then(element => {
-                    commit('setElement', element);
-                    dispatch("refreshIndexes");
-                    return element;
+            let key = this.#debouncedStores.findIndex(({params: obj}) => obj === params);
+
+            if (key === -1) {
+                let status = 'Bouncing';
+                let backlog = [];
+                key += this.#debouncedStores.push({
+                    params,
+                    status,
+                    backlog,
+                    promise: Debounce((url, params) => {
+                        status = 'Fetching';
+                        return this.#httpQueue
+                            .post(url, params)
+                            .then(response => dispatch("decorate", response.data.data))
+                            .then(element => {
+                                status = 'Bouncing';
+                                commit('setElement', element);
+                                dispatch("refreshIndexes");
+
+                                return element;
+                            });
+                    }, this.#debounce, this.#debounceOptions)
                 });
+
+            } else {
+                if (this.#debouncedStores[key].status === 'Fetching') {
+                    return this.#debouncedStores[key].promise.then((...args) => {
+                        // TOOD review
+                        throw new Error('Should not get here', args);
+                    });
+                }
+            }
+
+            return this.#debouncedStores[key].promise(url, params);
         },
 
         /**

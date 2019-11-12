@@ -23,23 +23,23 @@ export default class extends Module {
      * @param {string} options.actionParameter - Property that indicates action: default "action"
      */
     constructor(baseUrl, options = {}) {
+        const actionParameter = options.actionParameter || "action";
+        const idProperty = options.idProperty || "id";
+
         const buildUrl = params => {
-            const action = params[this.#actionParameter];
-            delete params[this.#actionParameter];
+            const action = params[actionParameter];
+            delete params[actionParameter];
 
             if (['index', 'store'].includes(action)) {
-                return this.#baseUrl;
+                return baseUrl;
             }
-                const id = params[options.idProperty];
-                delete params[options.idProperty];
-                return `${this.#baseUrl.replace(/\.json$/i, '')
-                     }/${id}.json`;
 
+            const id = params[idProperty];
+            delete params[idProperty];
+            return `${baseUrl.replace(/\.json$/i, '')
+                 }/${id}.json`;
         };
 
         super(buildUrl, options);
-
-        this.#actionParameter = options.actionParameter;
-        this.#baseUrl = baseUrl;
     }
 }
