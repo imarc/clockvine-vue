@@ -22,37 +22,23 @@ export default class extends Module {
      * @param {string} options.idProperty      - Property to use for IDs; default "id"
      * @param {string} options.actionParameter - Property that indicates action: default "action"
      */
-    constructor(
-        baseUrl,
-        {
-            idProperty = "id",
-            pageParameter = "page",
-            pqueueOptions = {concurrency: 2},
-            actionParameter = "action",
-        } = {},
-    ) {
+    constructor(baseUrl, options = {}) {
+        const actionParameter = options.actionParameter || "action";
+        const idProperty = options.idProperty || "id";
 
         const buildUrl = params => {
-            const action = params[this.#actionParameter];
-            delete params[this.#actionParameter];
+            const action = params[actionParameter];
+            delete params[actionParameter];
 
             if (['index', 'store'].includes(action)) {
-                return this.#baseUrl;
+                return baseUrl;
             }
 
             const id = params[idProperty];
             delete params[idProperty];
-            return `${this.#baseUrl  }/${id}`;
+            return `${baseUrl}/${id}`;
         };
 
-        super(buildUrl, {
-            idProperty,
-            pageParameter,
-            pqueueOptions,
-            actionParameter
-        });
-
-        this.#actionParameter = actionParameter;
-        this.#baseUrl = baseUrl;
+        super(buildUrl, options);
     }
 }
