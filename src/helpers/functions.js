@@ -30,12 +30,43 @@ export function spliceAll(array, element) {
 };
 
 
-const ternaryRegex = /\{([^}]+)\?([^}]*):([^}]+)\}/g;
-const paramRegex = /\{(\W*)(\w+)(\W*)\}/g;
 /**
+ * Internal use. Populates a string using values from the params object, and
+ * deletes used keys from the params object.
  *
+ * This looks within the string for two patterns:
+ *
+ *     {KEY?truthy:falsy} and {prefixKEYsuffix}
+ *
+ * For the first pattern, if KEY exists in params and its value is truthy,
+ * it'll be replaced with truthy, otherwise, it's replaced by falsy. If truthy
+ * isn't specified, it uses the value of params[KEY].
+ *
+ * For the second pattern, if KEY exists in params and its value is truthy,
+ * it'll be replaced with params[KEY], and prefixes/suffixes are carried over,
+ * otherwise it's all removed. Prefixes and Suffixes have to be non-WORD
+ * characters.
+ *
+ * Examples using the params object {"id": "1", "slug": "example"}:
+ *
+ *   - /article/{id}-{slug}       => /article/1-example
+ *   - /api/articles{/id}         => /api/articles/1
+ *   - /news/{id}-{slug?:article} => /news/article/1-example
+ *   - /news/{id?foo:bar}         => /news/foo
+ *
+ * More with the params object {"id": "1"}:
+ *
+ *   - /article/{id}{-slug}       => /article/1
+ *   - /api/articles{/slug}       => /api/articles
+ *   - /news/{id}-{slug?:article} => /news/article/1-article
+ *   - /news/{id?foo:bar}         => /news/foo
+ *
+ * @param {string} str - string to populate
+ * @param {object} params - parameters used.
  */
 export function populateStr(str, params = {}) {
+    const ternaryRegex = /\{([^}]+)\?([^}]*):([^}]+)\}/g;
+    const paramRegex = /\{(\W*)(\w+)(\W*)\}/g;
     const usedParams = [];
     let newStr = str.replace(ternaryRegex, (m, key, truthy, falsy) => {
         if (key in params && params[key]) {

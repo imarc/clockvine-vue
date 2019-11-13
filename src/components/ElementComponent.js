@@ -147,6 +147,36 @@ export default {
 
     },
 
+    /**
+     * This is a sugar method for ElementComponent instances. This method
+     * returns a new instance of ElementComponent, except that vuexModule is no
+     * longer an available property; it's converted into a computed property
+     * (thanks to Clockvine.with) set to the value passed to .for(). Further,
+     * it additionally adds to the vue-slot a singularized version of the vuex
+     * module as an alternative to 'element'.
+     *
+     * For example, doing this:
+     *
+     * Vue.component('user', ElementComponent.for('users'));
+     *
+     * let's you do this:
+     *
+     * <user v-slot="{ user }">...</user>
+     *
+     *
+     *
+     * As sugar for doing this:
+     *
+     * Vue.component('user', ElementComponent);
+     *
+     * and this:
+     *
+     * <user vuex-module="users" v-slot="{ element: user }">...</user>
+     *
+     * @param {string} vuexModule - the vuex module for this instance.
+     *
+     * @return {object} - a tweaked ElementComponent instance
+     */
     for(vuexModule) {
         return withHelper(this, {
             computed: {
@@ -167,6 +197,19 @@ export default {
         });
     },
 
+    /**
+     * This is a sugar method for ElementComponent instances.
+     *
+     *     ElementComponent.with(obj)
+     *
+     * is a shorthand for
+     *
+     *     Clockvine.with(ElementComponent, obj)
+     *
+     * You'll likely want to read Clockvine.with's documentation for details.
+     *
+     * @param {object} overrides
+     */
     with(overrides) {
         return withHelper(this, overrides);
     },
