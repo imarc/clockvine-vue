@@ -9,6 +9,11 @@ export default {
             required: true,
         },
 
+        params: {
+            type: Object,
+            default: () => ({}),
+        },
+
         id: {},
 
         noFetching: {
@@ -98,7 +103,7 @@ export default {
             this.$emit('isLoading', this.isLoading = true);
 
             const action = `${this.vuexModule}/${mustGet ? 'mustShow' : 'show'}`;
-            return this.$store.dispatch(action, {id: this.id})
+            return this.$store.dispatch(action, {...this.params, id: this.id})
                 .then(response => {
                     this.$emit('isLoading', this.isLoading = false);
                     this.url = response.config.url;
