@@ -36,8 +36,10 @@ export default {
         }
 
         if (this.newElement) {
-            return this.$store.dispatch(`${this.vuexModule}/decorate`, this.newElement)
-                .then(obj => {
+            return this.$store.dispatch(`${this.vuexModule}/decorate`, {
+                params: this.params,
+                elements: this.newElement,
+            }).then(obj => {
                     this.internalElement = obj;
                 });
         }
@@ -115,16 +117,17 @@ export default {
             this.element.$store()
                 .then(() => {
                     this.$emit('isLoading', this.isLoading = false);
-                }).then(() => this.$store.dispatch(`${this.vuexModule}/decorate`, this.newElement))
-                .then(obj => {
+                }).then(() => this.$store.dispatch(`${this.vuexModule}/decorate`, {
+                    params: this.params,
+                    elements: this.newElement,
+                })).then(obj => {
                     this.internalElement = obj;
                 });
         },
 
         update() {
             this.$emit('isLoading', this.isLoading = true);
-            const action = `${this.vuexModule}/update`;
-            return this.$store.dispatch(action, this.element)
+            this.element.$update()
                 .then(() => {
                     this.$emit('isLoading', this.isLoading = false);
                 });
@@ -132,8 +135,7 @@ export default {
 
         destroy() {
             this.$emit('isLoading', this.isLoading = true);
-            const action = `${this.vuexModule}/destroy`;
-            return this.$store.dispatch(action, this.element)
+            this.element.$destroy()
                 .then(() => {
                     this.$emit('isLoading', this.isLoading = false);
                 });

@@ -96,7 +96,7 @@ export default class {
         return this.#httpQueue
             .get(url)
             .then(response => {
-                dispatch('decorate', response.data.data);
+                dispatch('decorate', { params, elements: response.data.data });
                 dispatch('decorateIndex', response.data.data);
                 commit("setIndex", {url, data: response.data});
                 commit("setElement", response.data.data);
@@ -245,44 +245,64 @@ export default class {
 
 
     actions = {
-        decorate: ({dispatch, state}, obj = []) => {
-            const elements = Array.isArray(obj) ? obj : [obj];
-            elements.forEach(element => {
+        decorate: ({dispatch, state}, { elements = [], params = {} } = {}) => {
+            const ensureArray = Array.isArray(elements) ? elements : [elements];
+            ensureArray.forEach(element => {
 
                 if (typeof element === 'function') {
                     element = element();
                 }
 
-                const methods = ['show', 'mustShow', 'update', 'store', 'destroy'];
+                if (!element.hasOwnProperty('$params')) {
+                    Object.defineProperty(element, '$params', {
+                        enumerable: false,
+                        get: () => params,
+                    });
+                }
 
-                for (const method of methods) {
-                    if (!element.hasOwnProperty('$' + method)) {
-                        Object.defineProperty(element, '$' + method, {
-                            enumerable: false,
-                            value: () => dispatch(method, element),
-                        });
-                    }
+                if (!element.hasOwnProperty('$exists')) {
+                    Object.defineProperty(element, '$exists', {
+                        enumerable: false,
+                        get: () => element[this.#idProperty] in state.elements,
+                    });
+                }
 
-                    if (!element.hasOwnProperty('$exists')) {
-                        Object.defineProperty(element, '$exists', {
-                            enumerable: false,
-                            get: () => element[this.#idProperty] in state.elements,
-                        });
-                    }
+                for (const method of ['show', 'mustShow', 'destroy']) {
+                    Object.defineProperty(element, '$' + method, {
+                        enumerable: false,
+                        value: () => dispatch(method, element),
+                    });
+                }
+
+                for (const method of ['update', 'store']) {
+                    Object.defineProperty(element, '$' + method, {
+                        enumerable: false,
+                        value: () => dispatch(method, {
+                            params: element.$params,
+                            data: element,
+                        }),
+                    });
                 }
             });
 
-            return obj;
+            return elements;
         },
 
         decorateIndex: ({dispatch}, index = []) => {
-            const methods = ['index', 'mustIndex', 'show', 'mustShow', 'update', 'store', 'destroy'];
-
-            for (const method of methods) {
+            for (const method of ['index', 'mustIndex', 'show', 'mustShow', 'destroy']) {
                 if (!index.hasOwnProperty('$' + method)) {
                     Object.defineProperty(index, '$' + method, {
                         enumerable: false,
-                        value: (...params) => dispatch(method, params),
+                        value: (params) => dispatch(method, params),
+                    });
+                }
+            }
+
+            for (const method of ['update', 'store']) {
+                if (!index.hasOwnProperty('$' + method)) {
+                    Object.defineProperty(index, '$' + method, {
+                        enumerable: false,
+                        value: ({ params = {}, data = {} } = {}) => dispatch(method, { params, data }),
                     });
                 }
             }
@@ -302,7 +322,7 @@ export default class {
             return this.#httpQueue
                 .mustGet(url)
                 .then(response => {
-                    dispatch("decorate", response.data.data);
+                    dispatch("decorate", { params, elements: response.data.data });
                     dispatch('decorateIndex', response.data.data);
                     commit("setIndex", {url, data: response.data});
                     commit("setElement", response.data.data);
@@ -310,12 +330,12 @@ export default class {
                 });
         },
 
-        refreshIndexes: ({state, commit, dispatch}, params = {}) => {
+        refreshIndexes: ({state, commit, dispatch}, { params = {}, data = {} } = {}) => {
             for (const url in state.indexes) {
                 this.#httpQueue
                     .mustGet(url)
                     .then(response => {
-                        dispatch("decorate", response.data.data)
+                        dispatch("decorate", { params, elements: response.data.data });
                         dispatch('decorateIndex', response.data.data);
                         commit("setIndex", {url, data: response.data});
                         commit("setElement", response.data.data);
@@ -336,7 +356,7 @@ export default class {
             return this.#httpQueue
                 .get(url)
                 .then(response => {
-                    dispatch("decorate", response.data.data);
+                    dispatch("decorate", { params, elements: response.data.data });
                     commit("setElement", response.data.data);
                     return response;
                 });
@@ -354,7 +374,7 @@ export default class {
             return this.#httpQueue
                 .mustGet(url)
                 .then(response => {
-                    dispatch("decorate", response.data.data);
+                    dispatch("decorate", { params, elements: response.data.data });
                     commit("setElement", response.data.data);
                     return response;
                 });
@@ -366,7 +386,7 @@ export default class {
          * @param {object} params - parameters to pass
          * @return {promise}
          */
-        store: ({commit, dispatch}, params = {}) => {
+        store: ({commit, dispatch}, { params = {}, data = {} } = {}) => {
             const url = this.#createQueryUrl({[this.#actionParameter]: 'store', ...params});
 
             let key = this.#debouncedStores.findIndex(({params: obj}) => obj === params);
@@ -381,8 +401,8 @@ export default class {
                     promise: Debounce((url, params) => {
                         status = 'Fetching';
                         return this.#httpQueue
-                            .post(url, params)
-                            .then(response => dispatch("decorate", response.data.data))
+                            .post(url, data)
+                            .then(response => dispatch("decorate", { params, elements: response.data.data }))
                             .then(element => {
                                 status = 'Bouncing';
                                 commit('setElement', element);
@@ -411,16 +431,16 @@ export default class {
          * @param {object} params - parameters to pass
          * @return {promise}
          */
-        update: ({commit, dispatch}, params = {}) => {
+        update: ({commit, dispatch}, { params = {}, data = {} } = {}) => {
             const key = params[this.#idProperty];
             const url = this.#createQueryUrl({[this.#actionParameter]: 'update', ...params});
 
             if (!this.#debouncedUpdates[key]) {
                 this.#debouncedUpdates[key] = Debounce((url, params) => {
                     return this.#httpQueue
-                        .put(url, params)
+                        .put(url, data)
                         .then(response => {
-                            dispatch("decorate", response.data.data);
+                            dispatch("decorate", { params, elements: response.data.data });
                             commit("setElement", response.data.data);
                             return response;
                         });
@@ -440,7 +460,7 @@ export default class {
             const url = this.#createQueryUrl({[this.#actionParameter]: 'destroy', ...params});
 
             return this.#httpQueue
-                .delete(url, params)
+                .delete(url)
                 .then(response => {
                     commit("deleteElement", response.data.data);
                     dispatch("refreshIndexes");
