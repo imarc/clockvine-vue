@@ -1,6 +1,10 @@
 Clockvine – Getting Started
 ===========================
 
+```
+$ npm install clockvine-vue
+```
+
 First up, you'll need to have a JSON-based API. Clockvine has been tested with both craftcms/element-api as well as building endpoints using Laravel's resource controllers, but it should work with any endpoints that are close enough to [the implementation that Clockvine expects.](ExpectedAPI.md)
 
 Assuming you've got that far, next is setting up your Vuex store. Clockvine uses Vuex to cache retrieved elements.
