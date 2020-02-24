@@ -1,8 +1,8 @@
-import ElementsComponent from './ElementsComponent';
+import CollectionComponent from './CollectionComponent';
 
 export default {
 
-    mixins: [ElementsComponent],
+    mixins: [CollectionComponent],
 
     computed: {
 

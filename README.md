@@ -30,9 +30,9 @@ Clockvine provides constructors for Vuex modules, constructors for Vue component
 **Components**
 
 * ElementComponent (previously vueMixin) - used for a single element.
-* ElementsComponent - used for a collection of elements.
-* PaginatedElementsComponent - subclass of ElementsComponent that is built for paginated elements.
-* ContinuousElementsComponent - subclass of ElementsComponent that is built for paginated elements displayed as a 'growing list' (Load More buttons, etc) instead of page by page.
+* CollectionComponent - used for a collection of elements.
+* PaginatedCollectionComponent - subclass of CollectionComponent that is built for paginated elements.
+* ContinuousCollectionComponent - subclass of CollectionComponent that is built for paginated elements displayed as a 'growing list' (Load More buttons, etc) instead of page by page.
 * LiveSearch - constructs a Vue component for a live search field.
 * PaginationNav - constructors a Vue component for pagination.
 
