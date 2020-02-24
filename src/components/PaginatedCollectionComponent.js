@@ -1,9 +1,6 @@
 import CollectionComponent from './CollectionComponent';
 
-export default {
-
-    mixins: [CollectionComponent],
-
+export default CollectionComponent.with({
     computed: {
 
         /**
@@ -15,8 +12,7 @@ export default {
             if (this.params && this.params.page) {
                 return this.params.page;
             }
-                return 1;
-
+            return 1;
         },
 
         /**
@@ -34,4 +30,4 @@ export default {
             };
         },
     },
-}
+});

@@ -1,10 +1,7 @@
 import isEqual from 'lodash/isEqual';
 import CollectionComponent from './CollectionComponent';
 
-export default {
-
-    mixins: [CollectionComponent],
-
+export default CollectionComponent.with({
     data: () => ({
         /**
          * Common parameters to all active URLs, to determine whether to empty the urls array.
@@ -88,4 +85,4 @@ export default {
                 });
         },
     },
-}
+});
