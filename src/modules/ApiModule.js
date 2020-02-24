@@ -352,7 +352,7 @@ export default class {
                 });
         },
 
-        refreshIndexes: ({state, commit, dispatch}, { params = {}, data = {} } = {}) => {
+        refreshIndexes: ({state, commit, dispatch}, params = {}) => {
             for (const url in state.indexes) {
                 this.#httpQueue
                     .mustGet(url)
@@ -454,8 +454,15 @@ export default class {
          * @return {promise}
          */
         update: ({commit, dispatch}, { params = {}, data = {} } = {}) => {
-            const key = params[this.#idProperty];
-            const url = this.#createQueryUrl({[this.#actionParameter]: 'update', ...params});
+            let key = params[this.#idProperty];
+            if (key === undefined) {
+                key = data[this.#idProperty];
+            }
+            const url = this.#createQueryUrl({
+                [this.#actionParameter]: 'update',
+                [this.#idProperty]: key,
+                ...params,
+            });
 
             if (!this.#debouncedUpdates[key]) {
                 this.#debouncedUpdates[key] = Debounce((url, params) => {
