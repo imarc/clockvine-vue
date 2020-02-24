@@ -10,10 +10,19 @@ There is a PHP package,
 middleware designed to normalize responses from Laravel to be compatible, but
 that library is currently out of date.
 
-0.4 is currently an **alpha** - we're using the existing functionality, but
+0.4 is currently in **beta** - we're using the existing functionality, but
 there's still additional functionality planned for completion before the next
 stable release and backwards-compatibility breaks may be introduced between any
 versions.
+
+Docs
+----
+
+* [Expected API](docs/ExpectedAPI.md)
+* [Getting Started](docs/GettingStarted.md)
+* [ApiModule](docs/ApiModule.md)
+* [ElementComponent](docs/ElementComponent.md)
+* [CollectionComponent](docs/CollectionComponent.md)
 
 
 Exports
@@ -22,15 +31,15 @@ Exports
 Clockvine provides constructors for Vuex modules, constructors for Vue components, and regular Vue components.
 
 
-**Modules**
+**[Modules](docs/ApiModule.md)**
 
 * ApiModule (previously vuexModule) - class used to construct Vuex modules that are backed by a RESTful API endpoint.
 * ElementApiModule - subclass of ApiModule configured specifically for craftcms/element-api endpoints.
 
 **Components**
 
-* ElementComponent (previously vueMixin) - used for a single element.
-* CollectionComponent - used for a collection of elements.
+* [ElementComponent](docs/ElementComponent.md) - used for a single element.
+* [CollectionComponent](docs/CollectionComponent.dm) (previously ElementsCompononet) - used for a collection of elements.
 * PaginatedCollectionComponent - subclass of CollectionComponent that is built for paginated elements.
 * ContinuousCollectionComponent - subclass of CollectionComponent that is built for paginated elements displayed as a 'growing list' (Load More buttons, etc) instead of page by page.
 * LiveSearch - constructs a Vue component for a live search field.
@@ -42,117 +51,27 @@ Clockvine provides constructors for Vuex modules, constructors for Vue component
 * SyncsWithUrl - Syncs URL params back and forth with a data property.
 
 
-Expected API
-------------
-
-This package doesn't require that you use imarc/clockvine or laravel, as long
-as you build a compatible API.
-
-1. First, all responses are **expected to be JSON**.
-2. Second, all responses are expected to be a single object, with
-3. the primary content stored the `data` attribute of that object.
-
-The last two requirements are inspired by JSONAPI, and primarily meant to allow
-for flexibility in the future.
-
-A clockvine vuexModule requires two arguments, `baseUrl` and `primaryKey`.
-Based on these, this is what it expects for the following REST actions.
-
-| Action  | Method | URL Format               | Example URL  |
-| ------- | ------ | ------------------------ | ------------ |
-| index   | GET    | `baseUrl`                | /api/users   |
-| show    | GET    | `baseUrl`/`primary key`  | /api/users/1 |
-| store   | POST   | `baseUrl`                | /api/users   |
-| update  | PUT    | `baseUrl`/`primary key`  | /api/users/1 |
-| destroy | DELETE | `baseUrl`/`primary key`  | /api/users/1 |
-
-### Expected API for ElementApi endpoints
-
-For Element API, the default behavior is slightly different. It's assumed that
-`baseUrl` ends with `.json` and that needs to be stripped off. For the table
-below, `baseNoSuffix` refers to `baseUrl` with the suffix stripped.
-
-| Action  | Method | URL Format                         | Example URL  |
-| ------- | ------ | ---------------------------------- | ------------ |
-| index   | GET    | `baseUrl`                          | /api/users   |
-| show    | GET    | `baseNoSuffix`/`primary key`.json  | /api/users/1 |
-| store   | POST   | `baseUrl`                          | /api/users   |
-| update  | PUT    | `baseNoSuffix`/`primary key`.json  | /api/users/1 |
-| destroy | DELETE | `baseNoSuffix`/`primary key`.json  | /api/users/1 |
-
-
-#### INDEX
-
-An index action is a `GET` request to `baseUrl`. The primary content of the
-response must be an array of object, with each object representing a single
-model for this endpoint.
-
-It's important that each model object here has it's primary key as an attribute, and the name of the primary key field matches `primaryKey`. By default, Clockvine will use "id" for `primaryKey`, and therefore look for a "id" field on each object.
-
-Example response:
-```json
-{
-  "data": [{
-    "id": 1,
-    "name": "Imarc",
-    "email": "info@imarc.com",
-    "created_at": "2017-10-27 22:09:36",
-    "updated_at": "2017-10-27 22:09:36",
-    "phone": null,
-    "deleted_at": null,
-    "role": "Administrator"
-  }, {
-    "id": 2,
-    "name": "Kevin Hamer",
-    "email": "kevin+example@imarc.com",
-    "created_at": "2017-10-27 22:09:37",
-    "updated_at": "2017-10-27 22:09:37",
-    "phone": "978 426 8848",
-    "deleted_at": null,
-    "role": "User"
-  }, {
-    "id": 3,
-    "name": "First Lastername",
-    "email": "fake-person@imarc.com",
-    "created_at": "2017-10-27 22:09:37",
-    "updated_at": "2017-10-27 22:09:37",
-    "phone": null,
-    "deleted_at": null,
-    "role": "User"
-  }],
-  "meta": {
-    "pagination": {
-      "total_pages": 5
-    }
-  }
-}
-```
-
-
-#### SHOW
-
-A show action is a `GET` request to `indexUrl`/`primary key`, where `primary key` is the primary key of the model you'd like to fetch. The primary content of the response should be a single object representing the model you're fetching.
-
-Just as with index actions, it's important that the primary key is defined within the model.
-
-Example response:
-
-```json
-{
-  "id": 1,
-  "name": "Imarc",
-  "email": "info@imarc.com",
-  "created_at": "2017-10-27 22:09:36",
-  "updated_at": "2017-10-27 22:09:36",
-  "phone": null,
-  "deleted_at": null,
-  "role": "Administrator"
-}
-```
 
 
 Release Notes
 -------------
+
+### 0.4.0-beta.2
+
+This has backwards compatibility breaks with beta.1.
+
+* Change store and update actions to accept a payload of `{ params, data }`
+  instead of just `data`.
+* Make sure elements are decorated even when using `no-fetching`.
+* Add a new configuration option to ApiModules, `relatedElements`, to configure
+  decorating and updating vuex with elements that are embedded within a
+  response. For example, child elements.
+* Rename ElementsComponent to CollectionComponent and related. Old names are
+* deprecated but will continue to work for now.
+
+### 0.4.0-beta.1
+
+* Add support for passing `params` to ElementComponent
 
 ### 0.4.0-alpha.13
 
