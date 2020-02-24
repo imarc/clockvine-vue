@@ -56,7 +56,7 @@ Clockvine provides constructors for Vuex modules, constructors for Vue component
 Release Notes
 -------------
 
-### 0.4.0-beta.2
+### 0.4.0
 
 This has backwards compatibility breaks with beta.1.
 
