@@ -99,7 +99,10 @@ export default {
          */
         show({mustGet = false } = {}) {
             if (!mustGet && this.noFetching) {
-                return undefined;
+                return this.$store.dispatch(`${this.vuexModule}/decorate`, {
+                    params: this.params,
+                    elements: this.element,
+                });
             }
 
             this.$emit('isLoading', this.isLoading = true);
