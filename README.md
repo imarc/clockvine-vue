@@ -1,19 +1,11 @@
 Clockvine
 =========
 
-Clockvine is a JavaScript library that provides some CRUD-like functionality
-for collections and models on top of a JSON-based API. Currently it supports
-RESTful JSON endpoints, such as those provided by craftcms/element-api.
+Clockvine is a JavaScript library that provides some CRUD-like functionality for elements and collections on top of a JSON-based API. Currently it supports RESTful JSON endpoints, such as those provided by craftcms/element-api or easily built with Laravel's resource controllers.
 
-There is a PHP package,
-[imarc/clockvine](https://packagist.org/packages/imarc/clockvine), that's a
-middleware designed to normalize responses from Laravel to be compatible, but
-that library is currently out of date.
+There is a PHP package, [imarc/clockvine](https://packagist.org/packages/imarc/clockvine), that's a middleware designed to normalize responses from Laravel to be compatible, but that library is deprecated and unnecessary.
 
-0.4 is currently in **beta** - we're using the existing functionality, but
-there's still additional functionality planned for completion before the next
-stable release and backwards-compatibility breaks may be introduced between any
-versions.
+0.4 is **out of beta**, but still young - we're using the existing functionality, but it hasn't quite hit the stability we'd associate with a 1.0 release. Any backwards compatibility breaks are being documented in the release notes, and we're following semver.
 
 Docs
 ----
