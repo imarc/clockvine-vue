@@ -18,6 +18,7 @@ export default class {
      * @param {string} actionParameter  - Property that indicates action; default "action"
      * @param {number} debounce         - Set a debounce in between events; default 0
      * @param {object} debounceOptions  - Override Debouce options; default {}
+     * @param {object} relatedElements  - configure indexing related (nested) elements; default {}
      */
     constructor(
         baseUrl,
@@ -28,6 +29,7 @@ export default class {
             actionParameter = "action",
             debounce = 0,
             debounceOptions = {},
+            relatedElements = {},
         } = {},
     ) {
         this.#actionParameter = actionParameter;
@@ -37,6 +39,7 @@ export default class {
         this.#pageParameter = pageParameter;
         this.#debounce = debounce;
         this.#debounceOptions = debounceOptions;
+        this.#relatedElements = relatedElements;
 
         this.actions.index = Debounce((...args) => this.#index(...args), this.#debounce, this.#debounceOptions);
     }
@@ -100,6 +103,15 @@ export default class {
                 dispatch('decorateIndex', response.data.data);
                 commit("setIndex", {url, data: response.data});
                 commit("setElement", response.data.data);
+
+                for (let module in this.#relatedElements) {
+                    response.data.data.forEach(element => {
+                        let { params = { ...params }, elements = [] } = this.#relatedElements[module](element);
+                        dispatch(`${module}/decorate`, { params, elements }, { root: true });
+                        commit(`${module}/setElement`, elements, { root: true });
+                    });
+                }
+
                 return response;
             });
     };
@@ -136,6 +148,12 @@ export default class {
      * Parameter used for identifying models. Default is "id".
      */
     #idProperty;
+
+    /**
+     * Used to configure related elements that should be decorated, indexed,
+     * and/or updated whenever these elements are.
+     */
+    #relatedElements;
 
     /**
      * Parameter used for specifying pages. Default is "page".
