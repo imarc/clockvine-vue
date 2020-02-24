@@ -51,14 +51,14 @@ export default class {
          */
         generateURL(paramChanges = {}) {
             const property = this.$options.$_syncsWithUrl_Property;
-                const {ignoreParams} = this;
+            const {ignoreParams} = this;
             const urlParams = new URLSearchParams;
 
             const params = {...this[property], ...paramChanges};
 
             Object.entries(params)
                 .filter(([key, val]) => {
-                    return (!(key in ignoreParams) || !(val !== ignoreParams[key]))
+                    return (!(key in ignoreParams) || (val !== ignoreParams[key]))
                         && val !== undefined && val !== null && val !== '';
                 }).forEach(([key, val]) => {
                     urlParams.append(key, val);
