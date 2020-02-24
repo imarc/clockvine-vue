@@ -286,20 +286,24 @@ export default class {
                 }
 
                 for (const method of ['show', 'mustShow', 'destroy']) {
-                    Object.defineProperty(element, '$' + method, {
-                        enumerable: false,
-                        value: () => dispatch(method, element),
-                    });
+                    if (!element.hasOwnProperty('$' + method)) {
+                        Object.defineProperty(element, '$' + method, {
+                            enumerable: false,
+                            value: () => dispatch(method, element),
+                        });
+                    }
                 }
 
                 for (const method of ['update', 'store']) {
-                    Object.defineProperty(element, '$' + method, {
-                        enumerable: false,
-                        value: () => dispatch(method, {
-                            params: element.$params,
-                            data: element,
-                        }),
-                    });
+                    if (!element.hasOwnProperty('$' + method)) {
+                        Object.defineProperty(element, '$' + method, {
+                            enumerable: false,
+                            value: () => dispatch(method, {
+                                params: element.$params,
+                                data: element,
+                            }),
+                        });
+                    }
                 }
             });
 
