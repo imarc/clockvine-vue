@@ -58,8 +58,17 @@ export default class {
 
             Object.entries(params)
                 .filter(([key, val]) => {
-                    return (!(key in ignoreParams) || (val !== ignoreParams[key]))
-                        && val !== undefined && val !== null && val !== '';
+                    if (val === undefined || val === null || val === '') {
+                        return false;
+                    }
+                    if (key in ignoreParams) {
+                        if (typeof ignoreParams[key] === 'function') {
+                            return ignoreParams[key](val);
+                        } else {
+                            return val !== ignoreParams[key];
+                        }
+                    }
+                    return true;
                 }).forEach(([key, val]) => {
                     urlParams.append(key, val);
                 });
