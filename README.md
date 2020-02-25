@@ -15,6 +15,7 @@ Docs
 * [ApiModule](docs/ApiModule.md)
 * [ElementComponent](docs/ElementComponent.md)
 * [CollectionComponent](docs/CollectionComponent.md)
+* [Decorated Element Methods](docs/DecoratedElementMethods.md)
 
 
 Exports
