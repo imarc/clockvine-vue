@@ -66,7 +66,7 @@ export default CollectionComponent.with({
         query({mustGet = false} = {}) {
             const clonedParams = {...this.filteredParams};
             let clearExisting = false;
-            const parentQuery = this.$options.mixins[0].methods.query;
+            const parentQuery = CollectionComponent.methods.query;
 
             delete clonedParams.page;
 
@@ -79,7 +79,7 @@ export default CollectionComponent.with({
                 .then(response => {
                     if (clearExisting) {
                         this.urls = [response.config.url];
-                    } else {
+                    } else if (!this.urls.includes(response.config.url)) {
                         this.urls.push(response.config.url);
                     }
                 });
