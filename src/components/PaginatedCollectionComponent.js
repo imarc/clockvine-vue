@@ -23,7 +23,7 @@ export default CollectionComponent.with({
          * @return {object}
          */
         slotParams() {
-            const parentParams = this.$options.mixins[0].computed.slotParams.call(this);
+            const parentParams = CollectionComponent.computed.slotParams.call(this);
             return {
                 ...parentParams,
                 page: this.page,
