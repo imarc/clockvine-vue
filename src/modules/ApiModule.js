@@ -100,7 +100,7 @@ export default class {
             .get(url)
             .then(response => {
                 dispatch('decorate', { params, elements: response.data.data });
-                dispatch('decorateIndex', response.data.data);
+                dispatch('decorateIndex', { params, index: response.data });
                 commit("setIndex", {url, data: response.data});
                 commit("setElement", response.data.data);
 
@@ -310,7 +310,14 @@ export default class {
             return elements;
         },
 
-        decorateIndex: ({dispatch}, index = []) => {
+        decorateIndex: ({dispatch}, { params = {}, index = [] }) => {
+            if (!index.hasOwnProperty('$params')) {
+                Object.defineProperty(index, '$params', {
+                    enumerable: false,
+                    get: () => params,
+                });
+            }
+
             for (const method of ['index', 'mustIndex', 'show', 'mustShow', 'destroy']) {
                 if (!index.hasOwnProperty('$' + method)) {
                     Object.defineProperty(index, '$' + method, {
@@ -345,20 +352,23 @@ export default class {
                 .mustGet(url)
                 .then(response => {
                     dispatch("decorate", { params, elements: response.data.data });
-                    dispatch('decorateIndex', response.data.data);
+                    dispatch('decorateIndex', { params, index: response.data });
                     commit("setIndex", {url, data: response.data});
                     commit("setElement", response.data.data);
                     return response;
                 });
         },
 
-        refreshIndexes: ({state, commit, dispatch}, params = {}) => {
+        refreshIndexes: ({state, commit, dispatch}) => {
             for (const url in state.indexes) {
                 this.#httpQueue
                     .mustGet(url)
                     .then(response => {
+                        dispatch('decorateIndex', { index: response.data });
+
+                        let params = state.indexes[url].$params;
                         dispatch("decorate", { params, elements: response.data.data });
-                        dispatch('decorateIndex', response.data.data);
+
                         commit("setIndex", {url, data: response.data});
                         commit("setElement", response.data.data);
                         return response;
