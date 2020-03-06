@@ -479,6 +479,7 @@ export default class {
                     return this.#httpQueue
                         .put(url, data)
                         .then(response => {
+                            delete this.#debouncedUpdates[key];
                             dispatch("decorate", { params, elements: response.data.data });
                             commit("setElement", response.data.data);
                             return response;
