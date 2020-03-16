@@ -1,4 +1,4 @@
-import { populateStr } from '../helpers/functions';
+import pathToURL from '../helpers/pathToURL';
 import Module from './ApiModule';
 
 /**
@@ -27,15 +27,15 @@ export default class extends Module {
         const actionParameter = options.actionParameter || "action";
         const idProperty = options.idProperty || "id";
 
-        const buildUrl = params => {
+        const buildUrl = (params = {}, data = {}) => {
             const action = params[actionParameter];
             delete params[actionParameter];
 
             if (['index', 'store'].includes(action)) {
-                return populateStr(baseUrl, params);
+                return pathToURL(baseUrl, params, data);
             }
 
-            return populateStr(`${baseUrl}{/${idProperty}}`, params);
+            return pathToURL(`${baseUrl}/:${idProperty}?`, params, data);
         };
 
         super(buildUrl, options);

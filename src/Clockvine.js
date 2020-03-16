@@ -11,6 +11,7 @@ import PaginationNav from "./components/PaginationNav.vue";
 import ResetsPage from "./mixins/ResetsPage";
 import SyncsWithUrl from "./mixins/SyncsWithUrl";
 import withHelper from "./helpers/with";
+import pathToURL from "./helpers/pathToURL";
 
 export {
 
@@ -56,4 +57,5 @@ export {
      */
     HttpQueue,
     withHelper as with,
+    pathToURL,
 };

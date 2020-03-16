@@ -1,7 +1,8 @@
 import Vue from 'vue';
-import HttpQueue from '../HttpQueue';
 import Debounce from 'debounce-promise';
-import { populateStr, safelyGet, spliceAll } from '../helpers/functions';
+import HttpQueue from '../HttpQueue';
+import { safelyGet, spliceAll } from '../helpers/functions';
+import pathToURL from '../helpers/pathToURL';
 
 /**
  * Base Vuex Module for that communicates with a JSON-based, REST API endpoint.
@@ -73,18 +74,14 @@ export default class {
      * @param {object} params - The object of parameters
      * @return {string}
      */
-    #createQueryUrl(params) {
+    #createQueryUrl(params = {}, availableParams = {}) {
         const action = params[this.#actionParameter];
         let url = this.#baseUrl;
         if (typeof url === "function") {
-            url = url(params);
+            url = url(params, availableParams);
         }
 
-        if (action === 'show' || action === 'index') {
-            return url + this.#createQueryParams(params);
-        } else {
-            return url;
-        }
+        return pathToURL(url, params, availableParams);
     }
 
     /**
@@ -289,7 +286,10 @@ export default class {
                     if (!element.hasOwnProperty('$' + method)) {
                         Object.defineProperty(element, '$' + method, {
                             enumerable: false,
-                            value: () => dispatch(method, element),
+                            value: (params = {}) => dispatch(method, {
+                                params,
+                                data: element,
+                            }),
                         });
                     }
                 }
@@ -298,8 +298,8 @@ export default class {
                     if (!element.hasOwnProperty('$' + method)) {
                         Object.defineProperty(element, '$' + method, {
                             enumerable: false,
-                            value: () => dispatch(method, {
-                                params: element.$params,
+                            value: (params = {}) => dispatch(method, {
+                                params: {...element.$params, ...params},
                                 data: element,
                             }),
                         });
@@ -382,8 +382,8 @@ export default class {
          * @param {object} params - parameters to pass
          * @return {promise}
          */
-        show: ({commit, dispatch}, params = {}) => {
-            const url = this.#createQueryUrl({[this.#actionParameter]: 'show', ...params});
+        show: ({commit, dispatch}, { params = {}, data = {} } = {}) => {
+            const url = this.#createQueryUrl({[this.#actionParameter]: 'show', ...params}, data);
 
             return this.#httpQueue
                 .get(url)
@@ -401,7 +401,7 @@ export default class {
          * @return {promise}
          */
         mustShow: ({commit, dispatch}, params = {}) => {
-            const url = this.#createQueryUrl({[this.#actionParameter]: 'show', ...params});
+            const url = this.#createQueryUrl({[this.#actionParameter]: 'show', ...params}, data);
 
             return this.#httpQueue
                 .mustGet(url)
@@ -419,7 +419,7 @@ export default class {
          * @return {promise}
          */
         store: ({commit, dispatch}, { params = {}, data = {} } = {}) => {
-            const url = this.#createQueryUrl({[this.#actionParameter]: 'store', ...params});
+            const url = this.#createQueryUrl({[this.#actionParameter]: 'store', ...params}, data);
 
             let key = this.#debouncedStores.findIndex(({params: obj}) => obj === params);
 
@@ -464,15 +464,8 @@ export default class {
          * @return {promise}
          */
         update: ({commit, dispatch}, { params = {}, data = {} } = {}) => {
-            let key = params[this.#idProperty];
-            if (key === undefined) {
-                key = data[this.#idProperty];
-            }
-            const url = this.#createQueryUrl({
-                [this.#actionParameter]: 'update',
-                [this.#idProperty]: key,
-                ...params,
-            });
+            const key = this.#idProperty in params ? params[this.#idProperty] : data[this.#idProperty];
+            const url = this.#createQueryUrl({[this.#actionParameter]: 'update', ...params}, data);
 
             if (!this.#debouncedUpdates[key]) {
                 this.#debouncedUpdates[key] = Debounce((url, params) => {

@@ -31,6 +31,8 @@ export function spliceAll(array, element) {
 
 
 /**
+ * @deprecated - use pathToURL instead
+ *
  * Internal use. Populates a string using values from the params object, and
  * deletes used keys from the params object.
  *
