@@ -73,17 +73,25 @@ export default class {
      * @param {object} params - The object of parameters
      * @return {string}
      */
-    #createQueryUrl(params) {
+    #createQueryUrl(params, availableParams = {}) {
         const action = params[this.#actionParameter];
         let url = this.#baseUrl;
         if (typeof url === "function") {
-            url = url(params);
+            url = url(params, availableParams);
         }
 
         if (action === 'show' || action === 'index') {
             return url + this.#createQueryParams(params);
         } else {
             return url;
+        }
+    }
+
+    #parsePayload(payload) {
+        if ('params' in payload || 'data' in payload) {
+            return payload;
+        } else {
+            return { params: payload, data: {} };
         }
     }
 
@@ -289,7 +297,10 @@ export default class {
                     if (!element.hasOwnProperty('$' + method)) {
                         Object.defineProperty(element, '$' + method, {
                             enumerable: false,
-                            value: () => dispatch(method, element),
+                            value: (params = {}) => dispatch(method, {
+                                params: {...element.$params, ...params},
+                                data: element,
+                            }),
                         });
                     }
                 }
@@ -298,8 +309,8 @@ export default class {
                     if (!element.hasOwnProperty('$' + method)) {
                         Object.defineProperty(element, '$' + method, {
                             enumerable: false,
-                            value: () => dispatch(method, {
-                                params: element.$params,
+                            value: (params = {}) => dispatch(method, {
+                                params: {...element.$params, ...params},
                                 data: element,
                             }),
                         });
@@ -322,7 +333,10 @@ export default class {
                 if (!index.hasOwnProperty('$' + method)) {
                     Object.defineProperty(index, '$' + method, {
                         enumerable: false,
-                        value: (params) => dispatch(method, params),
+                        value: (params) => dispatch(method, {
+                            params: {...index.$params, ...params},
+                            data: index,
+                        }),
                     });
                 }
             }
@@ -331,7 +345,10 @@ export default class {
                 if (!index.hasOwnProperty('$' + method)) {
                     Object.defineProperty(index, '$' + method, {
                         enumerable: false,
-                        value: ({ params = {}, data = {} } = {}) => dispatch(method, { params, data }),
+                        value: ({ params = {}, data = {} } = {}) => dispatch(method, {
+                            params: {...index.$params, ...params},
+                            data,
+                        }),
                     });
                 }
             }
@@ -345,8 +362,9 @@ export default class {
          * @param {object} params - parameters to pass
          * @return {promise}
          */
-        mustIndex: ({commit, dispatch}, params = {}) => {
-            const url = this.#createQueryUrl({[this.#actionParameter]: 'index', ...params});
+        mustIndex: ({commit, dispatch}, payload = {}) => {
+            const {params, data} = this.#parsePayload(payload);
+            const url = this.#createQueryUrl({[this.#actionParameter]: 'index', ...params}, data);
 
             return this.#httpQueue
                 .mustGet(url)
@@ -359,7 +377,9 @@ export default class {
                 });
         },
 
-        refreshIndexes: ({state, commit, dispatch}) => {
+        refreshIndexes: ({state, commit, dispatch}, payload = {}) => {
+            const {params, data} = this.#parsePayload(payload);
+
             for (const url in state.indexes) {
                 this.#httpQueue
                     .mustGet(url)
@@ -382,8 +402,9 @@ export default class {
          * @param {object} params - parameters to pass
          * @return {promise}
          */
-        show: ({commit, dispatch}, params = {}) => {
-            const url = this.#createQueryUrl({[this.#actionParameter]: 'show', ...params});
+        show: ({commit, dispatch}, payload = {}) => {
+            const {params, data} = this.#parsePayload(payload);
+            const url = this.#createQueryUrl({[this.#actionParameter]: 'show', ...params}, data);
 
             return this.#httpQueue
                 .get(url)
@@ -400,8 +421,9 @@ export default class {
          * @param {object} params - parameters to pass
          * @return {promise}
          */
-        mustShow: ({commit, dispatch}, params = {}) => {
-            const url = this.#createQueryUrl({[this.#actionParameter]: 'show', ...params});
+        mustShow: ({commit, dispatch}, payload = {}) => {
+            const {params, data} = this.#parsePayload(payload);
+            const url = this.#createQueryUrl({[this.#actionParameter]: 'show', ...params}, data);
 
             return this.#httpQueue
                 .mustGet(url)
@@ -418,8 +440,9 @@ export default class {
          * @param {object} params - parameters to pass
          * @return {promise}
          */
-        store: ({commit, dispatch}, { params = {}, data = {} } = {}) => {
-            const url = this.#createQueryUrl({[this.#actionParameter]: 'store', ...params});
+        store: ({commit, dispatch}, payload = {}) => {
+            const {params, data} = this.#parsePayload(payload);
+            const url = this.#createQueryUrl({[this.#actionParameter]: 'store', ...params}, data);
 
             let key = this.#debouncedStores.findIndex(({params: obj}) => obj === params);
 
@@ -463,16 +486,20 @@ export default class {
          * @param {object} params - parameters to pass
          * @return {promise}
          */
-        update: ({commit, dispatch}, { params = {}, data = {} } = {}) => {
+        update: ({commit, dispatch}, payload = {}) => {
+            const {params, data} = this.#parsePayload(payload);
             let key = params[this.#idProperty];
             if (key === undefined) {
                 key = data[this.#idProperty];
             }
-            const url = this.#createQueryUrl({
-                [this.#actionParameter]: 'update',
-                [this.#idProperty]: key,
-                ...params,
-            });
+            const url = this.#createQueryUrl(
+                {
+                    [this.#actionParameter]: 'update',
+                    [this.#idProperty]: key,
+                    ...params,
+                },
+                data
+            );
 
             if (!this.#debouncedUpdates[key]) {
                 this.#debouncedUpdates[key] = Debounce((url, params) => {
@@ -496,8 +523,9 @@ export default class {
          * @param {object} params - parameters to pass
          * @return {promise}
          */
-        destroy: ({commit, dispatch}, params = {}) => {
-            const url = this.#createQueryUrl({[this.#actionParameter]: 'destroy', ...params});
+        destroy: ({commit, dispatch}, payload = {}) => {
+            const {params, data} = this.#parsePayload(payload);
+            const url = this.#createQueryUrl({[this.#actionParameter]: 'destroy', ...params}, data);
 
             return this.#httpQueue
                 .delete(url)
