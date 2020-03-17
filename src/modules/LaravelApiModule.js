@@ -27,15 +27,15 @@ export default class extends Module {
         const actionParameter = options.actionParameter || "action";
         const idProperty = options.idProperty || "id";
 
-        const buildUrl = params => {
+        const buildUrl = (params, availableParams) => {
             const action = params[actionParameter];
             delete params[actionParameter];
 
             if (['index', 'store'].includes(action)) {
-                return populateStr(baseUrl, params);
+                return populateStr(baseUrl, params, availableParams);
             }
 
-            return populateStr(`${baseUrl}{/${idProperty}}`, params);
+            return populateStr(`${baseUrl}{/${idProperty}}`, params, availableParams);
         };
 
         super(buildUrl, options);

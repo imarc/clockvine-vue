@@ -64,13 +64,15 @@ export function spliceAll(array, element) {
  * @param {string} str - string to populate
  * @param {object} params - parameters used.
  */
-export function populateStr(str, params = {}) {
+export function populateStr(str, params = {}, availableParams = {}) {
     const ternaryRegex = /\{([^}]+)\?([^}]*):([^}]+)\}/g;
     const paramRegex = /\{(\W*)(\w+)(\W*)\}/g;
     const usedParams = [];
     let newStr = str.replace(ternaryRegex, (m, key, truthy, falsy) => {
         if (key in params && params[key]) {
             usedParams.push(key);
+            return truthy || `{${key}}`;
+        } else if (key in availableParams && availableParams[key]) {
             return truthy || `{${key}}`;
         }
         return falsy;
@@ -80,6 +82,8 @@ export function populateStr(str, params = {}) {
         if (params[key]) {
             usedParams.push(key);
             return prefix + params[key] + suffix;
+        } else if (availableParams[key]) {
+            return prefix + availableParams[key] + suffix;
         }
 
         return '';
