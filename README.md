@@ -49,7 +49,37 @@ Clockvine provides constructors for Vuex modules, constructors for Vue component
 Release Notes
 -------------
 
+### 0.5.0
+
+* Major cleanup to how parameters are handled within URL generation; separation into params/availableParams
+* Add parseResponse configuration option
+
+### 0.4.4
+
+* Critical fix for debouncing functionality
+
+### 0.4.3
+
+* Critical fix for subsequent shows after updates
+
+### 0.4.2
+
+* Critical fix for PaginatedCollectionComponent
+
 ### 0.4.0
+
+This has backwards compatibility breaks with beta.1.
+
+* Change store and update actions to accept a payload of `{ params, data }`
+  instead of just `data`.
+* Make sure elements are decorated even when using `no-fetching`.
+* Add a new configuration option to ApiModules, `relatedElements`, to configure
+  decorating and updating vuex with elements that are embedded within a
+  response. For example, child elements.
+* Rename ElementsComponent to CollectionComponent and related. Old names are
+* deprecated but will continue to work for now.
+
+### 0.4.0-beta.2
 
 This has backwards compatibility breaks with beta.1.
 

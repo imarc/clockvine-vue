@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import HttpQueue from '../HttpQueue';
 import Debounce from 'debounce-promise';
-import { populateStr, safelyGet, spliceAll } from '../helpers/functions';
+import { safelyGet, spliceAll } from '../helpers/functions';
 
 /**
  * Base Vuex Module for that communicates with a JSON-based, REST API endpoint.
@@ -19,6 +19,7 @@ export default class {
      * @param {number} debounce         - Set a debounce in between events; default 0
      * @param {object} debounceOptions  - Override Debouce options; default {}
      * @param {object} relatedElements  - configure indexing related (nested) elements; default {}
+     * @param {function} parseResponse  - override default HTTP response object parsing; default ({data}) => data
      */
     constructor(
         baseUrl,
@@ -30,6 +31,7 @@ export default class {
             debounce = 0,
             debounceOptions = {},
             relatedElements = {},
+            parseResponse = ({data}) => data,
         } = {},
     ) {
         this.#actionParameter = actionParameter;
@@ -40,6 +42,7 @@ export default class {
         this.#debounce = debounce;
         this.#debounceOptions = debounceOptions;
         this.#relatedElements = relatedElements;
+        this.#parseResponse = parseResponse;
 
         this.actions.index = Debounce((...args) => this.#index(...args), this.#debounce, this.#debounceOptions);
     }
@@ -106,14 +109,15 @@ export default class {
 
         return this.#httpQueue
             .get(url)
+            .then(this.#parseResponse)
             .then(response => {
-                dispatch('decorate', { params, elements: response.data.data });
-                dispatch('decorateIndex', { params, index: response.data });
-                commit("setIndex", {url, data: response.data});
-                commit("setElement", response.data.data);
+                dispatch('decorate', { params, elements: response.data });
+                dispatch('decorateIndex', { params, index: response });
+                commit("setIndex", {url, data: response});
+                commit("setElement", response.data);
 
                 for (let module in this.#relatedElements) {
-                    response.data.data.forEach(element => {
+                    response.data.forEach(element => {
                         let { params = { ...params }, elements = [] } = this.#relatedElements[module](element);
                         dispatch(`${module}/decorate`, { params, elements }, { root: true });
                         commit(`${module}/setElement`, elements, { root: true });
@@ -368,11 +372,12 @@ export default class {
 
             return this.#httpQueue
                 .mustGet(url)
+                .then(this.#parseResponse)
                 .then(response => {
-                    dispatch("decorate", { params, elements: response.data.data });
-                    dispatch('decorateIndex', { params, index: response.data });
-                    commit("setIndex", {url, data: response.data});
-                    commit("setElement", response.data.data);
+                    dispatch("decorate", { params, elements: response.data });
+                    dispatch('decorateIndex', { params, index: response });
+                    commit("setIndex", {url, data: response});
+                    commit("setElement", response.data);
                     return response;
                 });
         },
@@ -383,14 +388,15 @@ export default class {
             for (const url in state.indexes) {
                 this.#httpQueue
                     .mustGet(url)
+                    .then(this.#parseResponse)
                     .then(response => {
-                        dispatch('decorateIndex', { index: response.data });
+                        dispatch('decorateIndex', { index: response });
 
                         let params = state.indexes[url].$params;
-                        dispatch("decorate", { params, elements: response.data.data });
+                        dispatch("decorate", { params, elements: response.data });
 
-                        commit("setIndex", {url, data: response.data});
-                        commit("setElement", response.data.data);
+                        commit("setIndex", {url, data: response});
+                        commit("setElement", response.data);
                         return response;
                     });
             }
@@ -408,9 +414,10 @@ export default class {
 
             return this.#httpQueue
                 .get(url)
+                .then(this.#parseResponse)
                 .then(response => {
-                    dispatch("decorate", { params, elements: response.data.data });
-                    commit("setElement", response.data.data);
+                    dispatch("decorate", { params, elements: response.data });
+                    commit("setElement", response.data);
                     return response;
                 });
         },
@@ -427,9 +434,10 @@ export default class {
 
             return this.#httpQueue
                 .mustGet(url)
+                .then(this.#parseResponse)
                 .then(response => {
-                    dispatch("decorate", { params, elements: response.data.data });
-                    commit("setElement", response.data.data);
+                    dispatch("decorate", { params, elements: response.data });
+                    commit("setElement", response.data);
                     return response;
                 });
         },
@@ -457,7 +465,8 @@ export default class {
                         status = 'Fetching';
                         return this.#httpQueue
                             .post(url, data)
-                            .then(response => dispatch("decorate", { params, elements: response.data.data }))
+                            .then(this.#parseResponse)
+                            .then(response => dispatch("decorate", { params, elements: response.data }))
                             .then(element => {
                                 status = 'Bouncing';
                                 commit('setElement', element);
@@ -505,10 +514,11 @@ export default class {
                 this.#debouncedUpdates[key] = Debounce((url, params) => {
                     return this.#httpQueue
                         .put(url, data)
+                        .then(this.#parseResponse)
                         .then(response => {
                             delete this.#debouncedUpdates[key];
-                            dispatch("decorate", { params, elements: response.data.data });
-                            commit("setElement", response.data.data);
+                            dispatch("decorate", { params, elements: response.data });
+                            commit("setElement", response.data);
                             return response;
                         });
                 }, this.#debounce, this.#debounceOptions);
@@ -529,8 +539,9 @@ export default class {
 
             return this.#httpQueue
                 .delete(url)
+                .then(this.#parseResponse)
                 .then(response => {
-                    commit("deleteElement", response.data.data);
+                    commit("deleteElement", response.data);
                     dispatch("refreshIndexes");
                     return response;
                 });

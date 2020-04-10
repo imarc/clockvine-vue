@@ -52,3 +52,18 @@ new LaravelApiModule('/api/users', {
 ```
 
 Along with `elements`, your closure's response object can also provide a `params` key that would contain parameters to be passed along for your related elements.
+
+
+### parseResponse (default `({data}) => data`)
+
+The `parseResponse` configuration option allows you to override the default parsing that Clockvine uses on all API responses with your own function. For example, let's say the API you want to connect to doesn't use a wrapper object with `data`/`meta` attributes:
+
+```javascript
+new LaravelApiModule('/api/users', {
+  parseResponse: response => response
+})
+```
+
+parseResponse is passed the HTTP response object and is expected to return an object with at least a `data` attribute. Technically you should be able to use this functionality to do even more wild things (like, handle non-JSON responses.)
+
+That said, the default API format that Clockvine uses (the wrapper object with `data`/`meta` attributes) is considered better practice, and is consistent many JSON APIs.

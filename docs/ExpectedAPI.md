@@ -5,9 +5,10 @@ Clockvine will work for you as long as your API is compatible with the following
 
 1. First, all responses are **expected to be JSON**.
 2. Second, all responses are expected to be a single object, with
-3. the primary content stored the `data` attribute of that object.
+3. the primary content stored the `data` attribute of that object, and
+4. an optional set of meta information in the `meta` attribute of that object.
 
-The last two requirements are inspired by JSONAPI, and primarily meant to allow for flexibility in the future.
+The requirements are inspired by JSONAPI, and primarily meant to allow for flexibility in the future.
 
 
 Expected Endpoints
@@ -40,6 +41,11 @@ For Element API, the default behavior is slightly different. It's assumed that `
 ### Custom Endpoints
 
 Clockvine also supports customizing the URL formats further, also the actions and methods can't be. The `baseUrl` argument to the ApiModule constructor can be a function, that is passed all parameters, as well as the action as the configurable `actionParameter` (default "action".)
+
+
+### Even More Custom Endpoints
+
+Beyond customizing the URL formats, You can also provide your own parsing function to Clockvine to handle other response formats. See the [parseResponse configuration option](ApiModule.md) when defining your ApiModule.
 
 
 ### Endpoint Actions
@@ -151,112 +157,3 @@ An update action is a `PUT` request to `baseUrl`/`primary key`, where `primary k
 #### DESTROY
 
 Finally, a destroy action is a `DELETE` request to `baseUrl`/`primary key`, where `primay key` is the primary key of the model you'd like to delete.
-
-
-
-
-Release Notes
--------------
-
-### 0.4.0-beta.2
-
-This has backwards compatibility breaks with beta.1.
-
-* Change store and update actions to accept a payload of `{ params, data }`
-  instead of just `data`.
-* Make sure elements are decorated even when using `no-fetching`.
-* Add a new configuration option to ApiModules, `relatedElements`, to configure
-  decorating and updating vuex with elements that are embedded within a
-  response. For example, child elements.
-* Rename ElementsComponent to CollectionComponent and related. Old names are
-* deprecated but will continue to work for now.
-
-### 0.4.0-beta.1
-
-* Add support for passing `params` to ElementComponent
-
-### 0.4.0-alpha.13
-
-This has backwards compatibility breaks with alpha.12.
-
-* Fix issue so that you can `import { ElementComponent} from 'clockvine-vue'`
-  now instead of having to import the whole object every time.
-* Add ElementComponent.with, ElementComponent.for, ElementsComponent.with, ElementsComponent.for
-* Add debouncing in between vuex events and API requests for store, update, and index calls
-* Add support a pseudo template string format to LaraevlApiModule (may change more)
-
-### 0.4.0-alpha.12
-
-* Fix bug with isLoading events
-
-### 0.4.0-alpha.11
-
-* Fix bug with .store promise
-
-### 0.4.0-alpha.10
-
-* Add require-params prop
-
-### 0.4.0-alpha.8
-
-This has backwards compatibility breaks with alpha.7.
-
-* Change implementation to decoate elements (objects) returned by clockvine with methods/properties. These include `$show`, `$mustShow`, `$update`, `$store`, `$destroy`, `$index`, `$mustIndex`, and `$exists` for different objects.
-* Add `syncsWithUrl` property to disable URL syncing for ElementsComponent.
-
-### 0.4.0-alpha.7
-
-* Add functionality to 'clear out' data using `newElement` after triggering a `store`
-
-### 0.4.0-alpha.6
-
-This has backwards compatibility breaks with alpha.5.
-
-* Rework Vue Components so they're no longer JS classes. This was necessary because there were assumptions made about how instances work that were wrong.
-* Make store/update/destroy work.
-
-### 0.4.0-alpha.5
-
-* Make it so that vuex module can be passed as a param
-
-### 0.4.0-alpha.4
-
-* Add LaravelApiModule
-* Bug fixes for LiveSearch and SyncsWithUrl
-
-### 0.4.0-alpha.3
-
-This has backwards compatibility breaks with alpha.2.
-
-* Bug fixes and adopting airbnb and vue style guide conventions
-* Rename nearly all classes and mixins for clarity and consistency
-
-
-### 0.4.0-alpha.2
-
-This has backwards compatibility breaks with 0.3.
-
-* Read only functionality is mostly complete; tested primarily with ElementApi.
-
-
-### 0.3
-
-This has backwards compatibility breaks with 0.2.
-
-* This version makes some significant internal architecture changes, switching
-  to storing indices (collections) by URL along with individual models within
-  Vuex.
-* It also changes how urlParams should be passed, and flatted more of these
-  params together.
-* Also significant, you can provide a function to override indexUrl in
-  vuexModules so that, based on action and params, you can use a different
-  endpoint.
-
-
-### 0.2
-
-You should at least use this version, because I don't think 0.1 even worked.
-
-#### 0.2.12
-
-* Added support for simple pagination. These changes are not available in 0.3 yet.
