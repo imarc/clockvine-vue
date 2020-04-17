@@ -19,7 +19,7 @@ export default class {
      * @param {number} debounce         - Set a debounce in between events; default 0
      * @param {object} debounceOptions  - Override Debouce options; default {}
      * @param {object} relatedElements  - configure indexing related (nested) elements; default {}
-     * @param {function} parseResponse  - override default HTTP response object parsing; default ({data}) => data
+     * @param {function} parseResponse  - override default HTTP response object parsing; default response => response
      */
     constructor(
         baseUrl,
@@ -31,7 +31,7 @@ export default class {
             debounce = 0,
             debounceOptions = {},
             relatedElements = {},
-            parseResponse = ({data}) => data,
+            parseResponse = response => response,
         } = {},
     ) {
         this.#actionParameter = actionParameter;
@@ -111,13 +111,13 @@ export default class {
             .get(url)
             .then(this.#parseResponse)
             .then(response => {
-                dispatch('decorate', { params, elements: response.data });
-                dispatch('decorateIndex', { params, index: response });
-                commit("setIndex", {url, data: response});
-                commit("setElement", response.data);
+                dispatch('decorate', { params, elements: response.data.data });
+                dispatch('decorateIndex', { params, index: response.data });
+                commit("setIndex", {url, data: response.data});
+                commit("setElement", response.data.data);
 
                 for (let module in this.#relatedElements) {
-                    response.data.forEach(element => {
+                    response.data.data.forEach(element => {
                         let { params = { ...params }, elements = [] } = this.#relatedElements[module](element);
                         dispatch(`${module}/decorate`, { params, elements }, { root: true });
                         commit(`${module}/setElement`, elements, { root: true });
@@ -166,6 +166,11 @@ export default class {
      * and/or updated whenever these elements are.
      */
     #relatedElements;
+
+    /**
+     * Used to parse HTTP responses into an object with data and optional meta attributes.
+     */
+    #parseResponse;
 
     /**
      * Parameter used for specifying pages. Default is "page".
@@ -374,10 +379,10 @@ export default class {
                 .mustGet(url)
                 .then(this.#parseResponse)
                 .then(response => {
-                    dispatch("decorate", { params, elements: response.data });
-                    dispatch('decorateIndex', { params, index: response });
-                    commit("setIndex", {url, data: response});
-                    commit("setElement", response.data);
+                    dispatch("decorate", { params, elements: response.data.data });
+                    dispatch('decorateIndex', { params, index: response.data });
+                    commit("setIndex", {url, data: response.data});
+                    commit("setElement", response.data.data);
                     return response;
                 });
         },
@@ -390,13 +395,13 @@ export default class {
                     .mustGet(url)
                     .then(this.#parseResponse)
                     .then(response => {
-                        dispatch('decorateIndex', { index: response });
+                        dispatch('decorateIndex', { index: response.data });
 
                         let params = state.indexes[url].$params;
-                        dispatch("decorate", { params, elements: response.data });
+                        dispatch("decorate", { params, elements: response.data.data });
 
-                        commit("setIndex", {url, data: response});
-                        commit("setElement", response.data);
+                        commit("setIndex", {url, data: response.data});
+                        commit("setElement", response.data.data);
                         return response;
                     });
             }
@@ -416,8 +421,8 @@ export default class {
                 .get(url)
                 .then(this.#parseResponse)
                 .then(response => {
-                    dispatch("decorate", { params, elements: response.data });
-                    commit("setElement", response.data);
+                    dispatch("decorate", { params, elements: response.data.data });
+                    commit("setElement", response.data.data);
                     return response;
                 });
         },
@@ -436,8 +441,8 @@ export default class {
                 .mustGet(url)
                 .then(this.#parseResponse)
                 .then(response => {
-                    dispatch("decorate", { params, elements: response.data });
-                    commit("setElement", response.data);
+                    dispatch("decorate", { params, elements: response.data.data });
+                    commit("setElement", response.data.data);
                     return response;
                 });
         },
@@ -466,7 +471,7 @@ export default class {
                         return this.#httpQueue
                             .post(url, data)
                             .then(this.#parseResponse)
-                            .then(response => dispatch("decorate", { params, elements: response.data }))
+                            .then(response => dispatch("decorate", { params, elements: response.data.data }))
                             .then(element => {
                                 status = 'Bouncing';
                                 commit('setElement', element);
@@ -541,7 +546,7 @@ export default class {
                 .delete(url)
                 .then(this.#parseResponse)
                 .then(response => {
-                    commit("deleteElement", response.data);
+                    commit("deleteElement", response.data.data);
                     dispatch("refreshIndexes");
                     return response;
                 });
