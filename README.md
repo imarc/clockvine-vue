@@ -49,6 +49,14 @@ Clockvine provides constructors for Vuex modules, constructors for Vue component
 Release Notes
 -------------
 
+### 0.7.0
+
+* Add support for parseResponse, a hook that can be used to make clockvine work with APIs that don't match the format clockvine expects.
+
+### 0.6.0
+
+* Don't use this version.
+
 ### 0.5.0
 
 * Major cleanup to how parameters are handled within URL generation; separation into params/availableParams
