@@ -12,6 +12,7 @@
         "vue-template-compiler": "^2.6.10"
     },
     "dependencies": {
+        "@babel/plugin-proposal-object-rest-spread": "^7.9.6",
         "axios": "^0.19.2",
         "debounce-promise": "^3.1.2",
         "lodash.clonedeep": "^4.5.0",
@@ -82,7 +83,8 @@
                     "loose": false
                 }
             ],
-            "@babel/plugin-proposal-private-methods"
+            "@babel/plugin-proposal-private-methods",
+            "@babel/plugin-proposal-object-rest-spread"
         ]
     }
 }
