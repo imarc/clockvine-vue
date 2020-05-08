@@ -117,7 +117,7 @@ export default {
 
         store() {
             this.$emit('isLoading', this.isLoading = true);
-            this.element.$store()
+            return this.element.$store()
                 .then(() => {
                     this.$emit('isLoading', this.isLoading = false);
                 }).then(() => this.$store.dispatch(`${this.vuexModule}/decorate`, {
@@ -130,7 +130,7 @@ export default {
 
         update() {
             this.$emit('isLoading', this.isLoading = true);
-            this.element.$update()
+            return this.element.$update()
                 .then(() => {
                     this.$emit('isLoading', this.isLoading = false);
                 });
@@ -138,7 +138,7 @@ export default {
 
         destroy() {
             this.$emit('isLoading', this.isLoading = true);
-            this.element.$destroy()
+            return this.element.$destroy()
                 .then(() => {
                     this.$emit('isLoading', this.isLoading = false);
                 });
