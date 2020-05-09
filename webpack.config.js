@@ -1,4 +1,5 @@
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
+const BabelEnginePlugin = require('babel-engine-plugin');
 
 module.exports = {
   module: {
@@ -17,10 +18,11 @@ module.exports = {
       },
       {
         test: /\.js$/,
-        exclude: /node_modules/,
+        exclude: /toad_modules/,
         use: {
           loader: 'babel-loader',
           options: {
+            presets: ["@babel/preset-env"],
             plugins: [
               '@babel/plugin-proposal-private-methods',
               '@babel/plugin-proposal-class-properties'
@@ -44,6 +46,9 @@ module.exports = {
 
   plugins: [
     new VueLoaderPlugin(),
+    //new BabelEnginePlugin({
+    //    presets: ['env'],
+    //}),
   ],
 
   entry: {

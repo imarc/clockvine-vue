@@ -1,6 +1,6 @@
 {
     "name": "clockvine-vue",
-    "version": "0.4.6",
+    "version": "0.4.7",
     "description": "",
     "author": "Kevin Hamer [kh] <kevin@imarc.com>",
     "license": "Apache-2.0",
@@ -13,7 +13,10 @@
     },
     "dependencies": {
         "@babel/plugin-proposal-object-rest-spread": "^7.9.6",
+        "@babel/plugin-transform-runtime": "^7.9.6",
         "axios": "^0.19.2",
+        "babel-engine-plugin": "^0.3.0",
+        "babel-preset-env": "^1.7.0",
         "debounce-promise": "^3.1.2",
         "lodash.clonedeep": "^4.5.0",
         "lodash.debounce": "^4.0.8",
@@ -84,7 +87,12 @@
                 }
             ],
             "@babel/plugin-proposal-private-methods",
-            "@babel/plugin-proposal-object-rest-spread"
+            "@babel/plugin-proposal-object-rest-spread",
+            "@babel/plugin-transform-runtime"
         ]
-    }
+    },
+    "browserslist": [
+        "defaults",
+        "IE 11"
+    ]
 }
