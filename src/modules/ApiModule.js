@@ -524,6 +524,7 @@ export default class {
                             delete this.#debouncedUpdates[key];
                             dispatch("decorate", { params, elements: response.data });
                             commit("setElement", response.data);
+                            dispatch("refreshIndexes");
                             return response;
                         });
                 }, this.#debounce, this.#debounceOptions);
