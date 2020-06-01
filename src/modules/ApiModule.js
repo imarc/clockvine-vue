@@ -522,8 +522,8 @@ export default class {
                         .then(this.#parseResponse)
                         .then(response => {
                             delete this.#debouncedUpdates[key];
-                            dispatch("decorate", { params, elements: response.data });
-                            commit("setElement", response.data);
+                            dispatch("decorate", { params, elements: response.data.data });
+                            commit("setElement", response.data.data);
                             dispatch("refreshIndexes");
                             return response;
                         });
