@@ -32,6 +32,7 @@ export default class {
             debounceOptions = {},
             relatedElements = {},
             parseResponse = response => response,
+            updateStrategy = 'replace',
         } = {},
     ) {
         this.#actionParameter = actionParameter;
@@ -43,6 +44,7 @@ export default class {
         this.#debounceOptions = debounceOptions;
         this.#relatedElements = relatedElements;
         this.#parseResponse = parseResponse;
+        this.#updateStrategy = updateStrategy;
 
         this.actions.index = Debounce((...args) => this.#index(...args), this.#debounce, this.#debounceOptions);
     }
@@ -173,6 +175,11 @@ export default class {
     #parseResponse;
 
     /**
+     * Used to define the strategy for updating existing elements.
+     */
+    #updateStrategy;
+
+    /**
      * Parameter used for specifying pages. Default is "page".
      */
     #pageParameter;
@@ -245,6 +252,59 @@ export default class {
                         element[this.#idProperty],
                         element
                     );
+                }
+            });
+
+            return elements;
+        },
+
+        /**
+         * updateElement sets or updates one or more elements within the store.
+         * It respects the updateStrategy configured for this module.
+         *
+         * @param {object|array} data - element(s) to set or update in the
+         *     module's store.
+         */
+        updateElement: (state, data = []) => {
+            const elements = Array.isArray(data) ? data : [data];
+
+            elements.forEach(element => {
+                console.log('updateElement', element, this.#updateStrategy);
+                if (element[this.#idProperty] != undefined) {
+
+                    if (typeof(this.#updateStrategy) === 'function') {
+                        this.#updateStrategy(state.elements, element, Vue);
+
+                    } else if (this.#updateStrategy === 'replace') {
+                        console.log('replacing');
+                        Vue.set(
+                            state.elements,
+                            element[this.#idProperty],
+                            element
+                        );
+
+                    } else if (this.#updateStrategy === 'merge') {
+                        if (
+                            element[this.#idProperty] in state.elements
+                            && Object.keys(state.elements[element[this.#idProperty]])
+                        ) {
+                            console.log('merging');
+                            for (const key in element) {
+                                Vue.set(
+                                    state.elements[element[this.#idProperty]],
+                                    key,
+                                    element[key]
+                                );
+                            }
+                        } else {
+                            console.log('actually replacing');
+                            Vue.set(
+                                state.elements,
+                                element[this.#idProperty],
+                                element
+                            );
+                        }
+                    }
                 }
             });
 
@@ -401,7 +461,7 @@ export default class {
                         dispatch("decorate", { params, elements: response.data.data });
 
                         commit("setIndex", {url, data: response.data});
-                        commit("setElement", response.data.data);
+                        commit("updateElement", response.data.data);
                         return response;
                     });
             }
@@ -422,7 +482,7 @@ export default class {
                 .then(this.#parseResponse)
                 .then(response => {
                     dispatch("decorate", { params, elements: response.data.data });
-                    commit("setElement", response.data.data);
+                    commit("updateElement", response.data.data);
                     return response;
                 });
         },
@@ -523,7 +583,7 @@ export default class {
                         .then(response => {
                             delete this.#debouncedUpdates[key];
                             dispatch("decorate", { params, elements: response.data.data });
-                            commit("setElement", response.data.data);
+                            commit("updateElement", response.data.data);
                             dispatch("refreshIndexes");
                             return response;
                         });
