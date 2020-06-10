@@ -392,7 +392,7 @@ export default class {
 
             for (const url in state.indexes) {
                 this.#httpQueue
-                    .mustGet(url)
+                    .get(url)
                     .then(this.#parseResponse)
                     .then(response => {
                         dispatch('decorateIndex', { index: response.data });
