@@ -16,8 +16,8 @@ module.exports = {
         ],
       },
       {
-        test: /\.js$/,
-        exclude: /node_modules/,
+        test: /\.jsx?$/,
+        //exclude: /[\\/]node_modules[\\/](?!(p-queue)[\\/])/,
         use: {
           loader: 'babel-loader',
           options: {
