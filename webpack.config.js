@@ -1,6 +1,8 @@
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
+const EsmWebpackPlugin = require('@purtuga/esm-webpack-plugin');
 
 module.exports = {
+  devtool: false,
   module: {
     rules: [
       {
@@ -44,16 +46,15 @@ module.exports = {
 
   plugins: [
     new VueLoaderPlugin(),
+    new EsmWebpackPlugin(),
   ],
 
-  entry: {
-    Clockvine: './src/Clockvine.js',
-  },
+  entry: './src/Clockvine.js',
 
   output: {
-    filename: '[name].js',
-    library: 'Clockvine',
-    libraryTarget: 'umd',
+    filename: 'Clockvine.js',
+    library: 'LIB',
+    libraryTarget: 'var',
     path: __dirname + '/lib',
   },
 };
