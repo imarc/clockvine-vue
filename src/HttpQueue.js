@@ -1,5 +1,5 @@
-import Axios from "axios";
-import PQueue from "p-queue";
+import Axios from 'axios'
+import PQueue from 'p-queue'
 
 /**
  * HttpQueue provides a queue for making HTTP requests.
@@ -17,8 +17,8 @@ export default class HttpQueue {
      *         An object of options passed to PQueue.
      * }
      */
-    constructor({ pqueueOptions = {} } = {}) {
-        this.#queue = new PQueue(pqueueOptions);
+    constructor ({ pqueueOptions = {} } = {}) {
+      this.#queue = new PQueue(pqueueOptions)
     }
 
     /**
@@ -28,12 +28,12 @@ export default class HttpQueue {
      * @param {String} url
      * @return {Promise}
      */
-    get(url) {
-        if (this.#urls[url]) {
-            return this.#urls[url];
-        }
+    get (url) {
+      if (this.#urls[url]) {
+        return this.#urls[url]
+      }
 
-        return this.mustGet(url);
+      return this.mustGet(url)
     }
 
     /**
@@ -44,8 +44,9 @@ export default class HttpQueue {
      * @param {String} url
      * @return {Promise}
      */
-    mustGet(url) {
-        return this.#urls[url] = this.#queue.add(() => Axios.get(url));
+    mustGet (url) {
+      this.#urls[url] = this.#queue.add(() => Axios.get(url))
+      return this.#urls[url]
     }
 
     /**
@@ -56,8 +57,8 @@ export default class HttpQueue {
      * @param {Object} params
      * @return {Promise}
      */
-    post(url, params) {
-        return this.#queue.add(() => Axios.post(url, params));
+    post (url, params) {
+      return this.#queue.add(() => Axios.post(url, params))
     }
 
     /**
@@ -68,8 +69,8 @@ export default class HttpQueue {
      * @param {Object} params
      * @return {Promise}
      */
-    put(url, params) {
-        return this.#queue.add(() => Axios.put(url, params));
+    put (url, params) {
+      return this.#queue.add(() => Axios.put(url, params))
     }
 
     /**
@@ -80,7 +81,7 @@ export default class HttpQueue {
      * @param {Object} params
      * @return {Promise}
      */
-    delete(url, params) {
-        return this.#queue.add(() => Axios.delete(url, params));
+    delete (url, params) {
+      return this.#queue.add(() => Axios.delete(url, params))
     }
 }

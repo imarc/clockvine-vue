@@ -1,14 +1,13 @@
-import Vue from 'vue';
-import HttpQueue from '../HttpQueue';
-import Debounce from 'debounce-promise';
-import { safelyGet, spliceAll } from '../helpers/functions';
+import Vue from 'vue'
+import HttpQueue from '../HttpQueue'
+import Debounce from 'debounce-promise'
+import { safelyGet, spliceAll } from '../helpers/functions'
 
 /**
  * Base Vuex Module for that communicates with a JSON-based, REST API endpoint.
  */
 export default class {
-
-    /**
+  /**
      * Constructor.
      *
      * @param {string|function} baseUrl - String or function for the baseURL
@@ -21,31 +20,31 @@ export default class {
      * @param {object} relatedElements  - configure indexing related (nested) elements; default {}
      * @param {function} parseResponse  - override default HTTP response object parsing; default response => response
      */
-    constructor(
-        baseUrl,
-        {
-            idProperty = "id",
-            pageParameter = "page",
-            pqueueOptions = {concurrency: 2},
-            actionParameter = "action",
-            debounce = 0,
-            debounceOptions = {},
-            relatedElements = {},
-            parseResponse = response => response,
-        } = {},
-    ) {
-        this.#actionParameter = actionParameter;
-        this.#baseUrl = baseUrl;
-        this.#httpQueue = new HttpQueue({pqueueOptions});
-        this.#idProperty = idProperty;
-        this.#pageParameter = pageParameter;
-        this.#debounce = debounce;
-        this.#debounceOptions = debounceOptions;
-        this.#relatedElements = relatedElements;
-        this.#parseResponse = parseResponse;
+  constructor (
+    baseUrl,
+    {
+      idProperty = 'id',
+      pageParameter = 'page',
+      pqueueOptions = { concurrency: 2 },
+      actionParameter = 'action',
+      debounce = 0,
+      debounceOptions = {},
+      relatedElements = {},
+      parseResponse = response => response
+    } = {}
+  ) {
+    this.#actionParameter = actionParameter
+    this.#baseUrl = baseUrl
+    this.#httpQueue = new HttpQueue({ pqueueOptions })
+    this.#idProperty = idProperty
+    this.#pageParameter = pageParameter
+    this.#debounce = debounce
+    this.#debounceOptions = debounceOptions
+    this.#relatedElements = relatedElements
+    this.#parseResponse = parseResponse
 
-        this.actions.index = Debounce((...args) => this.#index(...args), this.#debounce, this.#debounceOptions);
-    }
+    this.actions.index = Debounce((...args) => this.#index(...args), this.#debounce, this.#debounceOptions)
+  }
 
     /**
      * Internal use. Builds a quey string from an object of params.
@@ -183,374 +182,367 @@ export default class {
     namespaced = true;
 
     state = {
-        /**
+      /**
          * Indexes stores URLs that reference index requests with arrays inside of
          * them that reference the individual element objects.
          */
-        indexes: {},
+      indexes: {},
 
-        /**
+      /**
          * Elements stores references to the elements themselves, keyed by their
          * idProperty.
          */
-        elements: {},
+      elements: {}
     };
 
-
     getters = {
-        /**
+      /**
          * Elements is a getter than returns a function to get an array of elements
          * for a URL.
          */
-        elements: state => url => safelyGet(state.indexes, [url, 'data']),
+      elements: state => url => safelyGet(state.indexes, [url, 'data']),
 
-        /**
+      /**
          * Meta is a getter that returns a function to get meta information for a
          * URL.
          */
-        meta: state => url => safelyGet(state.indexes, [url, 'meta']),
+      meta: state => url => safelyGet(state.indexes, [url, 'meta']),
 
-        /**
+      /**
          * Element is a getter that returns a function get a single element by its
          * idProperty.
          */
-        element: state => id => state.elements[id],
+      element: state => id => state.elements[id]
     };
 
-
     mutations = {
-        /**
+      /**
          * setIndex sets an index within the module's store.
          */
-        setIndex: (state, {url, data}) => {
-            state.indexes = { ...state.indexes, [url]: data };
+      setIndex: (state, { url, data }) => {
+        state.indexes = { ...state.indexes, [url]: data }
 
-            return state.indexes[url];
-        },
+        return state.indexes[url]
+      },
 
-        /**
+      /**
          * setElement sets one or more elements within the store. If data is an
          * array, it will act as if setElement was called for each element within
          * the array.
          *
          * @param {object|array} data - element(s) to add to the module's store.
          */
-        setElement: (state, data = []) => {
-            const elements = Array.isArray(data) ? data : [data];
+      setElement: (state, data = []) => {
+        const elements = Array.isArray(data) ? data : [data]
 
-            elements.forEach(element => {
-                if (element[this.#idProperty] != undefined) {
-                    Vue.set(
-                        state.elements,
-                        element[this.#idProperty],
-                        element
-                    );
-                }
-            });
+        elements.forEach(element => {
+          if (element[this.#idProperty] !== undefined) {
+            Vue.set(
+              state.elements,
+              element[this.#idProperty],
+              element
+            )
+          }
+        })
 
-            return elements;
-        },
+        return elements
+      },
 
-        /**
+      /**
          * deleteElement removes one or more elements from the store. If data is an
          * array, it will act as if deleteElement was called for each object within
          * the array.
          *
          * @param {object|array} data - element(s)to remove from the module's store.
          */
-        deleteElement: (state, {data = []}) => {
-            const elements = Array.isArray(data) ? data : [data];
+      deleteElement: (state, { data = [] }) => {
+        const elements = Array.isArray(data) ? data : [data]
 
-            elements.forEach(element => {
-                if (element[this.#idProperty] != undefined) {
-                    Vue.delete(
-                        state.elements,
-                        element[this.#idProperty]
-                    );
+        elements.forEach(element => {
+          if (element[this.#idProperty] !== undefined) {
+            Vue.delete(
+              state.elements,
+              element[this.#idProperty]
+            )
 
-                    for (let index of Object.values(state.indexes)) {
-                        spliceAll(index.data, element);
-                    }
-                }
-            });
+            for (const index of Object.values(state.indexes)) {
+              spliceAll(index.data, element)
+            }
+          }
+        })
 
-            return elements;
-        },
+        return elements
+      }
     };
 
-
     actions = {
-        decorate: ({dispatch, state}, { elements = [], params = {} } = {}) => {
-            const ensureArray = Array.isArray(elements) ? elements : [elements];
-            ensureArray.forEach(element => {
+      decorate: ({ dispatch, state }, { elements = [], params = {} } = {}) => {
+        const ensureArray = Array.isArray(elements) ? elements : [elements]
+        ensureArray.forEach(element => {
+          if (typeof element === 'function') {
+            element = element()
+          }
 
-                if (typeof element === 'function') {
-                    element = element();
-                }
+          if (!Object.prototype.hasOwnProperty.call(element, '$params')) {
+            Object.defineProperty(element, '$params', {
+              enumerable: false,
+              get: () => params
+            })
+          }
 
-                if (!element.hasOwnProperty('$params')) {
-                    Object.defineProperty(element, '$params', {
-                        enumerable: false,
-                        get: () => params,
-                    });
-                }
+          if (!Object.prototype.hasOwnProperty.call(element, '$exists')) {
+            Object.defineProperty(element, '$exists', {
+              enumerable: false,
+              get: () => element[this.#idProperty] in state.elements
+            })
+          }
 
-                if (!element.hasOwnProperty('$exists')) {
-                    Object.defineProperty(element, '$exists', {
-                        enumerable: false,
-                        get: () => element[this.#idProperty] in state.elements,
-                    });
-                }
-
-                for (const method of ['show', 'mustShow', 'destroy']) {
-                    if (!element.hasOwnProperty('$' + method)) {
-                        Object.defineProperty(element, '$' + method, {
-                            enumerable: false,
-                            value: (params = {}) => dispatch(method, {
-                                params: {...element.$params, ...params},
-                                data: element,
-                            }),
-                        });
-                    }
-                }
-
-                for (const method of ['update', 'store']) {
-                    if (!element.hasOwnProperty('$' + method)) {
-                        Object.defineProperty(element, '$' + method, {
-                            enumerable: false,
-                            value: (params = {}) => dispatch(method, {
-                                params: {...element.$params, ...params},
-                                data: element,
-                            }),
-                        });
-                    }
-                }
-            });
-
-            return elements;
-        },
-
-        decorateIndex: ({dispatch}, { params = {}, index = [] }) => {
-            if (!index.hasOwnProperty('$params')) {
-                Object.defineProperty(index, '$params', {
-                    enumerable: false,
-                    get: () => params,
-                });
+          for (const method of ['show', 'mustShow', 'destroy']) {
+            if (!Object.prototype.hasOwnProperty.call(element, '$' + method)) {
+              Object.defineProperty(element, '$' + method, {
+                enumerable: false,
+                value: (params = {}) => dispatch(method, {
+                  params: { ...element.$params, ...params },
+                  data: element
+                })
+              })
             }
+          }
 
-            for (const method of ['index', 'mustIndex', 'show', 'mustShow', 'destroy']) {
-                if (!index.hasOwnProperty('$' + method)) {
-                    Object.defineProperty(index, '$' + method, {
-                        enumerable: false,
-                        value: (params) => dispatch(method, {
-                            params: {...index.$params, ...params},
-                            data: index,
-                        }),
-                    });
-                }
+          for (const method of ['update', 'store']) {
+            if (!Object.prototype.hasOwnProperty.call(element, '$' + method)) {
+              Object.defineProperty(element, '$' + method, {
+                enumerable: false,
+                value: (params = {}) => dispatch(method, {
+                  params: { ...element.$params, ...params },
+                  data: element
+                })
+              })
             }
+          }
+        })
 
-            for (const method of ['update', 'store']) {
-                if (!index.hasOwnProperty('$' + method)) {
-                    Object.defineProperty(index, '$' + method, {
-                        enumerable: false,
-                        value: ({ params = {}, data = {} } = {}) => dispatch(method, {
-                            params: {...index.$params, ...params},
-                            data,
-                        }),
-                    });
-                }
-            }
+        return elements
+      },
 
-            return index;
-        },
+      decorateIndex: ({ dispatch }, { params = {}, index = [] }) => {
+        if (!Object.prototype.hasOwnProperty.call(index, '$params')) {
+          Object.defineProperty(index, '$params', {
+            enumerable: false,
+            get: () => params
+          })
+        }
 
-        /**
+        for (const method of ['index', 'mustIndex', 'show', 'mustShow', 'destroy']) {
+          if (!Object.prototype.hasOwnProperty.call(index, '$' + method)) {
+            Object.defineProperty(index, '$' + method, {
+              enumerable: false,
+              value: (params) => dispatch(method, {
+                params: { ...index.$params, ...params },
+                data: index
+              })
+            })
+          }
+        }
+
+        for (const method of ['update', 'store']) {
+          if (!Object.prototype.hasOwnProperty.call(index, '$' + method)) {
+            Object.defineProperty(index, '$' + method, {
+              enumerable: false,
+              value: ({ params = {}, data = {} } = {}) => dispatch(method, {
+                params: { ...index.$params, ...params },
+                data
+              })
+            })
+          }
+        }
+
+        return index
+      },
+
+      /**
          * Gets an index of elements. Always bypasses the cache.
          *
          * @param {object} params - parameters to pass
          * @return {promise}
          */
-        mustIndex: ({commit, dispatch}, payload = {}) => {
-            const {params, data} = this.#parsePayload(payload);
-            const url = this.#createQueryUrl({[this.#actionParameter]: 'index', ...params}, data);
+      mustIndex: ({ commit, dispatch }, payload = {}) => {
+        const { params, data } = this.#parsePayload(payload)
+        const url = this.#createQueryUrl({ [this.#actionParameter]: 'index', ...params }, data)
 
-            return this.#httpQueue
-                .mustGet(url)
-                .then(this.#parseResponse)
-                .then(response => {
-                    dispatch("decorate", { params, elements: response.data.data });
-                    dispatch('decorateIndex', { params, index: response.data });
-                    commit("setIndex", {url, data: response.data});
-                    commit("setElement", response.data.data);
-                    return response;
-                });
-        },
+        return this.#httpQueue
+          .mustGet(url)
+          .then(this.#parseResponse)
+          .then(response => {
+            dispatch('decorate', { params, elements: response.data.data })
+            dispatch('decorateIndex', { params, index: response.data })
+            commit('setIndex', { url, data: response.data })
+            commit('setElement', response.data.data)
+            return response
+          })
+      },
 
-        refreshIndexes: ({state, commit, dispatch}, payload = {}) => {
-            const {params, data} = this.#parsePayload(payload);
+      refreshIndexes: ({ state, commit, dispatch }, payload = {}) => {
+        for (const url in state.indexes) {
+          this.#httpQueue
+            .get(url)
+            .then(this.#parseResponse)
+            .then(response => {
+              dispatch('decorateIndex', { index: response.data })
 
-            for (const url in state.indexes) {
-                this.#httpQueue
-                    .get(url)
-                    .then(this.#parseResponse)
-                    .then(response => {
-                        dispatch('decorateIndex', { index: response.data });
+              const params = state.indexes[url].$params
+              dispatch('decorate', { params, elements: response.data.data })
 
-                        let params = state.indexes[url].$params;
-                        dispatch("decorate", { params, elements: response.data.data });
+              commit('setIndex', { url, data: response.data })
+              commit('setElement', response.data.data)
+              return response
+            })
+        }
+      },
 
-                        commit("setIndex", {url, data: response.data});
-                        commit("setElement", response.data.data);
-                        return response;
-                    });
-            }
-        },
-
-        /**
+      /**
          * Gets a single element. If previously fetched, uses the cached value.
          *
          * @param {object} params - parameters to pass
          * @return {promise}
          */
-        show: ({commit, dispatch}, payload = {}) => {
-            const {params, data} = this.#parsePayload(payload);
-            const url = this.#createQueryUrl({[this.#actionParameter]: 'show', ...params}, data);
+      show: ({ commit, dispatch }, payload = {}) => {
+        const { params, data } = this.#parsePayload(payload)
+        const url = this.#createQueryUrl({ [this.#actionParameter]: 'show', ...params }, data)
 
-            return this.#httpQueue
-                .get(url)
-                .then(this.#parseResponse)
-                .then(response => {
-                    dispatch("decorate", { params, elements: response.data.data });
-                    commit("setElement", response.data.data);
-                    return response;
-                });
-        },
+        return this.#httpQueue
+          .get(url)
+          .then(this.#parseResponse)
+          .then(response => {
+            dispatch('decorate', { params, elements: response.data.data })
+            commit('setElement', response.data.data)
+            return response
+          })
+      },
 
-        /**
+      /**
          * Gets a single element. Always bypasses the cache.
          *
          * @param {object} params - parameters to pass
          * @return {promise}
          */
-        mustShow: ({commit, dispatch}, payload = {}) => {
-            const {params, data} = this.#parsePayload(payload);
-            const url = this.#createQueryUrl({[this.#actionParameter]: 'show', ...params}, data);
+      mustShow: ({ commit, dispatch }, payload = {}) => {
+        const { params, data } = this.#parsePayload(payload)
+        const url = this.#createQueryUrl({ [this.#actionParameter]: 'show', ...params }, data)
 
-            return this.#httpQueue
-                .mustGet(url)
-                .then(this.#parseResponse)
-                .then(response => {
-                    dispatch("decorate", { params, elements: response.data.data });
-                    commit("setElement", response.data.data);
-                    return response;
-                });
-        },
+        return this.#httpQueue
+          .mustGet(url)
+          .then(this.#parseResponse)
+          .then(response => {
+            dispatch('decorate', { params, elements: response.data.data })
+            commit('setElement', response.data.data)
+            return response
+          })
+      },
 
-        /**
+      /**
          * Stores a new element.
          *
          * @param {object} params - parameters to pass
          * @return {promise}
          */
-        store: ({commit, dispatch}, payload = {}) => {
-            const {params, data} = this.#parsePayload(payload);
-            const url = this.#createQueryUrl({[this.#actionParameter]: 'store', ...params}, data);
+      store: ({ commit, dispatch }, payload = {}) => {
+        const { params, data } = this.#parsePayload(payload)
+        const url = this.#createQueryUrl({ [this.#actionParameter]: 'store', ...params }, data)
 
-            let key = this.#debouncedStores.findIndex(({params: obj}) => obj === params);
+        let key = this.#debouncedStores.findIndex(({ params: obj }) => obj === params)
 
-            if (key === -1) {
-                let status = 'Bouncing';
-                let backlog = [];
-                key += this.#debouncedStores.push({
-                    params,
-                    status,
-                    backlog,
-                    promise: Debounce((url, params) => {
-                        status = 'Fetching';
-                        return this.#httpQueue
-                            .post(url, data)
-                            .then(this.#parseResponse)
-                            .then(response => dispatch("decorate", { params, elements: response.data.data }))
-                            .then(element => {
-                                status = 'Bouncing';
-                                commit('setElement', element);
-                                dispatch("refreshIndexes");
+        if (key === -1) {
+          let status = 'Bouncing'
+          const backlog = []
+          key += this.#debouncedStores.push({
+            params,
+            status,
+            backlog,
+            promise: Debounce((url, params) => {
+              status = 'Fetching'
+              return this.#httpQueue
+                .post(url, data)
+                .then(this.#parseResponse)
+                .then(response => dispatch('decorate', { params, elements: response.data.data }))
+                .then(element => {
+                  status = 'Bouncing'
+                  commit('setElement', element)
+                  dispatch('refreshIndexes')
 
-                                return element;
-                            });
-                    }, this.#debounce, this.#debounceOptions)
-                });
+                  return element
+                })
+            }, this.#debounce, this.#debounceOptions)
+          })
+        } else {
+          if (this.#debouncedStores[key].status === 'Fetching') {
+            return this.#debouncedStores[key].promise.then((...args) => {
+              // TOOD review
+              throw new Error('Should not get here', args)
+            })
+          }
+        }
 
-            } else {
-                if (this.#debouncedStores[key].status === 'Fetching') {
-                    return this.#debouncedStores[key].promise.then((...args) => {
-                        // TOOD review
-                        throw new Error('Should not get here', args);
-                    });
-                }
-            }
+        return this.#debouncedStores[key].promise(url, params)
+      },
 
-            return this.#debouncedStores[key].promise(url, params);
-        },
-
-        /**
+      /**
          * Updates an existing element.
          *
          * @param {object} params - parameters to pass
          * @return {promise}
          */
-        update: ({commit, dispatch}, payload = {}) => {
-            const {params, data} = this.#parsePayload(payload);
-            let key = params[this.#idProperty];
-            if (key === undefined) {
-                key = data[this.#idProperty];
-            }
-            const url = this.#createQueryUrl(
-                {
-                    [this.#actionParameter]: 'update',
-                    [this.#idProperty]: key,
-                    ...params,
-                },
-                data
-            );
+      update: ({ commit, dispatch }, payload = {}) => {
+        const { params, data } = this.#parsePayload(payload)
+        let key = params[this.#idProperty]
+        if (key === undefined) {
+          key = data[this.#idProperty]
+        }
+        const url = this.#createQueryUrl(
+          {
+            [this.#actionParameter]: 'update',
+            [this.#idProperty]: key,
+            ...params
+          },
+          data
+        )
 
-            if (!this.#debouncedUpdates[key]) {
-                this.#debouncedUpdates[key] = Debounce((url, params) => {
-                    return this.#httpQueue
-                        .put(url, data)
-                        .then(this.#parseResponse)
-                        .then(response => {
-                            delete this.#debouncedUpdates[key];
-                            dispatch("decorate", { params, elements: response.data.data });
-                            commit("setElement", response.data.data);
-                            dispatch("refreshIndexes");
-                            return response;
-                        });
-                }, this.#debounce, this.#debounceOptions);
-            }
+        if (!this.#debouncedUpdates[key]) {
+          this.#debouncedUpdates[key] = Debounce((url, params) => {
+            return this.#httpQueue
+              .put(url, data)
+              .then(this.#parseResponse)
+              .then(response => {
+                delete this.#debouncedUpdates[key]
+                dispatch('decorate', { params, elements: response.data.data })
+                commit('setElement', response.data.data)
+                dispatch('refreshIndexes')
+                return response
+              })
+          }, this.#debounce, this.#debounceOptions)
+        }
 
-            return this.#debouncedUpdates[key](url, params);
-        },
+        return this.#debouncedUpdates[key](url, params)
+      },
 
-        /**
+      /**
          * Destroys (deletes) an existing element.
          *
          * @param {object} params - parameters to pass
          * @return {promise}
          */
-        destroy: ({commit, dispatch}, payload = {}) => {
-            const {params, data} = this.#parsePayload(payload);
-            const url = this.#createQueryUrl({[this.#actionParameter]: 'destroy', ...params}, data);
+      destroy: ({ commit, dispatch }, payload = {}) => {
+        const { params, data } = this.#parsePayload(payload)
+        const url = this.#createQueryUrl({ [this.#actionParameter]: 'destroy', ...params }, data)
 
-            return this.#httpQueue
-                .delete(url)
-                .then(this.#parseResponse)
-                .then(response => {
-                    commit("deleteElement", response.data.data);
-                    dispatch("refreshIndexes");
-                    return response;
-                });
-        },
+        return this.#httpQueue
+          .delete(url)
+          .then(this.#parseResponse)
+          .then(response => {
+            commit('deleteElement', response.data.data)
+            dispatch('refreshIndexes')
+            return response
+          })
+      }
     };
 }

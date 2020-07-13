@@ -7,10 +7,9 @@
  * @param {array} path - Array of keys
  * @return {mixed}
  */
-export function safelyGet(obj, path) {
-    return path.reduce((xs, x) => (xs && xs[x] ? xs[x] : null), obj);
+export function safelyGet (obj, path) {
+  return path.reduce((xs, x) => (xs && xs[x] ? xs[x] : null), obj)
 };
-
 
 /**
  * Internal use. Removes all instances of element from an array.
@@ -19,16 +18,15 @@ export function safelyGet(obj, path) {
  * @param {mixed} element - element to look for and remove
  * @return {array}
  */
-export function spliceAll(array, element) {
-    for (let i = array.length - 1; i >= 0; i-=1) {
-        if (array[i] === element) {
-            array.splice(i, 1);
-        }
+export function spliceAll (array, element) {
+  for (let i = array.length - 1; i >= 0; i -= 1) {
+    if (array[i] === element) {
+      array.splice(i, 1)
     }
+  }
 
-    return array;
+  return array
 };
-
 
 /**
  * Internal use. Populates a string using values from the params object, and
@@ -64,34 +62,34 @@ export function spliceAll(array, element) {
  * @param {string} str - string to populate
  * @param {object} params - parameters used.
  */
-export function populateStr(str, params = {}, availableParams = {}) {
-    const ternaryRegex = /\{([^}]+)\?([^}]*):([^}]+)\}/g;
-    const paramRegex = /\{(\W*)(\w+)(\W*)\}/g;
-    const usedParams = [];
-    let newStr = str.replace(ternaryRegex, (m, key, truthy, falsy) => {
-        if (key in params && params[key]) {
-            usedParams.push(key);
-            return truthy || `{${key}}`;
-        } else if (key in availableParams && availableParams[key]) {
-            return truthy || `{${key}}`;
-        }
-        return falsy;
-    });
+export function populateStr (str, params = {}, availableParams = {}) {
+  const ternaryRegex = /\{([^}]+)\?([^}]*):([^}]+)\}/g
+  const paramRegex = /\{(\W*)(\w+)(\W*)\}/g
+  const usedParams = []
+  let newStr = str.replace(ternaryRegex, (m, key, truthy, falsy) => {
+    if (key in params && params[key]) {
+      usedParams.push(key)
+      return truthy || `{${key}}`
+    } else if (key in availableParams && availableParams[key]) {
+      return truthy || `{${key}}`
+    }
+    return falsy
+  })
 
-    newStr = newStr.replace(paramRegex, (m, prefix, key, suffix) => {
-        if (params[key]) {
-            usedParams.push(key);
-            return prefix + params[key] + suffix;
-        } else if (availableParams[key]) {
-            return prefix + availableParams[key] + suffix;
-        }
+  newStr = newStr.replace(paramRegex, (m, prefix, key, suffix) => {
+    if (params[key]) {
+      usedParams.push(key)
+      return prefix + params[key] + suffix
+    } else if (availableParams[key]) {
+      return prefix + availableParams[key] + suffix
+    }
 
-        return '';
-    });
+    return ''
+  })
 
-    usedParams.forEach(key => {
-        delete params[key];
-    });
+  usedParams.forEach(key => {
+    delete params[key]
+  })
 
-    return newStr;
+  return newStr
 };

@@ -1,4 +1,4 @@
-import Module from './ApiModule';
+import Module from './ApiModule'
 
 /**
  * Construct a new Vuex Module that's meant to work with a
@@ -22,24 +22,24 @@ export default class extends Module {
      * @param {string} options.idProperty      - Property to use for IDs; default "id"
      * @param {string} options.actionParameter - Property that indicates action: default "action"
      */
-    constructor(baseUrl, options = {}) {
-        const actionParameter = options.actionParameter || "action";
-        const idProperty = options.idProperty || "id";
+    constructor (baseUrl, options = {}) {
+      const actionParameter = options.actionParameter || 'action'
+      const idProperty = options.idProperty || 'id'
 
-        const buildUrl = params => {
-            const action = params[actionParameter];
-            delete params[actionParameter];
+      const buildUrl = params => {
+        const action = params[actionParameter]
+        delete params[actionParameter]
 
-            if (['index', 'store'].includes(action)) {
-                return baseUrl;
-            }
+        if (['index', 'store'].includes(action)) {
+          return baseUrl
+        }
 
-            const id = params[idProperty];
-            delete params[idProperty];
-            return `${baseUrl.replace(/\.json$/i, '')
-                 }/${id}.json`;
-        };
+        const id = params[idProperty]
+        delete params[idProperty]
+        return `${baseUrl.replace(/\.json$/i, '')
+                 }/${id}.json`
+      }
 
-        super(buildUrl, options);
+      super(buildUrl, options)
     }
 }
