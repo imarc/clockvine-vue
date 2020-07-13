@@ -23,7 +23,7 @@ export default {
         json(),
         babel({
             babelHelpers: 'bundled',
-            exclude: 'node_modules/**',
+            include: 'src/**',
         }),
         vue(),
     ],

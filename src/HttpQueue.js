@@ -18,7 +18,7 @@ export default class HttpQueue {
      * }
      */
     constructor ({ pqueueOptions = {} } = {}) {
-        this.#queue = new PQueue(pqueueOptions)
+        this.#queue = new PQueue.default(pqueueOptions)
     }
 
     /**
