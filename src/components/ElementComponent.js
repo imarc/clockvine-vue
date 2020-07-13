@@ -3,93 +3,93 @@ import withHelper from '../helpers/with'
 
 export default {
 
-  props: {
-    vuexModule: {
-      type: String,
-      required: true
+    props: {
+        vuexModule: {
+            type: String,
+            required: true,
+        },
+
+        params: {
+            type: Object,
+            default: () => ({}),
+        },
+
+        id: {},
+
+        noFetching: {
+            type: Boolean,
+            default: false,
+        },
+
+        newElement: {
+            type: Object,
+        },
     },
 
-    params: {
-      type: Object,
-      default: () => ({})
+    data: () => ({
+        internalElement: null,
+    }),
+
+    created () {
+        if (this.id) {
+            return this.show()
+        }
+
+        if (this.newElement) {
+            return this.$store.dispatch(`${this.vuexModule}/decorate`, {
+                params: this.params,
+                elements: this.newElement,
+            }).then(obj => {
+                this.internalElement = obj
+            })
+        }
+
+        return undefined
     },
 
-    id: {},
-
-    noFetching: {
-      type: Boolean,
-      default: false
+    watch: {
+        id (newVal, oldVal) {
+            if (newVal !== oldVal) {
+                this.show()
+            }
+        },
     },
 
-    newElement: {
-      type: Object
-    }
-  },
-
-  data: () => ({
-    internalElement: null
-  }),
-
-  created () {
-    if (this.id) {
-      return this.show()
-    }
-
-    if (this.newElement) {
-      return this.$store.dispatch(`${this.vuexModule}/decorate`, {
-        params: this.params,
-        elements: this.newElement
-      }).then(obj => {
-        this.internalElement = obj
-      })
-    }
-
-    return undefined
-  },
-
-  watch: {
-    id (newVal, oldVal) {
-      if (newVal !== oldVal) {
-        this.show()
-      }
-    }
-  },
-
-  computed: {
+    computed: {
     /**
          * Returns the current element from Vuex.
          *
          * @return {object}
          */
-    element () {
-      if (this.id) {
-        return this.$store.getters[`${this.vuexModule}/element`](this.id)
-      } if (this.internalElement) {
-        return this.internalElement
-      }
+        element () {
+            if (this.id) {
+                return this.$store.getters[`${this.vuexModule}/element`](this.id)
+            } if (this.internalElement) {
+                return this.internalElement
+            }
 
-      return undefined
-    },
+            return undefined
+        },
 
-    /**
+        /**
          * Specifies which params are exposed to the default slot.
          *
          * @return {object}
          */
-    slotParams () {
-      return {
-        element: this.element,
-        refresh () {
-          this.show({ mustGet: true })
+        slotParams () {
+            return {
+                element: this.element,
+                refresh () {
+                    this.show({ mustGet: true })
+                },
+                store: this.store,
+                update: this.update,
+                destroy: this.destroy,
+            }
         },
-        store: this.store,
-        update: this.update,
-        destroy: this.destroy
-      }
-    }
-  },
+    },
 
-  methods: {
+    methods: {
     /**
          * Queries the Vuex module for this element.
          *
@@ -97,66 +97,66 @@ export default {
          *
          * @return {promise}
          */
-    show ({ mustGet = false } = {}) {
-      if (!mustGet && this.noFetching) {
-        return this.$store.dispatch(`${this.vuexModule}/decorate`, {
-          params: this.params,
-          elements: this.element
-        })
-      }
+        show ({ mustGet = false } = {}) {
+            if (!mustGet && this.noFetching) {
+                return this.$store.dispatch(`${this.vuexModule}/decorate`, {
+                    params: this.params,
+                    elements: this.element,
+                })
+            }
 
-      this.$emit('isLoading', this.isLoading = true)
+            this.$emit('isLoading', this.isLoading = true)
 
-      const action = `${this.vuexModule}/${mustGet ? 'mustShow' : 'show'}`
-      return this.$store.dispatch(action, { ...this.params, id: this.id })
-        .then(response => {
-          this.$emit('isLoading', this.isLoading = false)
-          this.url = response.config.url
-        })
+            const action = `${this.vuexModule}/${mustGet ? 'mustShow' : 'show'}`
+            return this.$store.dispatch(action, { ...this.params, id: this.id })
+                .then(response => {
+                    this.$emit('isLoading', this.isLoading = false)
+                    this.url = response.config.url
+                })
+        },
+
+        store () {
+            this.$emit('isLoading', this.isLoading = true)
+            return this.element.$store()
+                .then(() => {
+                    this.$emit('isLoading', this.isLoading = false)
+                }).then(() => this.$store.dispatch(`${this.vuexModule}/decorate`, {
+                    params: this.params,
+                    elements: this.newElement,
+                })).then(obj => {
+                    this.internalElement = obj
+                })
+        },
+
+        update () {
+            this.$emit('isLoading', this.isLoading = true)
+            return this.element.$update()
+                .then(() => {
+                    this.$emit('isLoading', this.isLoading = false)
+                })
+        },
+
+        destroy () {
+            this.$emit('isLoading', this.isLoading = true)
+            return this.element.$destroy()
+                .then(() => {
+                    this.$emit('isLoading', this.isLoading = false)
+                })
+        },
     },
 
-    store () {
-      this.$emit('isLoading', this.isLoading = true)
-      return this.element.$store()
-        .then(() => {
-          this.$emit('isLoading', this.isLoading = false)
-        }).then(() => this.$store.dispatch(`${this.vuexModule}/decorate`, {
-          params: this.params,
-          elements: this.newElement
-        })).then(obj => {
-          this.internalElement = obj
-        })
-    },
-
-    update () {
-      this.$emit('isLoading', this.isLoading = true)
-      return this.element.$update()
-        .then(() => {
-          this.$emit('isLoading', this.isLoading = false)
-        })
-    },
-
-    destroy () {
-      this.$emit('isLoading', this.isLoading = true)
-      return this.element.$destroy()
-        .then(() => {
-          this.$emit('isLoading', this.isLoading = false)
-        })
-    }
-  },
-
-  /**
+    /**
      * Render function. This is a renderless component that just uses the default
      * slot for everything.
      */
-  render () {
-    if (this.element) {
-      return this.$scopedSlots.default(this.slotParams)
-    }
-    return ''
-  },
+    render () {
+        if (this.element) {
+            return this.$scopedSlots.default(this.slotParams)
+        }
+        return ''
+    },
 
-  /**
+    /**
      * This is a sugar method for ElementComponent instances. This method
      * returns a new instance of ElementComponent, except that vuexModule is no
      * longer an available property; it's converted into a computed property
@@ -186,27 +186,27 @@ export default {
      *
      * @return {object} - a tweaked ElementComponent instance
      */
-  for (vuexModule) {
-    return withHelper(this, {
-      computed: {
-        vuexModule: () => vuexModule,
-        slotParams () {
-          return {
-            [singular(vuexModule)]: this.element,
-            element: this.element,
-            refresh () {
-              this.show({ mustGet: true })
+    for (vuexModule) {
+        return withHelper(this, {
+            computed: {
+                vuexModule: () => vuexModule,
+                slotParams () {
+                    return {
+                        [singular(vuexModule)]: this.element,
+                        element: this.element,
+                        refresh () {
+                            this.show({ mustGet: true })
+                        },
+                        store: this.store,
+                        update: this.update,
+                        destroy: this.destroy,
+                    }
+                },
             },
-            store: this.store,
-            update: this.update,
-            destroy: this.destroy
-          }
-        }
-      }
-    })
-  },
+        })
+    },
 
-  /**
+    /**
      * This is a sugar method for ElementComponent instances.
      *
      *     ElementComponent.with(obj)
@@ -219,7 +219,7 @@ export default {
      *
      * @param {object} overrides
      */
-  with (overrides) {
-    return withHelper(this, overrides)
-  }
+    with (overrides) {
+        return withHelper(this, overrides)
+    },
 }

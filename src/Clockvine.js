@@ -14,41 +14,41 @@ import withHelper from './helpers/with'
 
 export {
 
-  /**
+    /**
      * Components
      */
-  ElementComponent,
+    ElementComponent,
 
-  CollectionComponent,
-  ContinuousCollectionComponent,
-  PaginatedCollectionComponent,
+    CollectionComponent,
+    ContinuousCollectionComponent,
+    PaginatedCollectionComponent,
 
-  /**
+    /**
      * These are deprecated; use CollectionComponent going forward.
      */
-  CollectionComponent as ElementsComponent,
-  ContinuousCollectionComponent as ContinuousElementsComponent,
-  PaginatedCollectionComponent as PaginatedElementsComponent,
+    CollectionComponent as ElementsComponent,
+    ContinuousCollectionComponent as ContinuousElementsComponent,
+    PaginatedCollectionComponent as PaginatedElementsComponent,
 
-  LiveSearch,
-  PaginationNav,
+    LiveSearch,
+    PaginationNav,
 
-  /**
+    /**
      * Vuex Modules
      */
-  ApiModule,
-  ElementApiModule,
-  LaravelApiModule,
+    ApiModule,
+    ElementApiModule,
+    LaravelApiModule,
 
-  /**
+    /**
      * Mixins
      */
-  ResetsPage,
-  SyncsWithUrl,
+    ResetsPage,
+    SyncsWithUrl,
 
-  /**
+    /**
      * Miscellaneous
      */
-  HttpQueue,
-  withHelper as with
+    HttpQueue,
+    withHelper as with,
 }

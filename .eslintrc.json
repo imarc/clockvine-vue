@@ -17,5 +17,8 @@
         "vue"
     ],
     "rules": {
+        "comma-dangle": ["warn", "always-multiline"],
+        "indent": ["warn", 4],
+        "vue/html-indent": ["warn", 4]
     }
 }
