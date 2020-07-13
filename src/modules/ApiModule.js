@@ -385,7 +385,7 @@ export default class {
         refreshIndexes: ({ state, commit, dispatch }, payload = {}) => {
             for (const url in state.indexes) {
                 this.#httpQueue
-                    .get(url)
+                    .mustGet(url)
                     .then(this.#parseResponse)
                     .then(response => {
                         dispatch('decorateIndex', { index: response.data })
