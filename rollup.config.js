@@ -11,6 +11,10 @@ export default {
             format: 'esm',
             file: 'lib/Clockvine.esm.js',
         },
+        {
+            format: 'cjs',
+            file: 'lib/Clockvine.js',
+        },
     ],
     external: ['vue'],
     plugins: [

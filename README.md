@@ -49,6 +49,21 @@ Clockvine provides constructors for Vuex modules, constructors for Vue component
 Release Notes
 -------------
 
+### 0.9.1
+
+* Added as commonjs built file as well.
+
+### 0.9.0
+
+Clockvine now builds as a ESM module, thanks to switching from Webpack to Rollup. The version produced should be much easier to use in projects where you need IE11 compatibility now.
+
+* Change build from webpack to rollup
+* Switch to standard for code formattting
+
+### 0.8.0
+
+* Package clockvine using purtuga/esm-webpack-plugin
+
 ### 0.7.2
 
 * Fix critical bug with calling $update multiple times on the same element
