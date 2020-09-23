@@ -25,7 +25,9 @@ export default class {
         {
             idProperty = 'id',
             pageParameter = 'page',
+            httpQueue = null,
             pqueueOptions = { concurrency: 2 },
+            axiosOptions = {},
             actionParameter = 'action',
             debounce = 0,
             debounceOptions = {},
@@ -35,13 +37,18 @@ export default class {
     ) {
         this.#actionParameter = actionParameter
         this.#baseUrl = baseUrl
-        this.#httpQueue = new HttpQueue({ pqueueOptions })
         this.#idProperty = idProperty
         this.#pageParameter = pageParameter
         this.#debounce = debounce
         this.#debounceOptions = debounceOptions
         this.#relatedElements = relatedElements
         this.#parseResponse = parseResponse
+
+        if (httpQueue) {
+            this.#httpQueue = httpQueue
+        } else {
+            this.#httpQueue = new HttpQueue({ pqueueOptions, axiosOptions })
+        }
 
         this.actions.index = Debounce((...args) => this.#index(...args), this.#debounce, this.#debounceOptions)
     }

@@ -17,8 +17,20 @@ export default class HttpQueue {
      *         An object of options passed to PQueue.
      * }
      */
-    constructor ({ pqueueOptions = {} } = {}) {
+    constructor (
+        {
+            pqueueOptions = {},
+            axiosOptions = {},
+            axios = null,
+        } = {}
+    ) {
         this.#queue = new PQueue.default(pqueueOptions)
+
+        if (axios) {
+            this.axios = axios
+        } else {
+            this.axios = Axios.create(axiosOptions)
+        }
     }
 
     /**
@@ -45,7 +57,7 @@ export default class HttpQueue {
      * @return {Promise}
      */
     mustGet (url) {
-        this.#urls[url] = this.#queue.add(() => Axios.get(url))
+        this.#urls[url] = this.#queue.add(() => this.axios.get(url))
         return this.#urls[url]
     }
 
@@ -58,7 +70,7 @@ export default class HttpQueue {
      * @return {Promise}
      */
     post (url, params) {
-        return this.#queue.add(() => Axios.post(url, params))
+        return this.#queue.add(() => this.axios.post(url, params))
     }
 
     /**
@@ -70,7 +82,7 @@ export default class HttpQueue {
      * @return {Promise}
      */
     put (url, params) {
-        return this.#queue.add(() => Axios.put(url, params))
+        return this.#queue.add(() => this.axios.put(url, params))
     }
 
     /**
@@ -82,6 +94,6 @@ export default class HttpQueue {
      * @return {Promise}
      */
     delete (url, params) {
-        return this.#queue.add(() => Axios.delete(url, params))
+        return this.#queue.add(() => this.axios.delete(url, params))
     }
 }
