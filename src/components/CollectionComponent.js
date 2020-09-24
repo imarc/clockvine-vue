@@ -7,14 +7,19 @@ export default {
     },
 
     data: () => ({
-    /**
+        /**
          * Whether data is loading or not.
          */
         isLoading: true,
 
         /**
+         * Current error response, if there was one.
+         */
+        error: false,
+
+        /**
          * The current URL for the data being shown for this component.
-         * TODO - maybe moev this to $options?
+         * TODO - maybe move this to $options?
          */
         url: null,
     }),
@@ -121,7 +126,15 @@ export default {
                 elements: this.elements,
                 isLoading: this.isLoading,
                 meta: this.meta,
+
+                error: this.error,
+                hasError: Boolean(this.error),
+                isLoading: this.isLoading,
+
                 query: this.query,
+                refresh () {
+                    this.query({ mustGet: true })
+                }
             }
         },
     },
@@ -153,15 +166,27 @@ export default {
                 }
             }
 
-            this.$emit('isLoading', this.isLoading = true)
+            const action = (mustGet || this.error) ? 'mustIndex' : 'index'
 
-            const action = `${this.vuexModule}/${mustGet ? 'mustIndex' : 'index'}`
-            return this.$store.dispatch(action, this.filteredParams)
+            this.$emit('isLoading', this.isLoading = true)
+            this.error = false
+
+            return this.$store.dispatch(
+                `${this.vuexModule}/${action}`,
+                this.filteredParams
+            )
                 .then(response => {
                     this.$emit('isLoading', this.isLoading = false)
                     this.url = response.config.url
 
                     return response
+                })
+                .catch(error => {
+                    this.$emit('isLoading', this.isLoading = false)
+                    this.error = error
+                    this.$emit('error', this.slotParams)
+
+                    throw error
                 })
         },
     },
@@ -174,9 +199,16 @@ export default {
                     return {
                         [vuexModule]: this.elements,
                         elements: this.elements,
-                        isLoading: this.isLoading,
                         meta: this.meta,
+
+                        error: this.error,
+                        hasError: Boolean(this.error),
+                        isLoading: this.isLoading,
+
                         query: this.query,
+                        refresh () {
+                            this.query({ mustGet: true })
+                        }
                     }
                 },
             },

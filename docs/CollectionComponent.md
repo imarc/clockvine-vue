@@ -78,6 +78,7 @@ Then these two are equivalent:
 ## API
 
 ### Props
+
 #### vuexModule
 
 Required; configures the associated Clockvine vuex module (ApiModule).
@@ -104,21 +105,44 @@ If set, no elements will be fetched unless there's at least one non-ignored para
 
 Fetch elements!
 
+
 ### Slot Scope Properties
 
-#### elements
+#### elements (Array)
 
 Associated elements.
 
-#### isLoading
+#### isLoading (Boolean)
 
 Boolean flag, whether elements are being fetched. Useful for loaders. When this flag changes, the component also `$emit`s a 'isLoading' event with the new value.
 
-#### meta
+#### meta (Object)
 
 Meta information directly from the API response.
 
+#### error (Object)
 
-#### query
+The current error object, if there was one fetching data from the API, false otherwise.
+
+#### hasError (Boolean)
+
+A sugar version of `error` - literally just `Boolean(this.error)` under the hood.
+
+#### query (Function)
 
 The search query itself for convenience.
+
+#### refresh (Function)
+
+A sugar method that calls query with `mustGet` set `true`.
+
+
+### Events
+
+#### isLoading
+
+Fired (with a payload of true) when starting to fetch data and again (with a payload of false) when it's done.
+
+#### error
+
+Fired if there's an error returned trying to fetch from the API. The payload for this event is an object containing all the slot scope properties above, so that you can access `error` to get details or do fancier things like call `query` or `refresh` after a timeout.

@@ -27,7 +27,20 @@ export default {
     },
 
     data: () => ({
+        /**
+         * Internal element reference.
+         */
         internalElement: null,
+
+        /**
+         * Whether data is loading or not.
+         */
+        isLoading: false,
+
+        /**
+         * Current error response, if there was one.
+         */
+        error: false,
     }),
 
     created () {
@@ -79,12 +92,18 @@ export default {
         slotParams () {
             return {
                 element: this.element,
-                refresh () {
-                    this.show({ mustGet: true })
-                },
+
+                error: this.error,
+                hasError: Boolean(this.error),
+                isLoading: this.isLoading,
+
+                show: this.show,
                 store: this.store,
                 update: this.update,
                 destroy: this.destroy,
+                refresh () {
+                    this.show({ mustGet: true })
+                },
             }
         },
     },
@@ -105,18 +124,34 @@ export default {
                 })
             }
 
-            this.$emit('isLoading', this.isLoading = true)
+            const action = (mustGet || this.error) ? 'mustShow' : 'show'
 
-            const action = `${this.vuexModule}/${mustGet ? 'mustShow' : 'show'}`
-            return this.$store.dispatch(action, { ...this.params, id: this.id })
+            this.$emit('isLoading', this.isLoading = true)
+            this.error = false
+
+            return this.$store.dispatch(
+                `${this.vuexModule}/${action}`,
+                { ...this.params, id: this.id }
+            )
                 .then(response => {
                     this.$emit('isLoading', this.isLoading = false)
                     this.url = response.config.url
+
+                    return response
+                })
+                .catch(error => {
+                    this.$emit('isLoading', this.isLoading = false)
+                    this.error = error
+                    this.$emit('error', this.slotParams)
+
+                    throw error
                 })
         },
 
         store () {
             this.$emit('isLoading', this.isLoading = true)
+            this.error = false
+
             return this.element.$store()
                 .then(() => {
                     this.$emit('isLoading', this.isLoading = false)
@@ -126,21 +161,46 @@ export default {
                 })).then(obj => {
                     this.internalElement = obj
                 })
+                .catch(error => {
+                    this.$emit('isLoading', this.isLoading = false)
+                    this.error = error
+                    this.$emit('error', this.slotParams)
+
+                    throw error
+                })
         },
 
         update () {
             this.$emit('isLoading', this.isLoading = true)
+            this.error = false
+
             return this.element.$update()
                 .then(() => {
                     this.$emit('isLoading', this.isLoading = false)
+                })
+                .catch(error => {
+                    this.$emit('isLoading', this.isLoading = false)
+                    this.error = error
+                    this.$emit('error', this.slotParams)
+
+                    throw error
                 })
         },
 
         destroy () {
             this.$emit('isLoading', this.isLoading = true)
+            this.error = false
+
             return this.element.$destroy()
                 .then(() => {
                     this.$emit('isLoading', this.isLoading = false)
+                })
+                .catch(error => {
+                    this.$emit('isLoading', this.isLoading = false)
+                    this.error = error
+                    this.$emit('error', this.slotParams)
+
+                    throw error
                 })
         },
     },
@@ -194,12 +254,18 @@ export default {
                     return {
                         [singular(vuexModule)]: this.element,
                         element: this.element,
-                        refresh () {
-                            this.show({ mustGet: true })
-                        },
+
+                        error: this.error,
+                        hasError: Boolean(this.error),
+                        isLoading: this.isLoading,
+
+                        show: this.show,
                         store: this.store,
                         update: this.update,
                         destroy: this.destroy,
+                        refresh () {
+                            this.show({ mustGet: true })
+                        },
                     }
                 },
             },

@@ -120,7 +120,7 @@ Deletes the associated element.
 
 ### Slot Scope Properties
 
-#### element
+#### element (Object)
 
 The associated element. You can use JavaScript's destructuring to change this element too:
 
@@ -136,22 +136,46 @@ The associated element. You can use JavaScript's destructuring to change this el
 </element-component>
 ```
 
+#### isLoading (Boolean)
 
-#### refresh
+Boolean flag, whether this element is being fetched. Useful for loaders. When this flag changes, the component also `$emit`s a 'isLoading' event with the new value.
 
-A method exposed to re-fetch (bypasses the cache) the associated element from the API.
+#### error (Object)
+
+The current error object, if there was one fetching data from the API, false otherwise.
+
+#### hasError (Boolean)
+
+A sugar version of `error` - literally just `Boolean(this.error)` under the hood.
 
 
-#### store
+### show (Function)
+
+The `show` method exposed to the slot. You could use this, but you likely want `refresh`.
+
+#### store (Function)
 
 The `store` method exposed to the slot.
 
-
-#### update
+#### update (Function)
 
 The `update` method exposed to the slot.
 
-
-#### destroy
+#### destroy (Function)
 
 The `destroy` method exposed to the slot.
+
+#### refresh (Function)
+
+A sugar method that calls show with `mustGet` set `true`. Useful to refresh this component from the API.
+
+
+### Events
+
+#### isLoading
+
+Fired (with a payload of true) when starting to fetch data and again (with a payload of false) when it's done.
+
+#### error
+
+Fired if there's an error returned trying to fetch from the API. The payload for this event is an object containing all the slot scope properties above, so that you can access `error` to get details or do fancier things like retry.
