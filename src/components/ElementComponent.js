@@ -105,21 +105,21 @@ export default {
                 })
             }
 
-            this.$emit('isLoading', this.isLoading = true)
+            this.$emit('is-loading', this.isLoading = true)
 
             const action = `${this.vuexModule}/${mustGet ? 'mustShow' : 'show'}`
             return this.$store.dispatch(action, { ...this.params, id: this.id })
                 .then(response => {
-                    this.$emit('isLoading', this.isLoading = false)
+                    this.$emit('is-loading', this.isLoading = false)
                     this.url = response.config.url
                 })
         },
 
         store () {
-            this.$emit('isLoading', this.isLoading = true)
+            this.$emit('is-loading', this.isLoading = true)
             return this.element.$store()
                 .then(() => {
-                    this.$emit('isLoading', this.isLoading = false)
+                    this.$emit('is-loading', this.isLoading = false)
                 }).then(() => this.$store.dispatch(`${this.vuexModule}/decorate`, {
                     params: this.params,
                     elements: this.newElement,
@@ -129,18 +129,18 @@ export default {
         },
 
         update () {
-            this.$emit('isLoading', this.isLoading = true)
+            this.$emit('is-loading', this.isLoading = true)
             return this.element.$update()
                 .then(() => {
-                    this.$emit('isLoading', this.isLoading = false)
+                    this.$emit('is-loading', this.isLoading = false)
                 })
         },
 
         destroy () {
-            this.$emit('isLoading', this.isLoading = true)
+            this.$emit('is-loading', this.isLoading = true)
             return this.element.$destroy()
                 .then(() => {
-                    this.$emit('isLoading', this.isLoading = false)
+                    this.$emit('is-loading', this.isLoading = false)
                 })
         },
     },

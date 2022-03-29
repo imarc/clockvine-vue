@@ -21,12 +21,12 @@ export default {
 
         input({target: {value}}) {
             this.internalValue = value;
-            this.$emit('isTyping', this.isTyping = true);
+            this.$emit('is-typing', this.isTyping = true);
             return this.$_liveSearch_debouncedInput(value);
         },
 
         $_liveSearch_debouncedInput: debounce(function(value) {
-            this.$emit('isTyping', this.isTyping = false);
+            this.$emit('is-typing', this.isTyping = false);
             return this.$emit('input', value);
         }, 300),
     },

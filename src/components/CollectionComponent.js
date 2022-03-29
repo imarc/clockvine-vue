@@ -153,12 +153,12 @@ export default {
                 }
             }
 
-            this.$emit('isLoading', this.isLoading = true)
+            this.$emit('is-loading', this.isLoading = true)
 
             const action = `${this.vuexModule}/${mustGet ? 'mustIndex' : 'index'}`
             return this.$store.dispatch(action, this.filteredParams)
                 .then(response => {
-                    this.$emit('isLoading', this.isLoading = false)
+                    this.$emit('is-loading', this.isLoading = false)
                     this.url = response.config.url
 
                     return response
