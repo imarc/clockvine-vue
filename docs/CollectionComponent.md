@@ -112,7 +112,7 @@ Associated elements.
 
 #### isLoading
 
-Boolean flag, whether elements are being fetched. Useful for loaders. When this flag changes, the component also `$emit`s a 'isLoading' event with the new value.
+Boolean flag, whether elements are being fetched. Useful for loaders. When this flag changes, the component also `$emit`s a 'is-loading' event with the new value.
 
 #### meta
 
