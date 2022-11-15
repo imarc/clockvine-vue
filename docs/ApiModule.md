@@ -56,11 +56,14 @@ Along with `elements`, your closure's response object can also provide a `params
 
 ### parseResponse (default `response => response`)
 
-The `parseResponse` configuration option allows you to override the default parsing that Clockvine uses on all API responses with your own function. For example, let's say the API you want to connect to doesn't use a wrapper object with `data`/`meta` attributes:
+The `parseResponse` configuration option allows you to override the default parsing that Clockvine uses on all API responses with your own function. For example, let's say the API you want to connect to doesn't use a wrapper object with `data`/`meta` attributes but `jobs`/`meta` instead:
 
 ```javascript
 new LaravelApiModule('/api/users', {
-parseResponse: response => ({ data: { data: response.data } })
+parseResponse: response => {
+  response.data.data = response.data.jobs
+  return response
+}
 })
 ```
 
