@@ -6,9 +6,11 @@ import JsonApi from './JsonApi'
 /**
  * defineApiStore() is a constructor function for Clockvine API stores. It uses Pinia internally.
  *
- * @param name
- * @param api
- * @param options = {
+ * @param string name
+ *     The name (or ID) for for the Pinia store.
+ * @param object|string api
+ *     An API or endpoint URL for a JsonApi instance.
+ * @param object options = {
  *   idField
  * }
  */

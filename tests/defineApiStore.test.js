@@ -2,35 +2,11 @@ import { setActivePinia, createPinia } from 'pinia'
 import defineApiStore from '../src/defineApiStore.js'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-const mockUsersInitialState = {
-  1: { id: 1, name: 'Kevin', full_name: 'Kevin Hamer' },
-  2: { id: 2, name: 'Test', full_name: 'Test test' }
-}
-let mockUsers = Object.assign({}, mockUsersInitialState)
-
-const mockUserApi = {
-  key: (action, { id } = {}) => `${action} ${id}`,
-  index: () => Promise.resolve({
-    data: Object.values(mockUsers).map(e => Object.assign({}, e))
-  }),
-  show: id => Promise.resolve(id in mockUsers ? Object.assign({}, mockUsers[id]) : null),
-  update: element => {
-    mockUsers[element.id] = element
-    return Promise.resolve(Object.assign({}, element))
-  },
-  store: element => {
-    mockUsers[element.id] = element
-    return Promise.resolve(Object.assign({}, element))
-  },
-  destroy: element => {
-    element = mockUsers[element.id]
-    delete mockUsers[element.id]
-    console.log('api destroy', element)
-    return Promise.resolve(Object.assign({}, element))
-  }
-}
+import mockUserApi from './usersApi.mock.js'
 
 const testUserStore = defineApiStore('testUserStore', mockUserApi)
+
+const vueUpdates = () => new Promise(setTimeout)
 
 describe('testing .index', () => {
   beforeEach(() => {
@@ -71,7 +47,7 @@ describe('testing .index', () => {
     const elements = store.index()
     expect(elements.value?.data?.length).toBe(undefined)
 
-    await new Promise(setTimeout)
+    await vueUpdates()
 
     expect(indexSpy).toHaveBeenCalledTimes(1)
     expect(elements.value.data.length).toBe(2)
@@ -92,7 +68,7 @@ describe('testing .show', () => {
 
     expect(person1?.value?.name).toBe(undefined)
 
-    await new Promise(setTimeout)
+    await vueUpdates()
 
     expect(showSpy).toHaveBeenCalledTimes(1)
 
@@ -105,7 +81,7 @@ describe('testing .show', () => {
     const store = testUserStore()
     const person1 = store.show(1)
     const another1 = store.show(1)
-    await new Promise(setTimeout)
+    await vueUpdates()
 
     another1.value.name = 'Chuck'
 
@@ -116,16 +92,16 @@ describe('testing .show', () => {
 describe('testing .update', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
-    mockUsers = Object.assign({}, mockUsersInitialState)
+    mockUserApi.reset()
   })
 
   test('can update', async () => {
     const store = testUserStore()
     const person1 = store.show(1)
-    await new Promise(setTimeout)
+    await vueUpdates()
 
     store.update({ id: 1, name: 'Chuck' })
-    await new Promise(setTimeout)
+    await vueUpdates()
 
     expect(person1.value.name).toBe('Chuck')
   })
@@ -133,13 +109,13 @@ describe('testing .update', () => {
   test('can update from clone object', async () => {
     const store = testUserStore()
     const person1 = store.show(1)
-    await new Promise(setTimeout)
+    await vueUpdates()
 
     const draftPerson = Object.assign({}, person1.value)
     draftPerson.full_name = 'Kevin "The Coder" Hamer'
 
     store.update(draftPerson)
-    await new Promise(setTimeout)
+    await vueUpdates()
 
     expect(person1.value.name).toBe('Kevin')
     expect(person1.value.full_name).toBe('Kevin "The Coder" Hamer')
@@ -149,16 +125,16 @@ describe('testing .update', () => {
 describe('testing .store', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
-    mockUsers = Object.assign({}, mockUsersInitialState)
+    mockUserApi.reset()
   })
 
   test('can store a new object', async () => {
     const store = testUserStore()
     store.store({ id: 3, name: 'Jim', full_name: 'Jim Halpert' })
-    await new Promise(setTimeout)
+    await vueUpdates()
 
     const person3 = store.show(3)
-    await new Promise(setTimeout)
+    await vueUpdates()
 
     expect(person3.value.name).toBe('Jim')
   })
@@ -167,20 +143,20 @@ describe('testing .store', () => {
 describe('testing .destroy', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
-    mockUsers = Object.assign({}, mockUsersInitialState)
+    mockUserApi.reset()
   })
 
   test('can destroy an object', async () => {
     const store = testUserStore()
 
     store.index()
-    await new Promise(setTimeout)
+    await vueUpdates()
 
     store.destroy({ id: 1 })
-    await new Promise(setTimeout)
+    await vueUpdates()
 
     const person1 = store.show(1)
-    await new Promise(setTimeout)
+    await vueUpdates()
 
     console.log('all elements', store.elements)
     expect(person1.value).toBe(null)
