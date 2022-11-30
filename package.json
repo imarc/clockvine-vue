@@ -1,0 +1,31 @@
+{
+    "name": "clockvine-vue",
+    "version": "2.0.0",
+    "description": "",
+    "author": "Kevin Hamer [kh] <kevin@imarc.com>",
+    "license": "Apache-2.0",
+    "main": "./lib/Clockvine.js",
+    "type": "module",
+    "module": "./lib/Clockvine.esm.js",
+    "browserslist": [
+        "defaults"
+    ],
+    "peerDependencies": {
+        "pinia": "^2.0.23",
+        "vue": "^3.2.37"
+    },
+    "scripts": {
+        "test": "vitest"
+    },
+    "devDependencies": {
+        "@vitejs/plugin-vue": "latest",
+        "@vue/test-utils": "^2.2.0",
+        "eslint": "^8.26.0",
+        "eslint-config-standard": "^17.0.0",
+        "eslint-plugin-import": "^2.26.0",
+        "eslint-plugin-n": "^15.3.0",
+        "eslint-plugin-promise": "^6.1.1",
+        "eslint-plugin-vue": "^9.6.0",
+        "vitest": "^0.24.3"
+    }
+}
