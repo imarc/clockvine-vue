@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { reactive, toRef, computed, unref, isRef, readonly } from 'vue'
+import { reactive, toRef, computed, unref } from 'vue'
 
 import JsonApi from './JsonApi'
 
@@ -11,7 +11,8 @@ import JsonApi from './JsonApi'
  * @param object|string api
  *     An API or endpoint URL for a JsonApi instance.
  * @param object options = {
- *   idField
+ *     idField (default: 'id')
+ *         Specify the field to use as the primary key for this store.
  * }
  */
 export default function defineApiStore (name, api, { idField = 'id' } = {}) {
@@ -23,26 +24,20 @@ export default function defineApiStore (name, api, { idField = 'id' } = {}) {
     const elements = reactive({})
     const indexes = reactive({})
 
-    const setIndex = (key, { data = [], meta = {} }) => {
-      indexes[key] = { data, meta }
-      return indexes[key]
-    }
-
-    const setElement = (key, element) => {
-      elements[key] = reactive(element)
-      return elements[key]
-    }
-
     const deleteElement = (element) => {
       const key = element[idField]
-      console.log('deleteElement', key, elements)
       delete elements[key]
-      console.log('deleteElement', key, elements)
       return element
     }
 
-    const setElements = elements => {
-      elements.forEach(element => setElement(element[idField], element))
+    /**
+     *
+     * @param {mixed} id
+     *     The primary key of the element to fetch.
+     */
+    const fetchElement = async id => {
+      const element = await api.show(id)
+      return setElement(id, element)
     }
 
     const fetchIndex = async (params = {}) => {
@@ -52,47 +47,104 @@ export default function defineApiStore (name, api, { idField = 'id' } = {}) {
       return setIndex(key, { data, meta })
     }
 
+    const setElement = (key, element) => {
+      elements[key] = reactive(element)
+      return elements[key]
+    }
+
+    const setElements = elements => {
+      elements.forEach(element => setElement(element[idField], element))
+    }
+
+    const setIndex = (key, { data = [], meta = {} }) => {
+      indexes[key] = { data, meta }
+      return indexes[key]
+    }
+
+    //
+    // Actions
+    //
+
+    /**
+     * Delete an element.
+     *
+     * @param {Object} element
+     *
+     * @returns {Object}
+     *     Returns the deleted element.
+     */
+    const destroy = async element => {
+      element = await api.destroy(element)
+      return deleteElement(element)
+    }
+
+    /**
+     * Get a ref for an element index for the given params.
+     *
+     * @param {Object} params
+     * @returns {ref}
+     */
     const index = (params = {}) => {
       const key = computed(() => api.key('index', params))
 
       if (!(key.value in indexes)) {
+        indexes[key.value] = undefined
         fetchIndex(params)
       }
 
       return toRef(indexes, key.value)
     }
 
-    const fetchElement = async id => {
-      const element = await api.show(id)
-      return setElement(id, element)
-    }
-
+    /**
+     * Return a ref to an element for the given primary key. The element does
+     * not need to exist before this is called.
+     *
+     * If idRef is a reference, than reactivity will be respected and when it
+     * changes, the value of the returned ref will also change.
+     *
+     * @param {ref|mixed} idRef
+     *     Primary key or a ref to a primary key.
+     * @returns  {ref}
+     */
     const show = idRef => {
-      if (unref(idRef) == null) {
+      idRef = unref(idRef)
+      if (idRef == null) {
         return
       }
-      if (!(unref(idRef) in elements)) {
-        fetchElement(unref(idRef))
+      if (!(idRef in elements)) {
+        elements[idRef] = undefined
+        fetchElement(idRef)
       }
 
-      return toRef(elements, unref(idRef))
+      return toRef(elements, idRef)
     }
 
-    const store = async (params = {}) => {
-      const element = await api.store(params)
-      return setElement(element[idField], element)
+    /**
+     * Create a new element.
+     *
+     * @param {Object} element
+     *
+     * @returns {ref}
+     *     The new element returned from the API and stored in Pinia.
+     */
+    const store = async (element = {}) => {
+      const newElement = await api.store(element)
+      setElement(element[idField], newElement)
+
+      return toRef(elements, element[idField])
     }
 
+    /**
+     * Update an element.
+     *
+     * @param {Object} element
+     * @returns {ref}
+     */
     const update = async element => {
       element = await api.update(element)
-      return setElement(element[idField], element)
-    }
+      setElement(element[idField], element)
 
-    const destroy = async element => {
-      console.log('destroy', element)
-      element = await api.destroy(element)
-      console.log('api.destroy response', element)
-      return deleteElement(element)
+      return toRef(elements, element[idField])
     }
 
     return { index, show, store, update, destroy, elements, indexes }

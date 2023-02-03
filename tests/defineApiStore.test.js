@@ -29,7 +29,7 @@ describe('testing .index', () => {
     store.index()
     store.index()
 
-    expect(indexSpy).toHaveBeenCalledTimes(2) // TODO
+    expect(indexSpy).toHaveBeenCalledTimes(1) // TODO
   })
 
   test('Parameters are passed through', () => {
@@ -75,6 +75,16 @@ describe('testing .show', () => {
     console.log('person1', person1.value)
 
     expect(person1?.value.name).toBe('Kevin')
+  })
+
+  test('Only calls show on Api once', () => {
+    const show = vi.spyOn(mockUserApi, 'show')
+    const store = testUserStore()
+
+    store.show(1)
+    store.show(1)
+
+    expect(show).toHaveBeenCalledTimes(1) // TODO
   })
 
   test('ref is mutable', async () => {
@@ -134,6 +144,17 @@ describe('testing .store', () => {
     await vueUpdates()
 
     const person3 = store.show(3)
+    await vueUpdates()
+
+    expect(person3.value.name).toBe('Jim')
+  })
+
+  test('can have a reference to an object before its created', async () => {
+    const store = testUserStore()
+    const person3 = store.show(3)
+    await vueUpdates()
+
+    store.store({ id: 3, name: 'Jim', full_name: 'Jim Halpert' })
     await vueUpdates()
 
     expect(person3.value.name).toBe('Jim')
