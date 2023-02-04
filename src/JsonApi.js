@@ -1,5 +1,5 @@
 export default function JsonApi (baseUrl) {
-  this.key = function (action, params) {
+  const createQueryUrl = function (action, params) {
     if (['show', 'update', 'destroy'].includes(action)) {
       return baseUrl.replace(/\.json$/, `/${params}.json`)
     } else {
@@ -8,13 +8,15 @@ export default function JsonApi (baseUrl) {
     }
   }
 
+  this.key = createQueryUrl
+
   this.index = async function (params) {
-    const url = this.key('index', params)
+    const url = createQueryUrl('index', params)
     return fetch(url).then(r => r.json())
   }
 
   this.show = async function (id) {
-    const url = this.key('show', id)
+    const url = createQueryUrl('show', id)
     return fetch(url).then(r => r.json())
   }
 }
