@@ -1,6 +1,8 @@
 import { setActivePinia, createPinia } from 'pinia'
 import defineApiStore from '../src/defineApiStore.js'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { reactive, toRef, computed, unref, isRef, isReactive, toRefs } from 'vue'
+
 
 import mockUserApi from './usersApi.mock.js'
 
@@ -44,13 +46,13 @@ describe('testing .index', () => {
   test('ref is reactive', async () => {
     const indexSpy = vi.spyOn(mockUserApi, 'index')
     const store = testUserStore()
-    const elements = store.index()
-    expect(elements.value?.data?.length).toBe(undefined)
+    const { data: elements } = store.index()
+    expect(elements.value).toBe(undefined)
 
     await vueUpdates()
 
     expect(indexSpy).toHaveBeenCalledTimes(1)
-    expect(elements.value.data.length).toBe(2)
+    expect(elements.value.length).toBe(2)
   })
 })
 
@@ -64,15 +66,11 @@ describe('testing .show', () => {
     const store = testUserStore()
     const person1 = store.show(1)
 
-    console.log('person1', person1.value)
-
     expect(person1?.value?.name).toBe(undefined)
 
     await vueUpdates()
 
     expect(showSpy).toHaveBeenCalledTimes(1)
-
-    console.log('person1', person1.value)
 
     expect(person1?.value.name).toBe('Kevin')
   })
@@ -179,7 +177,6 @@ describe('testing .destroy', () => {
     const person1 = store.show(1)
     await vueUpdates()
 
-    console.log('all elements', store.elements)
     expect(person1.value).toBe(null)
   })
 })

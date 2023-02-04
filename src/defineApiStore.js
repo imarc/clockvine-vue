@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { reactive, toRef, computed, unref } from 'vue'
+import { reactive, toRef, computed, unref, isRef, isReactive, toRefs } from 'vue'
 
 import JsonApi from './JsonApi'
 
@@ -57,7 +57,7 @@ export default function defineApiStore (name, api, { idField = 'id' } = {}) {
     }
 
     const setIndex = (key, { data = [], meta = {} }) => {
-      indexes[key] = { data, meta }
+      Object.assign(indexes[key], { data, meta })
       return indexes[key]
     }
 
@@ -88,11 +88,11 @@ export default function defineApiStore (name, api, { idField = 'id' } = {}) {
       const key = computed(() => api.key('index', params))
 
       if (!(key.value in indexes)) {
-        indexes[key.value] = undefined
+        indexes[key.value] = { data: undefined, meta: undefined }
         fetchIndex(params)
       }
 
-      return toRef(indexes, key.value)
+      return toRefs(indexes[key.value])
     }
 
     /**

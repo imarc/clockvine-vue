@@ -21,7 +21,6 @@ const mockUserApi = {
   destroy: element => {
     element = mockUsers[element.id]
     delete mockUsers[element.id]
-    console.log('api destroy', element)
     return Promise.resolve(Object.assign({}, element))
   },
 
