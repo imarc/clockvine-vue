@@ -1,7 +1,7 @@
 import { setActivePinia, createPinia } from 'pinia'
 import defineApiStore from '../src/defineApiStore.js'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import { reactive, toRef, computed, unref, isRef, isReactive, toRefs } from 'vue'
+import { reactive, ref, toRef, computed, unref, isRef, isReactive, toRefs } from 'vue'
 
 
 import mockUserApi from './usersApi.mock.js'
@@ -19,7 +19,8 @@ describe('testing .index', () => {
     const indexSpy = vi.spyOn(mockUserApi, 'index')
     const store = testUserStore()
 
-    store.index()
+    // necessary for to trigger computing the index at all
+    store.index().value
 
     expect(indexSpy).toHaveBeenCalledTimes(1)
   })
@@ -28,8 +29,8 @@ describe('testing .index', () => {
     const indexSpy = vi.spyOn(mockUserApi, 'index')
     const store = testUserStore()
 
-    store.index()
-    store.index()
+    store.index().value
+    store.index().value
 
     expect(indexSpy).toHaveBeenCalledTimes(1) // TODO
   })
@@ -38,15 +39,66 @@ describe('testing .index', () => {
     const indexSpy = vi.spyOn(mockUserApi, 'index')
     const store = testUserStore()
 
-    store.index({ foo: 'bar', bin: 'baz' })
+    store.index({ foo: 'bar', bin: 'baz' }).value
 
     expect(indexSpy).toHaveBeenCalledWith({ foo: 'bar', bin: 'baz' })
+  })
+
+  test('Parameters can change', async () => {
+    const indexSpy = vi.spyOn(mockUserApi, 'index')
+    const store = testUserStore()
+
+    store.index({ foo: 'bar', bin: 'baz' }).value
+
+    expect(indexSpy).toHaveBeenCalledWith({ foo: 'bar', bin: 'baz' })
+
+    store.index({ foo: 'alpha' }).value
+
+    await vueUpdates()
+
+    expect(indexSpy).toHaveBeenCalledWith({ foo: 'alpha' })
+  })
+
+  test('Parameters can be reactive', async () => {
+    const indexSpy = vi.spyOn(mockUserApi, 'index')
+    const store = testUserStore()
+
+    const foo = ref('bar')
+    const params = computed(() => ({ foo: foo.value }))
+    const fooIndex = store.index(params)
+    fooIndex.value
+
+    expect(indexSpy).toHaveBeenCalledWith({ foo: 'bar' })
+
+    foo.value = 'biz'
+    await vueUpdates()
+    fooIndex.value
+
+    expect(indexSpy).toHaveBeenCalledWith({ foo: 'biz' })
+  })
+
+  test('Parameters can be a pojo with a reactive key', async () => {
+    const indexSpy = vi.spyOn(mockUserApi, 'index')
+    const store = testUserStore()
+
+    const foo = ref('bar')
+    const params = computed(() => ({ foo: foo.value }))
+    const fooIndex = store.index(params)
+    fooIndex.value
+
+    expect(indexSpy).toHaveBeenCalledWith({ foo: 'bar' })
+
+    foo.value = 'biz'
+    await vueUpdates()
+    fooIndex.value
+
+    expect(indexSpy).toHaveBeenCalledWith({ foo: 'biz' })
   })
 
   test('ref is reactive', async () => {
     const indexSpy = vi.spyOn(mockUserApi, 'index')
     const store = testUserStore()
-    const { data: elements } = store.index()
+    const { data: elements } = store.index().value
     expect(elements.value).toBe(undefined)
 
     await vueUpdates()

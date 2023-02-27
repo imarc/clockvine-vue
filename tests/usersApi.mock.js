@@ -5,7 +5,11 @@ const mockUsersInitialState = {
 let mockUsers = Object.assign({}, mockUsersInitialState)
 
 const mockUserApi = {
-  key: (action, { id } = {}) => `${action} ${id}`,
+  key: (action, params) => {
+    const queryStr = (new URLSearchParams(params)).toString()
+    console.log(`mockUserapi.key() ${action}?${queryStr}`)
+    return `${action}?${queryStr}`
+  },
   index: () => Promise.resolve({
     data: Object.values(mockUsers).map(e => Object.assign({}, e))
   }),
