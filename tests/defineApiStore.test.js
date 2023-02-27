@@ -82,7 +82,7 @@ describe('testing .index', () => {
     const store = testUserStore()
 
     const foo = ref('bar')
-    const params = computed(() => ({ foo: foo.value }))
+    const params = computed(() => ({ foo }))
     const fooIndex = store.index(params)
     fooIndex.value
 

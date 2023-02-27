@@ -3,6 +3,8 @@ import { reactive, toRef, computed, unref, isRef, isReactive, toRefs } from 'vue
 
 import JsonApi from './JsonApi'
 
+const unrefAttributes = obj => Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, unref(v)]))
+
 /**
  * defineApiStore() is a constructor function for Clockvine API stores. It uses Pinia internally.
  *
@@ -85,12 +87,12 @@ export default function defineApiStore (name, api, { idField = 'id' } = {}) {
      * @returns {ref}
      */
     const index = (params = {}) => {
-      const key = computed(() => api.key('index', unref(params)))
+      const key = computed(() => api.key('index', unrefAttributes(unref(params))))
 
       return computed(() => {
         if (!(key.value in indexes)) {
           indexes[key.value] = { data: undefined, meta: undefined }
-          fetchIndex(unref(params))
+          fetchIndex(unrefAttributes(unref(params)))
         }
 
         return toRefs(indexes[key.value])
