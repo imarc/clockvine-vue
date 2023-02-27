@@ -20,7 +20,7 @@ describe('testing .index', () => {
     const store = testUserStore()
 
     // necessary for to trigger computing the index at all
-    store.index().value
+    store.index().data.value
 
     expect(indexSpy).toHaveBeenCalledTimes(1)
   })
@@ -29,8 +29,8 @@ describe('testing .index', () => {
     const indexSpy = vi.spyOn(mockUserApi, 'index')
     const store = testUserStore()
 
-    store.index().value
-    store.index().value
+    store.index().data.value
+    store.index().data.value
 
     expect(indexSpy).toHaveBeenCalledTimes(1) // TODO
   })
@@ -39,7 +39,7 @@ describe('testing .index', () => {
     const indexSpy = vi.spyOn(mockUserApi, 'index')
     const store = testUserStore()
 
-    store.index({ foo: 'bar', bin: 'baz' }).value
+    store.index({ foo: 'bar', bin: 'baz' }).data.value
 
     expect(indexSpy).toHaveBeenCalledWith({ foo: 'bar', bin: 'baz' })
   })
@@ -48,11 +48,11 @@ describe('testing .index', () => {
     const indexSpy = vi.spyOn(mockUserApi, 'index')
     const store = testUserStore()
 
-    store.index({ foo: 'bar', bin: 'baz' }).value
+    store.index({ foo: 'bar', bin: 'baz' }).data.value
 
     expect(indexSpy).toHaveBeenCalledWith({ foo: 'bar', bin: 'baz' })
 
-    store.index({ foo: 'alpha' }).value
+    store.index({ foo: 'alpha' }).data.value
 
     await vueUpdates()
 
@@ -66,13 +66,13 @@ describe('testing .index', () => {
     const foo = ref('bar')
     const params = computed(() => ({ foo: foo.value }))
     const fooIndex = store.index(params)
-    fooIndex.value
+    fooIndex.data.value
 
     expect(indexSpy).toHaveBeenCalledWith({ foo: 'bar' })
 
     foo.value = 'biz'
     await vueUpdates()
-    fooIndex.value
+    fooIndex.data.value
 
     expect(indexSpy).toHaveBeenCalledWith({ foo: 'biz' })
   })
@@ -84,13 +84,13 @@ describe('testing .index', () => {
     const foo = ref('bar')
     const params = computed(() => ({ foo }))
     const fooIndex = store.index(params)
-    fooIndex.value
+    fooIndex.data.value
 
     expect(indexSpy).toHaveBeenCalledWith({ foo: 'bar' })
 
     foo.value = 'biz'
     await vueUpdates()
-    fooIndex.value
+    fooIndex.data.value
 
     expect(indexSpy).toHaveBeenCalledWith({ foo: 'biz' })
   })
@@ -98,7 +98,7 @@ describe('testing .index', () => {
   test('ref is reactive', async () => {
     const indexSpy = vi.spyOn(mockUserApi, 'index')
     const store = testUserStore()
-    const { data: elements } = store.index().value
+    const { data: elements } = store.index()
     expect(elements.value).toBe(undefined)
 
     await vueUpdates()

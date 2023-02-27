@@ -89,14 +89,24 @@ export default function defineApiStore (name, api, { idField = 'id' } = {}) {
     const index = (params = {}) => {
       const key = computed(() => api.key('index', unrefAttributes(unref(params))))
 
-      return computed(() => {
-        if (!(key.value in indexes)) {
-          indexes[key.value] = { data: undefined, meta: undefined }
-          fetchIndex(unrefAttributes(unref(params)))
-        }
+      return {
+        data: computed(() => {
+          if (!(key.value in indexes)) {
+            indexes[key.value] = { data: undefined, meta: undefined }
+            fetchIndex(unrefAttributes(unref(params)))
+          }
 
-        return toRefs(indexes[key.value])
-      })
+          return indexes[key.value].data
+        }),
+        meta: computed(() => {
+          if (!(key.value in indexes)) {
+            indexes[key.value] = { data: undefined, meta: undefined }
+            fetchIndex(unrefAttributes(unref(params)))
+          }
+
+          return indexes[key.value].meta
+        })
+      }
     }
 
     /**
