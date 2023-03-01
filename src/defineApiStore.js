@@ -23,9 +23,28 @@ export default function defineApiStore (name, api, { idField = 'id' } = {}) {
   }
 
   const useElementStore = defineStore(name, () => {
+
+    /**
+     * elements store
+     *
+     * @public
+     */
     const elements = reactive({})
+
+    /**
+     * indexes store
+     *
+     * @public
+     */
     const indexes = reactive({})
 
+    /**
+     * Delete an element.
+     *
+     * @internal
+     * @param {object} element
+     * @return {object}
+     */
     const deleteElement = (element) => {
       const key = element[idField]
       delete elements[key]
@@ -33,15 +52,24 @@ export default function defineApiStore (name, api, { idField = 'id' } = {}) {
     }
 
     /**
+     * fetch an element from the API and set it.
      *
-     * @param {mixed} id
-     *     The primary key of the element to fetch.
+     * @internal
+     * @param {mixed} id  The primary key of the element to fetch.
+   *   @return {ref}
      */
     const fetchElement = async id => {
       const element = await api.show(id)
       return setElement(id, element)
     }
 
+    /**
+     * Asyncronous function that returns a fetched { data, meta } index.
+     *
+     * @internal
+     * @param {object} params
+     * @return { data, meta }
+     */
     const fetchIndex = async (params = {}) => {
       const key = api.key('index', params)
       const { data, meta } = await api.index(params)
@@ -49,15 +77,37 @@ export default function defineApiStore (name, api, { idField = 'id' } = {}) {
       return setIndex(key, { data, meta })
     }
 
+    /**
+     * Sets an element and returns a reactive version of it.
+     *
+     * @internal
+     * @param {string|number} key
+     * @param {object} element
+     * @return {ref}
+     */
     const setElement = (key, element) => {
       elements[key] = reactive(element)
       return elements[key]
     }
 
+    /**
+     * Sets elements in mass with no return.
+     *
+     * @internal
+     * @param {array} elements
+     */
     const setElements = elements => {
       elements.forEach(element => setElement(element[idField], element))
     }
 
+    /**
+     * Sets an index and returns it.
+     *
+     * @internal
+     * @param {string} key
+     * @param { data: array, meta: object }
+     * @return {object}
+     */
     const setIndex = (key, { data = [], meta = {} }) => {
       Object.assign(indexes[key], { data, meta })
       return indexes[key]
@@ -70,9 +120,9 @@ export default function defineApiStore (name, api, { idField = 'id' } = {}) {
     /**
      * Delete an element.
      *
-     * @param {Object} element
-     *
-     * @returns {Object}
+     * @public
+     * @param {object} element
+     * @returns {object}
      *     Returns the deleted element.
      */
     const destroy = async element => {
@@ -83,8 +133,9 @@ export default function defineApiStore (name, api, { idField = 'id' } = {}) {
     /**
      * Get a ref for an element index for the given params.
      *
-     * @param {Object} params
-     * @returns {ref}
+     * @public
+     * @param {object} params
+     * @returns { data: ref, meta: ref }
      */
     const index = (params = {}) => {
       const key = computed(() => api.key('index', unrefAttributes(unref(params))))
@@ -116,28 +167,32 @@ export default function defineApiStore (name, api, { idField = 'id' } = {}) {
      * If idRef is a reference, than reactivity will be respected and when it
      * changes, the value of the returned ref will also change.
      *
+     * @public
      * @param {ref|mixed} idRef
      *     Primary key or a ref to a primary key.
      * @returns  {ref}
      */
     const show = idRef => {
-      idRef = unref(idRef)
-      if (idRef == null) {
-        return
-      }
-      if (!(idRef in elements)) {
-        elements[idRef] = undefined
-        fetchElement(idRef)
-      }
+      return computed(() => {
+        if (idRef == null || idRef.value == null) {
+          return
+        }
+        const id = isRef(idRef) ? idRef.value : idRef
 
-      return toRef(elements, idRef)
+        if (!(id in elements)) {
+          elements[id] = undefined
+          fetchElement(id)
+        }
+
+        return elements[id]
+      })
     }
 
     /**
      * Create a new element.
      *
-     * @param {Object} element
-     *
+     * @public
+     * @param {object} element
      * @returns {ref}
      *     The new element returned from the API and stored in Pinia.
      */
@@ -151,7 +206,8 @@ export default function defineApiStore (name, api, { idField = 'id' } = {}) {
     /**
      * Update an element.
      *
-     * @param {Object} element
+     * @public
+     * @param {object} element
      * @returns {ref}
      */
     const update = async element => {
