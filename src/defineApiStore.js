@@ -174,6 +174,11 @@ export default function defineApiStore (name, api, { idField = 'id' } = {}) {
      */
     const show = idRef => {
       return computed(() => {
+        // TODO these next three lines don't work with SingletonApi
+        if (idRef == null || idRef.value == null) {
+          return
+        }
+
         const id = isRef(idRef) ? idRef.value : idRef
 
         if (!(id in elements)) {
