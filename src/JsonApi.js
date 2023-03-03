@@ -5,9 +5,7 @@ const filterKeys = (obj, remove = [null, undefined]) => {
 export default function JsonApi (baseUrl) {
   const createQueryUrl = function (action, params) {
     if (['show', 'update', 'destroy'].includes(action)) {
-      const url = baseUrl.replace(/(\.json)?$/, `/${params}$1`)
-      console.log(`hitting ${url}, ${action}, ${params}`)
-      return url
+      return baseUrl.replace(/(\.json)?$/, `/${params}$1`)
     } else {
       const queryString = new URLSearchParams(filterKeys(params))
       return `${baseUrl}?${queryString}`
