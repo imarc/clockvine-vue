@@ -118,7 +118,7 @@ describe('testing .show', () => {
     const store = testUserStore()
     const person1 = store.show(1)
 
-    expect(person1?.value?.name).toBe(undefined)
+    expect(person1.value).toBe(undefined)
 
     await vueUpdates()
 
@@ -127,12 +127,12 @@ describe('testing .show', () => {
     expect(person1?.value.name).toBe('Kevin')
   })
 
-  test('Only calls show on Api once', () => {
+  test('Only calls show on Api once', async () => {
     const show = vi.spyOn(mockUserApi, 'show')
     const store = testUserStore()
 
-    store.show(1)
-    store.show(1)
+    store.show(1).value
+    store.show(1).value
 
     expect(show).toHaveBeenCalledTimes(1) // TODO
   })
@@ -142,6 +142,9 @@ describe('testing .show', () => {
     const person1 = store.show(1)
     const another1 = store.show(1)
     await vueUpdates()
+
+    console.log('person1', person1.value)
+    console.log('another1', another1.value)
 
     another1.value.name = 'Chuck'
 

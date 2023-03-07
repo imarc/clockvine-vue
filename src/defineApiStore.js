@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { reactive, toRef, computed, unref, isRef, isReactive, toRefs } from 'vue'
+import { reactive, ref, toRef, computed, unref, isRef, isReactive, toRefs } from 'vue'
 
 import JsonApi from './JsonApi'
 
@@ -60,7 +60,8 @@ export default function defineApiStore (name, api, { idField = 'id' } = {}) {
      */
     const fetchElement = async id => {
       const element = await api.show(id)
-      return setElement(id, element)
+      setElement(id, element)
+      return toRef(elements, id)
     }
 
     /**
@@ -86,7 +87,9 @@ export default function defineApiStore (name, api, { idField = 'id' } = {}) {
      * @return {ref}
      */
     const setElement = (key, element) => {
-      elements[key] = reactive(element)
+      console.log('setting element', key)
+      elements[key] = element
+      console.log(isReactive(elements[key]))
       return elements[key]
     }
 
@@ -173,21 +176,18 @@ export default function defineApiStore (name, api, { idField = 'id' } = {}) {
      * @returns  {ref}
      */
     const show = idRef => {
-      return computed(() => {
-        // TODO these next three lines don't work with SingletonApi
-        if (idRef == null || idRef.value == null) {
-          return
-        }
+      const id = unref(idRef)
+      // TODO these next three lines don't work with SingletonApi
+      if (id == null) {
+        return
+      }
 
-        const id = isRef(idRef) ? idRef.value : idRef
+      if (!(id in elements)) {
+        elements[id] = undefined
+        fetchElement(id)
+      }
 
-        if (!(id in elements)) {
-          elements[id] = undefined
-          fetchElement(id)
-        }
-
-        return elements[id]
-      })
+      return toRef(elements, id)
     }
 
     /**
