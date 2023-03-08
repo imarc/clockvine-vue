@@ -87,9 +87,7 @@ export default function defineApiStore (name, api, { idField = 'id' } = {}) {
      * @return {ref}
      */
     const setElement = (key, element) => {
-      console.log('setting element', key)
       elements[key] = element
-      console.log(isReactive(elements[key]))
       return elements[key]
     }
 

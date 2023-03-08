@@ -143,9 +143,6 @@ describe('testing .show', () => {
     const another1 = store.show(1)
     await vueUpdates()
 
-    console.log('person1', person1.value)
-    console.log('another1', another1.value)
-
     another1.value.name = 'Chuck'
 
     expect(person1?.value.name).toBe('Chuck')
