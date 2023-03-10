@@ -3,10 +3,7 @@ import { reactive, ref, toRef, computed, unref, isRef, isReactive, toRefs } from
 
 import JsonApi from './JsonApi'
 
-const nestedUnref = obj => {
-  const result = Object.fromEntries(Object.entries(unref(obj)).map(([k, v]) => [k, unref(v)]))
-  return result
-}
+const nestedUnref = obj => Object.fromEntries(Object.entries(unref(obj)).map(([k, v]) => [k, unref(v)]))
 
 export default function defineApiStore (name, api, { idField = 'id', indexDataField = 'data' } = {}) {
   if (typeof api === 'string') {
@@ -53,9 +50,8 @@ export default function defineApiStore (name, api, { idField = 'id', indexDataFi
      * @param {object} element
      * @return {ref}
      */
-    const mergeElement = (key, element) => {
-      const oldElement = unref(elements[key]) === undefined ? {} : unref(elements[key])
-      elements[key] = Object.assign(oldElement, element)
+    const setElement = (key, element) => {
+      elements[key] = element
       return toRef(elements, key)
     }
 
@@ -65,8 +61,8 @@ export default function defineApiStore (name, api, { idField = 'id', indexDataFi
      * @internal
      * @param {array} elements
      */
-    const mergeElements = elements => {
-      return elements.map(element => mergeElement(element[idField], element))
+    const setElements = elements => {
+      return elements.map(element => setElement(element[idField], element))
     }
 
     /**
@@ -78,9 +74,9 @@ export default function defineApiStore (name, api, { idField = 'id', indexDataFi
      * @return {object}
      */
     const setIndex = (key, index) => {
-      index[indexDataField] = mergeElements(index[indexDataField]).map(unref)
-      indexes[key] = index
-      return toRef(indexes, key)
+      index[indexDataField] = setElements(index[indexDataField])
+      Object.assign(indexes[key], index)
+      return indexes[key]
     }
 
     // =========================================================================
@@ -96,7 +92,7 @@ export default function defineApiStore (name, api, { idField = 'id', indexDataFi
         const id = unref(idRef)
         if (!(id in elements)) {
           elements[id] = undefined
-          api.show(id).then(element => mergeElement(id, element))
+          api.show(id).then(element => setElement(id, element))
         }
 
         return elements[id]
@@ -107,13 +103,12 @@ export default function defineApiStore (name, api, { idField = 'id', indexDataFi
       * @param {ref|object<ref>} params
       * @return {ref}  computed reference to elements[id]
       */
-    const index = (paramsRef = {}) => {
+    const index = (params = {}) => {
       return computed(() => {
-        const params = nestedUnref(paramsRef)
-        const key = api.key('index', params)
+        const key = api.key('index', nestedUnref(params))
 
         if (!(key in indexes)) {
-          indexes[key] = reactive({})
+          indexes[key] = undefined
           api.index(params).then(index => setIndex(key, index))
         }
 
@@ -127,13 +122,12 @@ export default function defineApiStore (name, api, { idField = 'id', indexDataFi
      */
     const store = async element => {
       const newElement = await api.store(nestedUnref(element))
-      return mergeElement(newElement[idField], newElement)
+      return setElement(newElement[idField], newElement)
     }
 
     const update = async element => {
       const updatedElement = await api.update(element)
-      const id = idField in updatedElement ? updatedElement[idField] : element[idField]
-      return mergeElement(id, updatedElement)
+      return setElement(updatedElement[idField], updatedElement)
     }
 
     const destroy = async element => {

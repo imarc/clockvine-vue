@@ -9,12 +9,8 @@ const mockUserApi = {
     const queryStr = (new URLSearchParams(params)).toString()
     return `${action}?${queryStr}`
   },
-  index: () => Promise.resolve({
-    data: Object.values(mockUsers).map(e => Object.assign({}, e))
-  }),
-  show: id => {
-    return Promise.resolve(id in mockUsers ? Object.assign({}, mockUsers[id]) : null)
-  },
+  index: (params) => Promise.resolve({ data: Object.values(mockUsers).map(e => Object.assign({}, e)) }),
+  show: id => Promise.resolve(id in mockUsers ? Object.assign({ shown: (new Date()) }, mockUsers[id]) : null),
   update: element => {
     mockUsers[element.id] = element
     return Promise.resolve(Object.assign({}, element))
