@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue'
 import { beforeEach, expect, test, vi } from 'vitest'
-import { userApiReset, mockUserApi, testUserStore, vueUpdates } from './testHelpers.js'
+import { userApiReset, mockUserApi, testUserStore, vueUpdates, ensureLoaded } from './testHelpers.js'
 
 beforeEach(userApiReset)
 
@@ -9,7 +9,7 @@ test('calls index on Api', () => {
   const store = testUserStore()
 
   // necessary for to trigger computing the index at all
-  store.index().value
+  ensureLoaded(store.index())
 
   expect(indexSpy).toHaveBeenCalledTimes(1)
 })
@@ -18,8 +18,8 @@ test('Only calls index on Api once', () => {
   const indexSpy = vi.spyOn(mockUserApi, 'index')
   const store = testUserStore()
 
-  store.index().value
-  store.index().value
+  ensureLoaded(store.index())
+  ensureLoaded(store.index())
 
   expect(indexSpy).toHaveBeenCalledTimes(1) // TODO
 })
@@ -28,7 +28,7 @@ test('Parameters are passed through', () => {
   const indexSpy = vi.spyOn(mockUserApi, 'index')
   const store = testUserStore()
 
-  store.index({ foo: 'bar', bin: 'baz' }).value
+  ensureLoaded(store.index({ foo: 'bar', bin: 'baz' }))
 
   expect(indexSpy).toHaveBeenCalledWith({ foo: 'bar', bin: 'baz' })
 })
@@ -37,11 +37,11 @@ test('Parameters can change', async () => {
   const indexSpy = vi.spyOn(mockUserApi, 'index')
   const store = testUserStore()
 
-  store.index({ foo: 'bar', bin: 'baz' }).value
+  ensureLoaded(store.index({ foo: 'bar', bin: 'baz' }))
 
   expect(indexSpy).toHaveBeenCalledWith({ foo: 'bar', bin: 'baz' })
 
-  store.index({ foo: 'alpha' }).value
+  ensureLoaded(store.index({ foo: 'alpha' }))
 
   await vueUpdates()
 
@@ -54,12 +54,12 @@ test('Parameters can be reactive', async () => {
 
   const foo = ref('bar')
   const fooIndex = store.index({ foo })
-  fooIndex.value
+  ensureLoaded(fooIndex)
 
   expect(indexSpy).toHaveBeenCalledWith({ foo: 'bar' })
 
   foo.value = 'biz'
-  fooIndex.value
+  ensureLoaded(fooIndex)
 
   expect(indexSpy).toHaveBeenCalledWith({ foo: 'biz' })
 })
@@ -71,12 +71,12 @@ test('Parameters can be in a computed object', async () => {
   const foo = ref('bar')
   const params = computed(() => ({ foo }))
   const fooIndex = store.index(params)
-  fooIndex.value
+  ensureLoaded(fooIndex)
 
   expect(indexSpy).toHaveBeenCalledWith({ foo: 'bar' })
 
   foo.value = 'biz'
-  fooIndex.value
+  ensureLoaded(fooIndex)
 
   expect(indexSpy).toHaveBeenCalledWith({ foo: 'biz' })
 })
@@ -97,9 +97,9 @@ test('ref is reactive', async () => {
 
 test('show merges over index', async () => {
   const store = testUserStore()
-  store.show(1).value
+  ensureLoaded(store.show(1))
   const userIndex = store.index()
-  userIndex.value
+  ensureLoaded(userIndex)
   await vueUpdates()
 
   expect(userIndex.value.data[0].shown).toBeTruthy()

@@ -1,5 +1,5 @@
 import { beforeEach, expect, test } from 'vitest'
-import { userApiReset, testUserStore, vueUpdates } from './testHelpers.js'
+import { userApiReset, testUserStore, vueUpdates, ensureLoaded } from './testHelpers.js'
 
 beforeEach(userApiReset)
 
@@ -17,7 +17,7 @@ test('can update from clone object', async () => {
   const store = testUserStore()
   const person1 = store.show(1)
 
-  person1.value // required because person1 is lazy
+  ensureLoaded(person1)
   await vueUpdates()
 
   const draftPerson = Object.assign({}, person1.value)

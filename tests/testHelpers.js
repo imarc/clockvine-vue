@@ -10,4 +10,12 @@ const userApiReset = () => {
   mockUserApi.reset()
 }
 
-export { mockUserApi, testUserStore, vueUpdates, userApiReset }
+const ensureLoaded = ref => ref.value
+
+export {
+  ensureLoaded,
+  mockUserApi,
+  testUserStore,
+  userApiReset,
+  vueUpdates
+}

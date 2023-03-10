@@ -1,5 +1,5 @@
 import { beforeEach, expect, test, vi } from 'vitest'
-import { userApiReset, mockUserApi, testUserStore, vueUpdates } from './testHelpers.js'
+import { userApiReset, mockUserApi, testUserStore, vueUpdates, ensureLoaded } from './testHelpers.js'
 
 beforeEach(userApiReset)
 
@@ -21,8 +21,8 @@ test('Only calls show on Api once', async () => {
   const show = vi.spyOn(mockUserApi, 'show')
   const store = testUserStore()
 
-  store.show(1).value
-  store.show(1).value
+  ensureLoaded(store.show(1))
+  ensureLoaded(store.show(1))
 
   expect(show).toHaveBeenCalledTimes(1) // TODO
 })
@@ -32,7 +32,7 @@ test('ref is mutable', async () => {
   const person1 = store.show(1)
   const another1 = store.show(1)
 
-  person1.value
+  ensureLoaded(person1)
   await vueUpdates()
 
   another1.value.name = 'Chuck'
