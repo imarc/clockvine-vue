@@ -1,19 +1,7 @@
-import { setActivePinia, createPinia } from 'pinia'
-import defineApiStore from '../src/defineApiStore.js'
-import { beforeEach, expect, test, vi } from 'vitest'
-import { reactive, ref, toRef, computed, unref, isRef, isReactive, toRefs } from 'vue'
+import { beforeEach, expect, test } from 'vitest'
+import { userApiReset, testUserStore, vueUpdates } from './testHelpers.js'
 
-
-import mockUserApi from './usersApi.mock.js'
-
-const testUserStore = defineApiStore('testUserStore', mockUserApi)
-
-const vueUpdates = () => new Promise(setTimeout)
-
-beforeEach(() => {
-  setActivePinia(createPinia())
-  mockUserApi.reset()
-})
+beforeEach(userApiReset)
 
 test('can update', async () => {
   const store = testUserStore()
@@ -67,7 +55,7 @@ test('can have a reference to an object before its created', async () => {
 test('can destroy an object', async () => {
   const store = testUserStore()
 
-  store.index()
+  store.show(1)
   await vueUpdates()
 
   store.destroy({ id: 1 })

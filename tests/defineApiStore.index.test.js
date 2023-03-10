@@ -1,18 +1,8 @@
-import { setActivePinia, createPinia } from 'pinia'
-import defineApiStore from '../src/defineApiStore.js'
+import { ref, computed } from 'vue'
 import { beforeEach, expect, test, vi } from 'vitest'
-import { reactive, ref, toRef, computed, unref, isRef, isReactive, toRefs } from 'vue'
+import { userApiReset, mockUserApi, testUserStore, vueUpdates } from './testHelpers.js'
 
-
-import mockUserApi from './usersApi.mock.js'
-
-const testUserStore = defineApiStore('testUserStore', mockUserApi)
-
-const vueUpdates = () => new Promise(setTimeout)
-
-beforeEach(() => {
-  setActivePinia(createPinia())
-})
+beforeEach(userApiReset)
 
 test('calls index on Api', () => {
   const indexSpy = vi.spyOn(mockUserApi, 'index')
@@ -103,43 +93,6 @@ test('ref is reactive', async () => {
 
   expect(indexSpy).toHaveBeenCalledTimes(1)
   expect(fooIndex.value.data.length).toBe(2)
-})
-
-test('ref is reactive', async () => {
-  const showSpy = vi.spyOn(mockUserApi, 'show')
-  const store = testUserStore()
-  const person1 = store.show(1)
-
-  expect(person1.value).toBe(undefined)
-
-  await vueUpdates()
-
-  expect(showSpy).toHaveBeenCalledTimes(1)
-
-  expect(person1?.value.name).toBe('Kevin')
-})
-
-test('Only calls show on Api once', async () => {
-  const show = vi.spyOn(mockUserApi, 'show')
-  const store = testUserStore()
-
-  store.show(1).value
-  store.show(1).value
-
-  expect(show).toHaveBeenCalledTimes(1) // TODO
-})
-
-test('ref is mutable', async () => {
-  const store = testUserStore()
-  const person1 = store.show(1)
-  const another1 = store.show(1)
-
-  person1.value
-  await vueUpdates()
-
-  another1.value.name = 'Chuck'
-
-  expect(person1?.value.name).toBe('Chuck')
 })
 
 test('show merges over index', async () => {
