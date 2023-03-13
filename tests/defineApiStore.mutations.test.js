@@ -1,5 +1,6 @@
-import { beforeEach, expect, test } from 'vitest'
-import { userApiReset, testUserStore, vueUpdates, ensureLoaded } from './testHelpers.js'
+import { watch } from 'vue'
+import { beforeEach, expect, test, vi } from 'vitest'
+import { userApiReset, mockUserApi, testUserStore, vueUpdates, ensureLoaded } from './testHelpers.js'
 
 beforeEach(userApiReset)
 
@@ -65,4 +66,38 @@ test('can destroy an object', async () => {
   await vueUpdates()
 
   expect(person1.value).toBe(undefined)
+})
+
+test('indexes refresh on store', async () => {
+  const users = testUserStore()
+  const usersIndex = users.index()
+
+  ensureLoaded(users.show(1))
+  watch(usersIndex, () => {})
+  await vueUpdates()
+
+  expect(usersIndex.value.data.length).toBe(2)
+  users.store({ id: 3, name: 'Jim', full_name: 'Jim Halpert' })
+  await vueUpdates()
+
+  expect(usersIndex.value.data.length).toBe(3)
+})
+
+test('index refresh is lazy', async () => {
+  const indexSpy = vi.spyOn(mockUserApi, 'index')
+  const users = testUserStore()
+  const usersIndex = users.index()
+
+  ensureLoaded(users.show(1))
+  ensureLoaded(usersIndex)
+  await vueUpdates()
+
+  expect(indexSpy).toHaveBeenCalledTimes(1)
+  users.store({ id: 3, name: 'Jim', full_name: 'Jim Halpert' })
+  await vueUpdates()
+
+  expect(indexSpy).toHaveBeenCalledTimes(1)
+
+  ensureLoaded(usersIndex)
+  expect(indexSpy).toHaveBeenCalledTimes(2)
 })
