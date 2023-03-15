@@ -1,3 +1,4 @@
+import { watch } from 'vue'
 import { beforeEach, expect, test, vi } from 'vitest'
 import { userApiReset, mockUserApi, testUserStore, vueUpdates, ensureLoaded } from './testHelpers.js'
 
@@ -38,4 +39,21 @@ test('ref is mutable', async () => {
   another1.value.name = 'Chuck'
 
   expect(person1?.value.name).toBe('Chuck')
+})
+
+test('invalidating an element will recall api.show', async () => {
+  const showSpy = vi.spyOn(mockUserApi, 'show')
+  const store = testUserStore()
+  const person1 = store.show(1)
+
+  watch(person1, () => {})
+
+  await vueUpdates()
+
+  expect(showSpy).toHaveBeenCalledTimes(1)
+
+  store.invalidate(person1)
+  await vueUpdates()
+
+  expect(showSpy).toHaveBeenCalledTimes(2)
 })

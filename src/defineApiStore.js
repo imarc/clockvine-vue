@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { reactive, ref, toRef, computed, unref, isRef, isReactive, toRefs } from 'vue'
+import { reactive, toRef, computed, unref } from 'vue'
 
 import JsonApi from './JsonApi'
 
@@ -32,6 +32,7 @@ export default function defineApiStore (
      * @public
      */
     const elements = reactive({})
+    const elementState = reactive({})
 
     /**
      * indexes store
@@ -54,6 +55,7 @@ export default function defineApiStore (
      */
     const deleteElement = (element) => {
       const key = element[idField]
+      delete elementState[key]
       delete elements[key]
       return element
     }
@@ -69,6 +71,7 @@ export default function defineApiStore (
     const mergeElement = (key, element) => {
       const oldElement = unref(elements[key]) === undefined ? {} : unref(elements[key])
       elements[key] = Object.assign(oldElement, element)
+      elementState[key] = VALID
       return toRef(elements, key)
     }
 
@@ -107,13 +110,30 @@ export default function defineApiStore (
     const show = idRef => {
       return computed(() => {
         const id = unref(idRef)
-        if (!(id in elements)) {
-          elements[id] = undefined
-          api.show(id).then(element => mergeElement(id, element))
+        if (!(id in elementState) || elementState[id] === INVALID) {
+          elements[id] = elements[id] || undefined
+          elementState[id] = LOADING
+          api.show(id).then(element => {
+            const newElement = mergeElement(id, element)
+            elementState[id] = VALID
+            return newElement
+          })
         }
 
         return elements[id]
       })
+    }
+
+    /**
+     * @param {ref|mixed} elementOrIdRef
+     */
+    const invalidate = elementOrIdRef => {
+      let elementOrId = unref(elementOrIdRef)
+      if (typeof elementOrId === 'object' && idField in elementOrId) {
+        elementOrId = elementOrId[idField]
+      }
+
+      elementState[elementOrId] = INVALID
     }
 
     /**
@@ -126,7 +146,7 @@ export default function defineApiStore (
         const key = api.key('index', params)
 
         if (!(key in indexState) || indexState[key] === INVALID) {
-          indexes[key] = reactive({})
+          indexes[key] = indexes[key] || reactive({})
           indexState[key] = LOADING
           api.index(params).then(index => {
             const newIndex = setIndex(key, index)
@@ -160,7 +180,7 @@ export default function defineApiStore (
             const key = api.key('index', params)
 
             if (!(key in indexState) || indexState[key] === INVALID) {
-              indexes[key] = reactive({})
+              indexes[key] = indexes[key] || reactive({})
               indexState[key] = LOADING
               api.index(params).then(index => {
                 const newIndex = setIndex(key, index)
@@ -198,6 +218,15 @@ export default function defineApiStore (
       return deleteElement(deletedElement)
     }
 
-    return { destroy, index, indexAsRef, show, store, update, invalidateIndex }
+    return {
+      destroy,
+      index,
+      indexAsRef,
+      invalidate,
+      invalidateIndex,
+      show,
+      store,
+      update,
+    }
   })
 }
