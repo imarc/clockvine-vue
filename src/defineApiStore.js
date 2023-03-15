@@ -152,16 +152,21 @@ export default function defineApiStore (
       }
     }
 
-    const newIndex = (paramsRef = {}) => {
+    const indexRefs = (paramsRef = {}) => {
       return new Proxy({}, {
         get (target, prop, receiver) {
           return computed(() => {
             const params = nestedUnref(paramsRef)
             const key = api.key('index', params)
 
-            if (!(key in indexes)) {
+            if (!(key in indexState) || indexState[key] === INVALID) {
               indexes[key] = reactive({})
-              api.index(params).then(index => setIndex(key, index))
+              indexState[key] = LOADING
+              api.index(params).then(index => {
+                const newIndex = setIndex(key, index)
+                indexState[key] = VALID
+                return newIndex
+              })
             }
 
             return indexes[key][prop]
@@ -169,16 +174,6 @@ export default function defineApiStore (
         }
       })
     }
-
-    const indexRefs = (paramsRef = {}) => {
-      const indexRef = index(paramsRef)
-
-      return Object.fromEntries(
-        [indexDataField, indexMetaField].map(key => [key, computed(() => unref(indexRef)[key])])
-      )
-    }
-
-
 
     /**
      * @param {ref|object<ref>} element
@@ -193,6 +188,7 @@ export default function defineApiStore (
     const update = async element => {
       const updatedElement = await api.update(element)
       const id = idField in updatedElement ? updatedElement[idField] : element[idField]
+      invalidateAllIndexes()
       return mergeElement(id, updatedElement)
     }
 
@@ -202,6 +198,6 @@ export default function defineApiStore (
       return deleteElement(deletedElement)
     }
 
-    return { destroy, index, newIndex, indexRefs, show, store, update, invalidateIndex }
+    return { destroy, index, indexRefs, show, store, update, invalidateIndex }
   })
 }

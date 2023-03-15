@@ -131,22 +131,16 @@ test('indexRefs returns references', async () => {
   expect(data.value.length).toBe(2)
 })
 
-/*
 test('indexRefs references work properly', async () => {
   const store = testUserStore()
   const { data } = store.indexRefs()
-
-  ensureLoaded(data)
+  watch(data, () => {})
   await vueUpdates()
 
   expect(data.value.length).toBe(2)
 
   await store.store({ id: 10, name: 'Cheese', full_name: 'Brie' })
-
-  console.log(store.index().value)
   await vueUpdates()
-  console.log(store.index().value)
 
   expect(data.value.length).toBe(3)
 })
-*/
