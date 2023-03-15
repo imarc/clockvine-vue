@@ -224,6 +224,7 @@ export default function defineApiStore (
       indexAsRef,
       invalidate,
       invalidateIndex,
+      invalidateAllIndexes,
       show,
       store,
       update,
