@@ -120,7 +120,7 @@ export default function defineApiStore (
       * @param {ref|object<ref>} params
       * @return {ref}  computed reference to elements[id]
       */
-    const index = (paramsRef = {}) => {
+    const indexAsRef = (paramsRef = {}) => {
       return computed(() => {
         const params = nestedUnref(paramsRef)
         const key = api.key('index', params)
@@ -152,7 +152,7 @@ export default function defineApiStore (
       }
     }
 
-    const indexRefs = (paramsRef = {}) => {
+    const index = (paramsRef = {}) => {
       return new Proxy({}, {
         get (target, prop, receiver) {
           return computed(() => {
@@ -198,6 +198,6 @@ export default function defineApiStore (
       return deleteElement(deletedElement)
     }
 
-    return { destroy, index, indexRefs, show, store, update, invalidateIndex }
+    return { destroy, index, indexAsRef, show, store, update, invalidateIndex }
   })
 }
