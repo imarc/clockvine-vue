@@ -1,18 +1,18 @@
 {
     "name": "clockvine",
-    "version": "2.0.0-alpha.1",
+    "version": "2.0.0-alpha.2",
     "description": "",
     "author": "Kevin Hamer [kh] <kevin@imarc.com>",
     "license": "Apache-2.0",
     "type": "module",
     "module": "./src/Clockvine.js",
     "exports": {
-      ".": {
-        "default": "./src/Clockvine.js"
-      }
+        ".": {
+            "default": "./src/Clockvine.js"
+        }
     },
     "engines": {
-      "node": ">=18.0.0"
+        "node": ">=18.0.0"
     },
     "browserslist": [
         "defaults"
