@@ -21,7 +21,7 @@ export default function defineApiStore (
     indexMetaField = 'meta'
   } = {}
 ) {
-  if (typeof api === 'string') {
+  if (typeof api === 'string' || typeof api === 'function') {
     api = new JsonApi(api)
   }
 
@@ -199,8 +199,8 @@ export default function defineApiStore (
      * @param {ref|object<ref>} element
      * @return {ref} computed reference to the new element
      */
-    const store = async element => {
-      const newElement = await api.store(nestedUnref(element))
+    const store = async (element, params = {}) => {
+      const newElement = await api.store(nestedUnref(element), params)
       invalidateAllIndexes()
       return mergeElement(newElement[idField], newElement)
     }
