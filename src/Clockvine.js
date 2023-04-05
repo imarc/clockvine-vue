@@ -1,11 +1,6 @@
-import defineApiStore from './defineApiStore.js'
-import JsonApi from './JsonApi.js'
-import JsonSingletonApi from './JsonSingletonApi.js'
-import XsrfFetch from './XsrfFetch.js'
-
-export {
-  defineApiStore,
-  JsonApi,
-  JsonSingletonApi,
-  XsrfFetch,
-}
+export { default as DefaultUrlFormatter } from './DefaultUrlFormatter.js'
+export { default as JsonApi } from './JsonApi.js'
+export { default as JsonSingletonApi } from './JsonSingletonApi.js'
+export { default as UrlFormatter } from './UrlFormatter.js'
+export { default as XsrfFetch } from './XsrfFetch.js'
+export { default as defineApiStore } from './defineApiStore.js'
