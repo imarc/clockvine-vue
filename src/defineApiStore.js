@@ -18,7 +18,8 @@ export default function defineApiStore (
   {
     idField = 'id',
     indexDataField = 'data',
-    indexMetaField = 'meta'
+    indexMetaField = 'meta',
+    showRequiresKey = true,
   } = {}
 ) {
   if (typeof api === 'string' || typeof api === 'function') {
@@ -110,6 +111,10 @@ export default function defineApiStore (
     const show = idRef => {
       return computed(() => {
         const id = unref(idRef)
+        if (showRequiresKey && id === undefined) {
+          return
+        }
+
         if (!(id in elementState) || elementState[id] === INVALID) {
           elements[id] = elements[id] || undefined
           elementState[id] = LOADING
