@@ -1,20 +1,10 @@
-const filterKeys = (obj, remove = [null, undefined]) => {
-  return Object.fromEntries(Object.entries(obj).filter(([_, v]) => !remove.includes(v)))
-}
+import DefaultUrlFormatter from './DefaultUrlFormatter.js'
 
-export default function JsonApi (baseUrl) {
-  const createQueryUrl = function (action, params, element) {
-    if (typeof baseUrl === 'function') {
-      baseUrl = baseUrl(action, params, element)
-    }
-
-    if (['show', 'update', 'destroy'].includes(action)) {
-      return baseUrl.replace(/(\.json)?$/, `/${params}$1`)
-    } else {
-      const queryString = new URLSearchParams(filterKeys(params))
-      return `${baseUrl}?${queryString}`
-    }
-  }
+export default function JsonApi (baseUrl, {
+  fetch = window.fetch,
+  Formatter = DefaultUrlFormatter
+} = {}) {
+  const createQueryUrl = (new Formatter(baseUrl)).format
 
   this.key = createQueryUrl
 
@@ -24,7 +14,7 @@ export default function JsonApi (baseUrl) {
   }
 
   this.show = async function (id) {
-    const url = createQueryUrl('show', id)
+    const url = createQueryUrl('show', { id })
     return fetch(url).then(r => r.json()).then(r => r.data)
   }
 
