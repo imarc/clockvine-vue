@@ -83,6 +83,9 @@ export default function defineApiStore (
      * @param {array} elements
      */
     const mergeElements = elements => {
+      if (!elements.map) {
+        console.error('elements.map not defined', elements)
+      }
       return elements.map(element => mergeElement(element[idField], element))
     }
 
@@ -210,15 +213,15 @@ export default function defineApiStore (
       return mergeElement(newElement[idField], newElement)
     }
 
-    const update = async element => {
-      const updatedElement = await api.update(element)
+    const update = async (element, params = {}) => {
+      const updatedElement = await api.update(nestedUnref(element), params)
       const id = idField in updatedElement ? updatedElement[idField] : element[idField]
       invalidateAllIndexes()
       return mergeElement(id, updatedElement)
     }
 
-    const destroy = async element => {
-      const deletedElement = await api.destroy(element)
+    const destroy = async (element, params = {}) => {
+      const deletedElement = await api.destroy(nestedUnref(element), params)
       invalidateAllIndexes()
       return deleteElement(deletedElement)
     }

@@ -29,4 +29,28 @@ export default function JsonApi (baseUrl, {
     }
     return fetch(url, options).then(r => r.json()).then(r => r.data)
   }
+
+  this.update = async function (element, params = {}) {
+    const url = createQueryUrl('update', params, element)
+    const options = {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(element)
+    }
+    return fetch(url, options).then(r => r.json()).then(r => r.data)
+  }
+
+  this.destroy = async function (element, params = {}) {
+    const url = createQueryUrl('destroy', params, element)
+    const options = {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(element)
+    }
+    return fetch(url, options).then(r => r.json()).then(r => r.data)
+  }
 }
