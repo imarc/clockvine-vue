@@ -2,7 +2,8 @@ import DefaultUrlFormatter from './DefaultUrlFormatter.js'
 
 export default function JsonApi (baseUrl, {
   fetch = window.fetch,
-  Formatter = DefaultUrlFormatter
+  Formatter = DefaultUrlFormatter,
+  serialize = JSON.stringify
 } = {}) {
   const createQueryUrl = (new Formatter(baseUrl)).format
 
@@ -25,7 +26,7 @@ export default function JsonApi (baseUrl, {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(element)
+      body: serialize(element)
     }
     return fetch(url, options).then(r => r.json()).then(r => r.data)
   }
@@ -37,7 +38,7 @@ export default function JsonApi (baseUrl, {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(element)
+      body: serialize(element)
     }
     return fetch(url, options).then(r => r.json()).then(r => r.data)
   }
@@ -49,7 +50,7 @@ export default function JsonApi (baseUrl, {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(element)
+      body: serialize(element)
     }
     return fetch(url, options).then(r => r.json()).then(r => r.data)
   }
