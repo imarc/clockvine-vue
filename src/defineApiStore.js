@@ -223,7 +223,7 @@ export default function defineApiStore (
     const destroy = async (element, params = {}) => {
       const deletedElement = await api.destroy(nestedUnref(element), params)
       invalidateAllIndexes()
-      return deleteElement(deletedElement)
+      return deleteElement(element)
     }
 
     return {
