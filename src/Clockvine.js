@@ -1,6 +1,7 @@
 export { default as DefaultUrlFormatter } from './DefaultUrlFormatter.js'
 export { default as JsonApi } from './JsonApi.js'
 export { default as JsonSingletonApi } from './JsonSingletonApi.js'
+export { default as SingletonUrlFormatter } from './SingletonUrlFormatter.js'
 export { default as UrlFormatter } from './UrlFormatter.js'
 export { default as XsrfFetch } from './XsrfFetch.js'
 export { default as defineApiStore } from './defineApiStore.js'
