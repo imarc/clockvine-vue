@@ -114,7 +114,7 @@ export default function defineApiStore (
     const show = idRef => {
       return computed(() => {
         const id = unref(idRef)
-        if (showRequiresKey && id === undefined) {
+        if (showRequiresKey && (id === undefined || id === null)) {
           return
         }
 
