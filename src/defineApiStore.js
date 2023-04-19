@@ -18,8 +18,7 @@ export default function defineApiStore (
   {
     idField = 'id',
     indexDataField = 'data',
-    indexMetaField = 'meta',
-    showRequiresKey = true,
+    showRequiresKey = true
   } = {}
 ) {
   if (typeof api === 'string' || typeof api === 'function') {
@@ -182,7 +181,7 @@ export default function defineApiStore (
 
     const index = (paramsRef = {}) => {
       return new Proxy({}, {
-        get (target, prop, receiver) {
+        get (_, prop) {
           return computed(() => {
             const params = nestedUnref(paramsRef)
             const key = api.key('index', params)
@@ -221,12 +220,22 @@ export default function defineApiStore (
     }
 
     const destroy = async (element, params = {}) => {
-      const deletedElement = await api.destroy(nestedUnref(element), params)
+      await api.destroy(nestedUnref(element), params)
       invalidateAllIndexes()
       return deleteElement(element)
     }
 
     return {
+      /**
+       * These are primarilary included so that pinia dev tools work; without
+       * these being returned, these reactive objects will not show in the dev
+       * tools.
+       */
+      elements,
+      elementState,
+      indexes,
+      indexState,
+
       destroy,
       index,
       indexAsRef,
@@ -235,7 +244,7 @@ export default function defineApiStore (
       invalidateAllIndexes,
       show,
       store,
-      update,
+      update
     }
   })
 }
