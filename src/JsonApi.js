@@ -1,12 +1,11 @@
-import DefaultUrlFormatter from './DefaultUrlFormatter.js'
+import URLFormat from './URLFormat.js'
 
-export default function JsonApi (baseUrl, {
-  fetch = window.fetch,
-  Formatter = DefaultUrlFormatter,
-  serialize = JSON.stringify
+const JsonApi = function JsonApi (baseUrl, {
+  fetch = JsonApi.config.fetch,
+  Format = JsonApi.config.Format,
+  serialize = JsonApi.config.serialize
 } = {}) {
-  const createQueryUrl = (new Formatter(baseUrl)).format
-
+  const createQueryUrl = (new Format(baseUrl)).format
   this.key = createQueryUrl
 
   this.index = async function (params) {
@@ -55,3 +54,13 @@ export default function JsonApi (baseUrl, {
     return fetch(url, options).then(r => r.json()).then(r => r.data)
   }
 }
+
+JsonApi.config = {
+  fetch,
+  Format: URLFormat,
+  serialize: JSON.stringify
+}
+
+JsonApi.use = plugin => plugin(JsonApi)
+
+export default JsonApi

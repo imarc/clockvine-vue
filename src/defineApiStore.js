@@ -12,7 +12,7 @@ const LOADING = 'LOADING'
 const VALID = 'VALID'
 const INVALID = 'INVALID'
 
-export default function defineApiStore (
+const defineApiStore = function defineApiStore (
   name,
   api,
   {
@@ -21,8 +21,14 @@ export default function defineApiStore (
     showRequiresKey = true
   } = {}
 ) {
-  if (typeof api === 'string' || typeof api === 'function') {
-    api = new JsonApi(api)
+  if (typeof name !== 'string') {
+    throw new Error('Store name must be a string.')
+  }
+
+  if (typeof api === 'string') {
+    api = new defineApiStore.config.DefaultApi(api)
+  } else if (typeof api !== 'object') {
+    throw new Error(`API must be a string or object: got ${typeof api}`)
   }
 
   return defineStore(name, () => {
@@ -69,8 +75,7 @@ export default function defineApiStore (
      * @return {ref}
      */
     const mergeElement = (key, element) => {
-      const oldElement = unref(elements[key]) === undefined ? {} : unref(elements[key])
-      elements[key] = Object.assign(oldElement, element)
+      elements[key] = Object.assign(elements[key] ?? {}, element)
       elementState[key] = VALID
       return toRef(elements, key)
     }
@@ -82,9 +87,6 @@ export default function defineApiStore (
      * @param {array} elements
      */
     const mergeElements = elements => {
-      if (!elements.map) {
-        console.error('elements.map not defined', elements)
-      }
       return elements.map(element => mergeElement(element[idField], element))
     }
 
@@ -97,6 +99,11 @@ export default function defineApiStore (
      * @return {object}
      */
     const setIndex = (key, index) => {
+      if (!index[indexDataField]) {
+        throw new Error(`Index must have a "${indexDataField}" field`)
+      } else if (typeof index[indexDataField].map !== 'function') {
+        throw new Error(`Index "${indexDataField}" field must be an array`)
+      }
       index[indexDataField] = mergeElements(index[indexDataField]).map(unref)
       indexes[key] = index
       return toRef(indexes, key)
@@ -248,3 +255,11 @@ export default function defineApiStore (
     }
   })
 }
+
+defineApiStore.config = {
+  DefaultApi: JsonApi
+}
+
+defineApiStore.use = plugin => plugin(defineApiStore)
+
+export default defineApiStore
