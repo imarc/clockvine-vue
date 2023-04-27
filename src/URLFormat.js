@@ -1,12 +1,10 @@
 import Params from './Params.js'
 
-const URLFormat = function URLFormat (
-  baseUrl,
-  {
-    format = URLFormat.config.format,
-    includeNulls = URLFormat.config.includeNulls
-  } = {}) {
-  this.format = function (action, queryParams, payload) {
+const URLFormat = function URLFormat ({
+  format = URLFormat.config.format,
+  includeNulls = URLFormat.config.includeNulls
+} = {}) {
+  return (baseUrl, action, queryParams, payload) => {
     const params = Params(queryParams, payload)
     const url = format(action, baseUrl, params)
     let unusedParams = params.getAll()

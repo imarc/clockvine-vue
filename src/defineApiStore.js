@@ -16,9 +16,9 @@ const defineApiStore = function defineApiStore (
   name,
   api,
   {
-    idField = 'id',
-    indexDataField = 'data',
-    showRequiresKey = true
+    idField = defineApiStore.config.idField,
+    indexDataField = defineApiStore.config.indexDataField,
+    showRequiresKey = defineApiStore.config.showRequiresKey
   } = {}
 ) {
   if (typeof name !== 'string') {
@@ -26,9 +26,7 @@ const defineApiStore = function defineApiStore (
   }
 
   if (typeof api === 'string') {
-    api = new defineApiStore.config.DefaultApi(api)
-  } else if (typeof api !== 'object') {
-    throw new Error(`API must be a string or object: got ${typeof api}`)
+    api = new JsonApi(api, defineApiStore.config.ApiOptions)
   }
 
   return defineStore(name, () => {
@@ -257,7 +255,10 @@ const defineApiStore = function defineApiStore (
 }
 
 defineApiStore.config = {
-  DefaultApi: JsonApi
+  idField: 'id',
+  indexDataField: 'data',
+  showRequiresKey: true,
+  ApiOptions: undefined
 }
 
 defineApiStore.use = plugin => plugin(defineApiStore)

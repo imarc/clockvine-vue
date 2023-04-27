@@ -2,10 +2,14 @@ import URLFormat from './URLFormat.js'
 
 const JsonApi = function JsonApi (baseUrl, {
   fetch = JsonApi.config.fetch,
-  Format = JsonApi.config.Format,
+  formatURL = JsonApi.config.formatURL(JsonApi.config.URLFormatOptions),
   serialize = JsonApi.config.serialize
 } = {}) {
-  const createQueryUrl = (new Format(baseUrl)).format
+  if (typeof baseUrl !== 'string') {
+    throw new TypeError('baseUrl must be a string')
+  }
+
+  const createQueryUrl = (action, params, payload) => formatURL(baseUrl, action, params, payload)
   this.key = createQueryUrl
 
   this.index = async function (params) {
@@ -56,8 +60,9 @@ const JsonApi = function JsonApi (baseUrl, {
 }
 
 JsonApi.config = {
-  fetch,
-  Format: URLFormat,
+  fetch: window.fetch,
+  formatURL: URLFormat,
+  URLFormatOptions: undefined,
   serialize: JSON.stringify
 }
 
