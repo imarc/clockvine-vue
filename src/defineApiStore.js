@@ -19,7 +19,8 @@ const defineApiStore = function defineApiStore (
     idField = defineApiStore.config.idField,
     indexDataField = defineApiStore.config.indexDataField,
     showRequiresKey = defineApiStore.config.showRequiresKey
-  } = {}
+  } = {},
+  apiActions = {}
 ) {
   if (typeof name !== 'string') {
     throw new Error('Store name must be a string.')
@@ -45,6 +46,11 @@ const defineApiStore = function defineApiStore (
      */
     const indexes = reactive({})
     const indexState = reactive({})
+
+    /**
+     * Custom actions.
+     */
+    const actions = {}
 
     // =========================================================================
     // = Low Level
@@ -230,6 +236,30 @@ const defineApiStore = function defineApiStore (
       return deleteElement(element)
     }
 
+    const defineAction = async (
+      action,
+      {
+        apiAction = action,
+        invalidateIndexes = false,
+        mergeElement = true
+      }
+    ) => {
+      actions[action] = async (element, params = {}) => {
+        const updatedElement = await api[apiAction](nestedUnref(element), params)
+        if (invalidateIndexes) {
+          invalidateAllIndexes()
+        }
+        const id = idField in updatedElement ? updatedElement[idField] : element[idField]
+        if (mergeElement && id) {
+          return mergeElement(id, updatedElement)
+        } else {
+          return updatedElement
+        }
+      }
+    }
+
+    Object.entries(apiActions).forEach(([action, options]) => defineAction(action, options))
+
     return {
       /**
        * These are primarilary included so that pinia dev tools work; without
@@ -240,6 +270,7 @@ const defineApiStore = function defineApiStore (
       elementState,
       indexes,
       indexState,
+      actions,
 
       destroy,
       index,
@@ -249,7 +280,9 @@ const defineApiStore = function defineApiStore (
       invalidateAllIndexes,
       show,
       store,
-      update
+      update,
+
+      ...actions
     }
   })
 }

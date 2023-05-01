@@ -3,6 +3,7 @@ import URLFormat from './URLFormat.js'
 const JsonApi = function JsonApi (baseUrl, {
   fetch = JsonApi.config.fetch,
   formatURL = JsonApi.config.formatURL(JsonApi.config.URLFormatOptions),
+  headers = JsonApi.config.headers,
   serialize = JsonApi.config.serialize
 } = {}) {
   if (typeof baseUrl !== 'string') {
@@ -17,51 +18,37 @@ const JsonApi = function JsonApi (baseUrl, {
     return fetch(url).then(r => r.json())
   }
 
-  this.show = async function (id) {
-    const url = createQueryUrl('show', { id })
-    return fetch(url).then(r => r.json()).then(r => r.data)
+  this.defineAction = function (action, method = action, callback = options => options) {
+    this[action] = async (element, params = {}) => {
+      const url = createQueryUrl(action, params, element)
+      const options = { url, method, headers, body: serialize(element) }
+      callback(options)
+      return fetch(options.url, options).then(r => r.json()).then(r => r.data)
+    }
   }
 
-  this.store = async function (element, params = {}) {
-    const url = createQueryUrl('store', params, element)
-    const options = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: serialize(element)
-    }
-    return fetch(url, options).then(r => r.json()).then(r => r.data)
-  }
+  this.defineAction('delete')
+  this.destroy = this.delete
 
-  this.update = async function (element, params = {}) {
-    const url = createQueryUrl('update', params, element)
-    const options = {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: serialize(element)
-    }
-    return fetch(url, options).then(r => r.json()).then(r => r.data)
-  }
+  this.defineAction('put')
+  this.update = this.put
 
-  this.destroy = async function (element, params = {}) {
-    const url = createQueryUrl('destroy', params, element)
-    const options = {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: serialize(element)
-    }
-    return fetch(url, options).then(r => r.json()).then(r => r.data)
-  }
+  this.defineAction('post')
+  this.store = this.post
+
+  this.defineAction('get')
+  this.show = async id => this.get(undefined, { id })
+
+  this.defineAction('show', 'GET', options => {
+    delete options.body
+    options.url = createQueryUrl('show', options.params)
+  })
 }
 
 JsonApi.config = {
   fetch: window.fetch,
   formatURL: URLFormat,
+  headers: { 'Content-Type': 'application/json' },
   URLFormatOptions: undefined,
   serialize: JSON.stringify
 }
