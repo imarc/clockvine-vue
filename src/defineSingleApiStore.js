@@ -1,4 +1,4 @@
-import defineApiStore from './defineSingleApiStore'
+import defineApiStore from './defineApiStore'
 
 const defineSingleApiStore = function defineSingleApiStore (name, api, options) {
   return defineApiStore(

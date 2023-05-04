@@ -1,8 +1,8 @@
-import URLFormat from './URLFormat.js'
+import TrackUsed from './TrackUsed.js'
+import StackObjects from './StackObjects.js'
 
 const JsonApi = function JsonApi (baseUrl, {
   fetch = JsonApi.config.fetch,
-  formatURL = JsonApi.config.formatURL(JsonApi.config.URLFormatOptions),
   headers = JsonApi.config.headers,
   serialize = JsonApi.config.serialize
 } = {}) {
@@ -10,46 +10,50 @@ const JsonApi = function JsonApi (baseUrl, {
     throw new TypeError('baseUrl must be a string')
   }
 
-  const createQueryUrl = (action, params, payload) => formatURL(baseUrl, action, params, payload)
-  this.key = createQueryUrl
-
-  this.index = async function (params) {
-    const url = createQueryUrl('index', params)
-    return fetch(url).then(r => r.json())
-  }
-
-  this.defineAction = function (action, method = action, callback = options => options) {
-    this[action] = async (element, params = {}) => {
-      const url = createQueryUrl(action, params, element)
-      const options = { url, method, headers, body: serialize(element) }
+  const makeAction = function (method, format = url => url, { callback = options => options } = {}) {
+    return async (element, params = {}) => {
+      const queryParams = TrackUsed(params)
+      const url = format(baseUrl, StackObjects(queryParams, element))
+      const queryString = (new URLSearchParams(queryParams.getUnused())).toString()
+      const options = {
+        url: url + (queryString ? '?' + queryString : ''),
+        method,
+        headers
+      }
+      if (!['get', 'head'].includes(method.toLowerCase())) {
+        options.body = serialize(element)
+      }
       callback(options)
-      return fetch(options.url, options).then(r => r.json()).then(r => r.data)
+      return fetch(options.url, options).then(r => r.json())
     }
   }
 
-  this.defineAction('delete')
+  this.defineAction = function (action, ...args) {
+    this[action] = (element, params = {}) => makeAction(...args)(element, params).then(r => r.data)
+  }
+
+  this.index = makeAction('get')
+  this.key = params => {
+    const queryString = (new URLSearchParams(params)).toString()
+    return baseUrl + (queryString ? '?' + queryString : '')
+  }
+
+  this.defineAction('delete', 'delete', (url, { id }) => `${url}/${id}`)
   this.destroy = this.delete
 
-  this.defineAction('put')
+  this.defineAction('put', 'put', (url, { id }) => `${url}/${id}`)
   this.update = this.put
 
-  this.defineAction('post')
+  this.defineAction('post', 'post')
   this.store = this.post
 
-  this.defineAction('get')
+  this.defineAction('get', 'get', (url, { id }) => `${url}/${id}`)
   this.show = async id => this.get(undefined, { id })
-
-  this.defineAction('show', 'GET', options => {
-    delete options.body
-    options.url = createQueryUrl('show', options.params)
-  })
 }
 
 JsonApi.config = {
   fetch: window.fetch,
-  formatURL: URLFormat,
   headers: { 'Content-Type': 'application/json' },
-  URLFormatOptions: undefined,
   serialize: JSON.stringify
 }
 
