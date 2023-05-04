@@ -10,7 +10,14 @@ const JsonApi = function JsonApi (baseUrl, {
     throw new TypeError('baseUrl must be a string')
   }
 
-  const makeAction = function (method, format = url => url, { callback = options => options } = {}) {
+  const makeAction = function (
+    method,
+    format = url => url,
+    {
+      beforeFetch = options => options,
+      afterFetch = r => r.json()
+    } = {}
+  ) {
     return async (element, params = {}) => {
       const queryParams = TrackUsed(params)
       const url = format(baseUrl, StackObjects(queryParams, element))
@@ -23,8 +30,8 @@ const JsonApi = function JsonApi (baseUrl, {
       if (!['get', 'head'].includes(method.toLowerCase())) {
         options.body = serialize(element)
       }
-      callback(options)
-      return fetch(options.url, options).then(r => r.json())
+      beforeFetch(options)
+      return fetch(options.url, options).then(afterFetch)
     }
   }
 
