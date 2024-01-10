@@ -1,32 +1,29 @@
 import TrackUsed from './TrackUsed.js'
-import StackObjects from './StackObjects.js'
+import UrlExp from './UrlExp.js'
 
-const JsonApi = function JsonApi (baseUrl, {
+const JsonApi = function JsonApi (urlExp, {
   fetch = JsonApi.config.fetch,
   headers = JsonApi.config.headers,
   serialize = JsonApi.config.serialize
 } = {}) {
-  if (typeof baseUrl !== 'string') {
-    throw new TypeError('baseUrl must be a string')
+  if (!(urlExp instanceof UrlExp)) {
+    if (typeof urlExp === 'string') {
+      urlExp = new UrlExp(urlExp)
+    } else {
+      throw new TypeError('urlExp must be a UrlExp or string')
+    }
   }
 
   const makeAction = function (
     method,
-    format = url => url,
     {
       beforeFetch = options => options,
       afterFetch = r => r.json()
     } = {}
   ) {
     return async (element, params = {}) => {
-      const queryParams = TrackUsed(params)
-      const url = format(baseUrl, StackObjects(queryParams, element))
-      const queryString = (new URLSearchParams(queryParams.getUnused())).toString()
-      const options = {
-        url: url + (queryString ? '?' + queryString : ''),
-        method,
-        headers
-      }
+      const url = urlExp.format(params, element)
+      const options = { url, method, headers }
       if (!['get', 'head'].includes(method.toLowerCase())) {
         options.body = serialize(element)
       }
@@ -35,31 +32,28 @@ const JsonApi = function JsonApi (baseUrl, {
     }
   }
 
-  this.defineAction = function (action, ...args) {
-    this[action] = (element, params = {}) => makeAction(...args)(element, params).then(r => r.data)
+  this.defineAction = function (action, method = action, ...args) {
+    this[action] = (element, params = {}) => makeAction(method, ...args)(element, params).then(r => r.data)
   }
 
-  this.index = makeAction('get')
-  this.key = params => {
-    const queryString = (new URLSearchParams(params)).toString()
-    return baseUrl + (queryString ? '?' + queryString : '')
-  }
+  this.key = params => urlExp.format(params)
 
-  this.defineAction('delete', 'delete', (url, { id }) => `${url}/${id}`)
+  this.defineAction('delete')
   this.destroy = this.delete
 
-  this.defineAction('put', 'put', (url, { id }) => `${url}/${id}`)
+  this.defineAction('put')
   this.update = this.put
 
-  this.defineAction('post', 'post')
+  this.defineAction('post')
   this.store = this.post
 
-  this.defineAction('get', 'get', (url, { id }) => `${url}/${id}`)
-  this.show = async id => this.get(undefined, { id })
+  this.defineAction('get')
+  this.show = this.get
+  this.index = this.get
 }
 
 JsonApi.config = {
-  fetch: window.fetch,
+  fetch,
   headers: { 'Content-Type': 'application/json' },
   serialize: JSON.stringify
 }
