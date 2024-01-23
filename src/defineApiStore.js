@@ -1,10 +1,12 @@
 import { defineStore } from 'pinia'
-import { reactive, toRef, computed, unref } from 'vue'
+import { reactive, toRef, computed, toValue } from 'vue'
 
 import JsonApi from './JsonApi'
 
-const nestedUnref = obj => {
-  const result = Object.fromEntries(Object.entries(unref(obj)).map(([k, v]) => [k, unref(v)]))
+const nestedToValue = (obj) => {
+  const result = Object.fromEntries(
+    Object.entries(toValue(obj)).map(([k, v]) => [k, toValue(v)])
+  )
   return result
 }
 
@@ -90,8 +92,8 @@ const defineApiStore = function defineApiStore (
      * @internal
      * @param {array} elements
      */
-    const mergeElements = elements => {
-      return elements.map(element => mergeElement(element[idField], element))
+    const mergeElements = (elements) => {
+      return elements.map((element) => mergeElement(element[idField], element))
     }
 
     /**
@@ -104,11 +106,11 @@ const defineApiStore = function defineApiStore (
      */
     const setIndex = (key, index) => {
       if (!index[indexDataField]) {
-        throw new Error(`Index must have a "${indexDataField}" field`)
+        throw new Error(`Index must have a '${indexDataField}' field`)
       } else if (typeof index[indexDataField].map !== 'function') {
-        throw new Error(`Index "${indexDataField}" field must be an array`)
+        throw new Error(`Index '${indexDataField}' field must be an array`)
       }
-      index[indexDataField] = mergeElements(index[indexDataField]).map(unref)
+      index[indexDataField] = mergeElements(index[indexDataField]).map(toValue)
       indexes[key] = index
       return toRef(indexes, key)
     }
@@ -118,12 +120,12 @@ const defineApiStore = function defineApiStore (
     // =========================================================================
 
     /**
-      * @param {ref|mixed} idRef
-      * @return {ref}  computed reference to elements[id]
-      */
-    const show = idRef => {
+     * @param {ref|mixed} idRef
+     * @return {ref}  computed reference to elements[id]
+     */
+    const show = (idRef) => {
       return computed(() => {
-        const id = unref(idRef)
+        const id = toValue(idRef)
         if (showRequiresKey && (id === undefined || id === null)) {
           return
         }
@@ -131,7 +133,7 @@ const defineApiStore = function defineApiStore (
         if (!(id in elementState) || elementState[id] === INVALID) {
           elements[id] = elements[id] || undefined
           elementState[id] = LOADING
-          api.show(id).then(element => {
+          api.get({ [idField]: id }).then((element) => {
             const newElement = mergeElement(id, element)
             elementState[id] = VALID
             return newElement
@@ -145,8 +147,8 @@ const defineApiStore = function defineApiStore (
     /**
      * @param {ref|mixed} elementOrIdRef
      */
-    const invalidate = elementOrIdRef => {
-      let elementOrId = unref(elementOrIdRef)
+    const invalidate = (elementOrIdRef) => {
+      let elementOrId = toValue(elementOrIdRef)
       if (typeof elementOrId === 'object' && idField in elementOrId) {
         elementOrId = elementOrId[idField]
       }
@@ -155,18 +157,18 @@ const defineApiStore = function defineApiStore (
     }
 
     /**
-      * @param {ref|object<ref>} params
-      * @return {ref}  computed reference to elements[id]
-      */
+     * @param {ref|object<ref>} params
+     * @return {ref}  computed reference to elements[id]
+     */
     const indexAsRef = (paramsRef = {}) => {
       return computed(() => {
-        const params = nestedUnref(paramsRef)
+        const params = nestedToValue(paramsRef)
         const key = api.key('index', params)
 
         if (!(key in indexState) || indexState[key] === INVALID) {
           indexes[key] = indexes[key] || reactive({})
           indexState[key] = LOADING
-          api.index(params).then(index => {
+          api.index(params).then((index) => {
             const newIndex = setIndex(key, index)
             indexState[key] = VALID
             return newIndex
@@ -178,7 +180,7 @@ const defineApiStore = function defineApiStore (
     }
 
     const invalidateIndex = (paramsRef = {}) => {
-      const params = nestedUnref(paramsRef)
+      const params = nestedToValue(paramsRef)
       const key = api.key('index', params)
 
       indexState[key] = INVALID
@@ -191,26 +193,29 @@ const defineApiStore = function defineApiStore (
     }
 
     const index = (paramsRef = {}) => {
-      return new Proxy({}, {
-        get (_, prop) {
-          return computed(() => {
-            const params = nestedUnref(paramsRef)
-            const key = api.key('index', params)
+      return new Proxy(
+        {},
+        {
+          get (_, prop) {
+            return computed(() => {
+              const params = nestedToValue(paramsRef)
+              const key = api.key('index', params)
 
-            if (!(key in indexState) || indexState[key] === INVALID) {
-              indexes[key] = indexes[key] || reactive({})
-              indexState[key] = LOADING
-              api.index(params).then(index => {
-                const newIndex = setIndex(key, index)
-                indexState[key] = VALID
-                return newIndex
-              })
-            }
+              if (!(key in indexState) || indexState[key] === INVALID) {
+                indexes[key] = indexes[key] || reactive({})
+                indexState[key] = LOADING
+                api.index(params).then((index) => {
+                  const newIndex = setIndex(key, index)
+                  indexState[key] = VALID
+                  return newIndex
+                })
+              }
 
-            return indexes[key][prop]
-          })
+              return indexes[key][prop]
+            })
+          }
         }
-      })
+      )
     }
 
     /**
@@ -218,38 +223,41 @@ const defineApiStore = function defineApiStore (
      * @return {ref} computed reference to the new element
      */
     const store = async (element, params = {}) => {
-      const newElement = await api.store(nestedUnref(element), params)
+      const newElement = await api.store(nestedToValue(element), params)
       invalidateAllIndexes()
       return mergeElement(newElement[idField], newElement)
     }
 
     const update = async (element, params = {}) => {
-      const updatedElement = await api.update(nestedUnref(element), params)
-      const id = idField in updatedElement ? updatedElement[idField] : element[idField]
+      const updatedElement = await api.put(nestedToValue(element), params)
+      const id =
+        idField in updatedElement ? updatedElement[idField] : element[idField]
       invalidateAllIndexes()
       return mergeElement(id, updatedElement)
     }
 
     const destroy = async (element, params = {}) => {
-      await api.destroy(nestedUnref(element), params)
+      await api.destroy(nestedToValue(element), params)
       invalidateAllIndexes()
       return deleteElement(element)
     }
 
     const defineAction = async (
       action,
-      {
-        apiAction = action,
-        invalidateIndexes = false,
-        mergeElement = true
-      }
+      { apiAction = action, invalidateIndexes = false, mergeElement = true }
     ) => {
       actions[action] = async (element, params = {}) => {
-        const updatedElement = await api[apiAction](nestedUnref(element), params)
+        const updatedElement = await api[apiAction](
+          nestedToValue(element),
+          params
+        )
         if (invalidateIndexes) {
           invalidateAllIndexes()
         }
-        const id = idField in updatedElement ? updatedElement[idField] : element[idField]
+        const id =
+          idField in updatedElement
+            ? updatedElement[idField]
+            : element[idField]
         if (mergeElement && id) {
           return mergeElement(id, updatedElement)
         } else {
@@ -258,7 +266,9 @@ const defineApiStore = function defineApiStore (
       }
     }
 
-    Object.entries(apiActions).forEach(([action, options]) => defineAction(action, options))
+    Object.entries(apiActions).forEach(([action, options]) =>
+      defineAction(action, options)
+    )
 
     return {
       /**
@@ -294,6 +304,6 @@ defineApiStore.config = {
   ApiOptions: undefined
 }
 
-defineApiStore.use = plugin => plugin(defineApiStore)
+defineApiStore.use = (plugin) => plugin(defineApiStore)
 
 export default defineApiStore
