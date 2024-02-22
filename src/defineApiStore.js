@@ -223,7 +223,7 @@ const defineApiStore = function defineApiStore (
      * @return {ref} computed reference to the new element
      */
     const store = async (element, params = {}) => {
-      const newElement = await api.store(nestedToValue(element), params)
+      const newElement = await api.post(nestedToValue(element), params)
       invalidateAllIndexes()
       return mergeElement(newElement[idField], newElement)
     }
