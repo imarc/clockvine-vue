@@ -15,7 +15,7 @@ const mockUserApi = {
   key: (method, params) => {
     return `${method}:${JSON.stringify(params)}`
   },
-  store: element => {
+  post: element => {
     mockUsers[element.id] = element
     return Promise.resolve(mockUsers[element.id])
   },
