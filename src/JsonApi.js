@@ -1,41 +1,41 @@
 import UrlExp from './UrlExp.js'
 
+const makeToUrl = url => {
+  if (url instanceof UrlExp) {
+    return url.format.bind(url)
+  } else if (typeof url === 'string') {
+    const exp = new UrlExp(url)
+    return exp.format.bind(exp)
+  } else if (typeof url === 'function') {
+    return url
+  } else {
+    throw new TypeError('url must be a UrlExp, function, or string')
+  }
+}
+
 const JsonApi = function JsonApi (urlExp, {
   fetch = JsonApi.config.fetch,
   headers = JsonApi.config.headers,
   serialize = JsonApi.config.serialize
 } = {}) {
-  if (!(urlExp instanceof UrlExp)) {
-    if (typeof urlExp === 'string') {
-      urlExp = new UrlExp(urlExp)
-    } else {
-      throw new TypeError('urlExp must be a UrlExp or string')
-    }
-  }
+  const toUrl = makeToUrl(urlExp)
 
-  const makeAction = function (
-    method,
-    {
-      beforeFetch = options => options,
-      afterFetch = r => r.json()
-    } = {}
-  ) {
-    return async (element, params = {}) => {
-      const url = urlExp.format(params, element)
-      const options = { url, method, headers }
+  const makeAction = method => {
+    return async (element, params = {}, overrides = {}) => {
+      const options = { method, headers, ...overrides }
+      options.url = options.url ? makeToUrl(options.url)(params, element) : toUrl(params, element)
       if (!['get', 'head'].includes(method.toLowerCase())) {
         options.body = serialize(element)
       }
-      beforeFetch(options)
-      return fetch(options.url, options).then(afterFetch)
+      return fetch(options.url, options).then(r => r.json())
     }
   }
 
-  this.defineAction = function (action, method = action, ...args) {
-    this[action] = (element, params = {}) => makeAction(method, ...args)(element, params).then(r => r.data)
+  this.defineAction = function (action, method = action, options) {
+    this[action] = (...args) => makeAction(method, options)(...args).then(r => r.data)
   }
 
-  this.key = params => urlExp.format(params)
+  this.key = params => toUrl(params)
 
   this.defineAction('delete')
   this.destroy = this.delete

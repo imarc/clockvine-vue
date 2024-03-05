@@ -250,12 +250,18 @@ const defineApiStore = function defineApiStore (
 
     const defineAction = async (
       action,
-      { apiAction = action, invalidateIndexes = false, mergeElement = true }
+      {
+        apiAction = action,
+        invalidateIndexes = false,
+        mergeElements = true,
+        url = undefined
+      } = {}
     ) => {
       actions[action] = async (element, params = {}) => {
         const updatedElement = await api[apiAction](
           nestedToValue(element),
-          params
+          params,
+          url ? { url } : undefined
         )
         if (invalidateIndexes) {
           invalidateAllIndexes()
@@ -264,7 +270,7 @@ const defineApiStore = function defineApiStore (
           idField in updatedElement
             ? updatedElement[idField]
             : element[idField]
-        if (mergeElement && id) {
+        if (mergeElements && id) {
           return mergeElement(id, updatedElement)
         } else {
           return updatedElement
