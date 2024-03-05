@@ -154,6 +154,8 @@ const defineApiStore = function defineApiStore (
       }
 
       elementState[elementOrId] = INVALID
+
+      return Promise.resolve()
     }
 
     /**
@@ -184,12 +186,16 @@ const defineApiStore = function defineApiStore (
       const key = api.key('index', params)
 
       indexState[key] = INVALID
+
+      return Promise.resolve()
     }
 
     const invalidateAllIndexes = () => {
       for (const key in indexState) {
         indexState[key] = INVALID
       }
+
+      return Promise.resolve()
     }
 
     const index = (paramsRef = {}) => {
