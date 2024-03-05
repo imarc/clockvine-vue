@@ -15,27 +15,16 @@ beforeEach(() => {
   store = useMockStore()
 })
 
-test('can load an index', async () => {
-  const index = store.index()
+test('can update an element', async () => {
+  const person1 = store.show(1)
 
-  toValue(index.data)
+  toValue(person1)
   await flushPromises()
 
-  expect(toValue(index.data).length).toBe(2)
-})
+  expect(person1.value.name).toBe('Kevin')
 
-test('index is reactive', async () => {
-  const index = store.index()
-
-  toValue(index.data)
+  store.update({ id: 1, name: 'Devin' })
   await flushPromises()
 
-  expect(toValue(index.data).length).toBe(2)
-
-  store.store({ id: 3, name: 'Chuck', full_name: 'Chuck Norris' })
-  await flushPromises()
-  toValue(index.data)
-  await flushPromises()
-
-  expect(toValue(index.data).length).toBe(3)
+  expect(person1.value.name).toBe('Devin')
 })

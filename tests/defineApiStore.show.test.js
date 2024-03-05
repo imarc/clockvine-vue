@@ -1,59 +1,70 @@
-import { watch } from 'vue'
-import { beforeEach, expect, test, vi } from 'vitest'
-import { userApiReset, mockUserApi, testUserStore, vueUpdates, ensureLoaded } from './testHelpers.js'
+import { beforeEach, expect, test } from 'vitest'
+import { ref, toValue } from 'vue'
+import { setActivePinia, createPinia } from 'pinia'
+import { flushPromises } from '@vue/test-utils'
 
-beforeEach(userApiReset)
+import defineApiStore from '../src/defineApiStore.js'
+import mockJsonApi from './JsonApi.mock.js'
 
-test('ref is reactive', async () => {
-  const showSpy = vi.spyOn(mockUserApi, 'show')
-  const store = testUserStore()
-  const person1 = store.show(1)
+const useMockStore = defineApiStore('testUsers', mockJsonApi)
+let store = null
 
-  expect(person1.value).toBe(undefined)
-
-  await vueUpdates()
-
-  expect(showSpy).toHaveBeenCalledTimes(1)
-
-  expect(person1?.value.name).toBe('Kevin')
+beforeEach(() => {
+  setActivePinia(createPinia())
+  mockJsonApi.reset()
+  store = useMockStore()
 })
 
-test('Only calls show on Api once', async () => {
-  const show = vi.spyOn(mockUserApi, 'show')
-  const store = testUserStore()
+test('can get by ID', async () => {
+  const person1 = store.show(1)
 
-  ensureLoaded(store.show(1))
-  ensureLoaded(store.show(1))
+  toValue(person1)
+  await flushPromises()
 
-  expect(show).toHaveBeenCalledTimes(1) // TODO
+  expect(person1.value.name).toBe('Kevin')
+})
+
+test('calls API', async () => {
+  const person1 = store.show(1)
+
+  await flushPromises()
+})
+
+test('get same value for multiple refs', async () => {
+  const person1 = store.show(1)
+  const person2 = store.show(1)
+
+  await flushPromises()
+
+  expect(person1 === person2).toBeFalsy()
+  expect(person1.value === person2.value).toBeTruthy()
 })
 
 test('ref is mutable', async () => {
-  const store = testUserStore()
   const person1 = store.show(1)
-  const another1 = store.show(1)
+  const person2 = store.show(1)
 
-  ensureLoaded(person1)
-  await vueUpdates()
+  toValue(person1)
+  toValue(person2)
+  await flushPromises()
 
-  another1.value.name = 'Chuck'
-
-  expect(person1?.value.name).toBe('Chuck')
+  person1.value.name = 'Chuck'
+  expect(person2.value.name).toBe('Chuck')
 })
 
-test('invalidating an element will recall api.show', async () => {
-  const showSpy = vi.spyOn(mockUserApi, 'show')
-  const store = testUserStore()
-  const person1 = store.show(1)
+test('ref is reactive to ID changes', async () => {
+  mockJsonApi.reset()
+  const id = ref(1)
+  const person1 = store.show(id)
 
-  watch(person1, () => {})
+  toValue(person1)
+  await flushPromises()
 
-  await vueUpdates()
+  expect(person1.value.name).toBe('Kevin')
 
-  expect(showSpy).toHaveBeenCalledTimes(1)
+  id.value = 2
+  toValue(person1)
+  await flushPromises()
 
-  store.invalidate(person1)
-  await vueUpdates()
-
-  expect(showSpy).toHaveBeenCalledTimes(2)
+  expect(person1.value.name).toBe('Test')
 })

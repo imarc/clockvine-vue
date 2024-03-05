@@ -1,57 +1,62 @@
-import DefaultUrlFormatter from './DefaultUrlFormatter.js'
+import UrlExp from './UrlExp.js'
 
-export default function JsonApi (baseUrl, {
-  fetch = window.fetch,
-  Formatter = DefaultUrlFormatter,
-  serialize = JSON.stringify
+const JsonApi = function JsonApi (urlExp, {
+  fetch = JsonApi.config.fetch,
+  headers = JsonApi.config.headers,
+  serialize = JsonApi.config.serialize
 } = {}) {
-  const createQueryUrl = (new Formatter(baseUrl)).format
-
-  this.key = createQueryUrl
-
-  this.index = async function (params) {
-    const url = createQueryUrl('index', params)
-    return fetch(url).then(r => r.json())
-  }
-
-  this.show = async function (id) {
-    const url = createQueryUrl('show', { id })
-    return fetch(url).then(r => r.json()).then(r => r.data)
-  }
-
-  this.store = async function (element, params = {}) {
-    const url = createQueryUrl('store', params, element)
-    const options = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: serialize(element)
+  if (!(urlExp instanceof UrlExp)) {
+    if (typeof urlExp === 'string') {
+      urlExp = new UrlExp(urlExp)
+    } else {
+      throw new TypeError('urlExp must be a UrlExp or string')
     }
-    return fetch(url, options).then(r => r.json()).then(r => r.data)
   }
 
-  this.update = async function (element, params = {}) {
-    const url = createQueryUrl('update', params, element)
-    const options = {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: serialize(element)
+  const makeAction = function (
+    method,
+    {
+      beforeFetch = options => options,
+      afterFetch = r => r.json()
+    } = {}
+  ) {
+    return async (element, params = {}) => {
+      const url = urlExp.format(params, element)
+      const options = { url, method, headers }
+      if (!['get', 'head'].includes(method.toLowerCase())) {
+        options.body = serialize(element)
+      }
+      beforeFetch(options)
+      return fetch(options.url, options).then(afterFetch)
     }
-    return fetch(url, options).then(r => r.json()).then(r => r.data)
   }
 
-  this.destroy = async function (element, params = {}) {
-    const url = createQueryUrl('destroy', params, element)
-    const options = {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: serialize(element)
-    }
-    return fetch(url, options).then(r => r.json()).then(r => r.data)
+  this.defineAction = function (action, method = action, ...args) {
+    this[action] = (element, params = {}) => makeAction(method, ...args)(element, params).then(r => r.data)
   }
+
+  this.key = params => urlExp.format(params)
+
+  this.defineAction('delete')
+  this.destroy = this.delete
+
+  this.defineAction('put')
+  this.update = this.put
+
+  this.defineAction('post')
+  this.store = this.post
+
+  this.defineAction('get')
+  this.show = this.get
+  this.index = this.get
 }
+
+JsonApi.config = {
+  fetch,
+  headers: { 'Content-Type': 'application/json' },
+  serialize: JSON.stringify
+}
+
+JsonApi.use = plugin => plugin(JsonApi)
+
+export default JsonApi
