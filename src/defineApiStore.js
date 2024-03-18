@@ -170,7 +170,7 @@ const defineApiStore = function defineApiStore (
         if (!(key in indexState) || indexState[key] === INVALID) {
           indexes[key] = indexes[key] || reactive({})
           indexState[key] = LOADING
-          api.index(params).then((index) => {
+          api.index({}, params).then((index) => {
             const newIndex = setIndex(key, index)
             indexState[key] = VALID
             return newIndex
@@ -210,7 +210,7 @@ const defineApiStore = function defineApiStore (
               if (!(key in indexState) || indexState[key] === INVALID) {
                 indexes[key] = indexes[key] || reactive({})
                 indexState[key] = LOADING
-                api.index(params).then((index) => {
+                api.index({}, params).then((index) => {
                   const newIndex = setIndex(key, index)
                   indexState[key] = VALID
                   return newIndex
