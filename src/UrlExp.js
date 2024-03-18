@@ -20,6 +20,6 @@ export default class UrlExp {
     const path = this.#toPath(StackObjects(observed, optionalArgs))
     const accessedKeys = observer.accessedKeys()
     const params = new URLSearchParams(Object.fromEntries(Object.entries(args).filter(([key]) => !accessedKeys.includes(key))))
-    return path + (params.toString() ? `?${params}` : '')
+    return path + (params.toString() ? `?${params.toString()}` : '')
   }
 }
