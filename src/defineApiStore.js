@@ -165,7 +165,7 @@ const defineApiStore = function defineApiStore (
     const indexAsRef = (paramsRef = {}) => {
       return computed(() => {
         const params = nestedToValue(paramsRef)
-        const key = api.key('index', params)
+        const key = api.key(params)
 
         if (!(key in indexState) || indexState[key] === INVALID) {
           indexes[key] = indexes[key] || reactive({})
@@ -183,7 +183,7 @@ const defineApiStore = function defineApiStore (
 
     const invalidateIndex = (paramsRef = {}) => {
       const params = nestedToValue(paramsRef)
-      const key = api.key('index', params)
+      const key = api.key(params)
 
       indexState[key] = INVALID
 
@@ -205,7 +205,7 @@ const defineApiStore = function defineApiStore (
           get (_, prop) {
             return computed(() => {
               const params = nestedToValue(paramsRef)
-              const key = api.key('index', params)
+              const key = api.key(params)
 
               if (!(key in indexState) || indexState[key] === INVALID) {
                 indexes[key] = indexes[key] || reactive({})

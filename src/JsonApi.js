@@ -48,7 +48,8 @@ const JsonApi = function JsonApi (urlExp, {
 
   this.defineAction('get')
   this.show = this.get
-  this.index = this.get
+
+  this.index = (...args) => makeAction('get')(...args)
 }
 
 JsonApi.config = {
