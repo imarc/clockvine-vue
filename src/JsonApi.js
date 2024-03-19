@@ -27,7 +27,14 @@ const JsonApi = function JsonApi (urlExp, {
       if (!['get', 'head'].includes(method.toLowerCase())) {
         options.body = serialize(element)
       }
-      return fetch(options.url, options).then(r => r.json())
+      return fetch(options.url, options)
+        .then(response => {
+          if (response.status > 399) {
+            throw new Error(`${response.status} response for ${method} request to ${response.url}`)
+          }
+          return response
+        })
+        .then(r => r.json())
     }
   }
 

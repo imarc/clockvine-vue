@@ -15,11 +15,15 @@ export default class UrlExp {
   }
 
   format (args = {}, optionalArgs = {}) {
+    if (typeof args !== 'object') {
+      console.log('args must be an object', args)
+      throw new Error('args must be an object')
+    }
     const observer = new AccessObserver()
     const observed = observer.observe(args)
     const path = this.#toPath(StackObjects(observed, optionalArgs))
     const accessedKeys = observer.accessedKeys()
-    const params = new URLSearchParams(Object.fromEntries(Object.entries(args).filter(([key]) => !accessedKeys.includes(key))))
+    const params = new URLSearchParams(Object.fromEntries(Object.entries(args).filter(([key, val]) => val !== undefined && !accessedKeys.includes(key))))
     return path + (params.toString() ? `?${params.toString()}` : '')
   }
 }

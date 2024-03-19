@@ -159,26 +159,33 @@ const defineApiStore = function defineApiStore (
     }
 
     /**
+     * @param {ref|object<ref>} paramsRef
+     * @return {ref} reference to elements[id]
+     */
+    const getIndex = (paramsRef = {}) => {
+      const params = nestedToValue(paramsRef)
+      const key = api.key(params)
+      console.log('getIndex for', params, key)
+
+      if (!(key in indexState) || indexState[key] === INVALID) {
+        indexes[key] = indexes[key] || reactive({})
+        indexState[key] = LOADING
+        api.index({}, params).then((index) => {
+          const newIndex = setIndex(key, index)
+          indexState[key] = VALID
+          return newIndex
+        })
+      }
+
+      return indexes[key]
+    }
+
+    /**
      * @param {ref|object<ref>} params
      * @return {ref}  computed reference to elements[id]
      */
     const indexAsRef = (paramsRef = {}) => {
-      return computed(() => {
-        const params = nestedToValue(paramsRef)
-        const key = api.key(params)
-
-        if (!(key in indexState) || indexState[key] === INVALID) {
-          indexes[key] = indexes[key] || reactive({})
-          indexState[key] = LOADING
-          api.index({}, params).then((index) => {
-            const newIndex = setIndex(key, index)
-            indexState[key] = VALID
-            return newIndex
-          })
-        }
-
-        return indexes[key]
-      })
+      return computed(() => getIndex(paramsRef))
     }
 
     const invalidateIndex = (paramsRef = {}) => {
@@ -203,22 +210,7 @@ const defineApiStore = function defineApiStore (
         {},
         {
           get (_, prop) {
-            return computed(() => {
-              const params = nestedToValue(paramsRef)
-              const key = api.key(params)
-
-              if (!(key in indexState) || indexState[key] === INVALID) {
-                indexes[key] = indexes[key] || reactive({})
-                indexState[key] = LOADING
-                api.index({}, params).then((index) => {
-                  const newIndex = setIndex(key, index)
-                  indexState[key] = VALID
-                  return newIndex
-                })
-              }
-
-              return indexes[key][prop]
-            })
+            return computed(() => getIndex(paramsRef)[prop])
           }
         }
       )
