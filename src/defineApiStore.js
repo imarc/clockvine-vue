@@ -137,9 +137,10 @@ const defineApiStore = function defineApiStore (
         throw new Error(`Index '${indexDataField}' field must be an array`)
       }
 
-      index[indexDataField] = mergeElements(index[indexDataField]).map(toValue)
+      // TODO uncomment
+      //index[indexDataField] = mergeElements(index[indexDataField]).map(toValue)
 
-      indexes[key][indexDataField] = index[indexDataField]
+      indexes[key] = index
     }
 
     // =========================================================================
