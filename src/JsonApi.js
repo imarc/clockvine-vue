@@ -1,5 +1,28 @@
 import UrlExp from './UrlExp.js'
 
+/**
+ * @typedef {(element: Element, params: Object, overrides: Object) => Promise} Action
+ * @typeDef {(args: Object, optionalArgs: Object) => string} ToUrl
+ *
+ * @typedef {({
+ *   put: Action,
+ *   update: Action,
+ *   delete: Action,
+ *   destroy: Action,
+ *   post: Action,
+ *   store: Action,
+ *   get: Action,
+ *   show: Action,
+ *   index: Action,
+ *   key: (params: Object) => string,
+ * })} JsonApi
+ *
+ */
+
+/**
+ * @param {String|UrlExp|((args: Object, optionalArgs: Object) => string)} url
+ * @return ToUrl
+ */
 const makeToUrl = url => {
   if (url instanceof UrlExp) {
     return url.format.bind(url)
@@ -13,6 +36,15 @@ const makeToUrl = url => {
   }
 }
 
+/**
+ * @param {String|UrlExp|((args: Object, optionalArgs: Object) => string)} urlExp
+ * @param {Object} options
+ * @param {Function} options.fetch
+ * @param {Object} options.headers
+ * @param {Function} options.seralize
+ *
+ * @return {JsonApi}
+ */
 const JsonApi = function JsonApi (urlExp, {
   fetch = JsonApi.config.fetch,
   headers = JsonApi.config.headers,
@@ -20,6 +52,10 @@ const JsonApi = function JsonApi (urlExp, {
 } = {}) {
   const toUrl = makeToUrl(urlExp)
 
+  /**
+   * @param {string} method
+   * @return Action
+   */
   const makeAction = method => {
     return async (element, params = {}, overrides = {}) => {
       const options = { method, headers, ...overrides }
@@ -38,8 +74,19 @@ const JsonApi = function JsonApi (urlExp, {
     }
   }
 
-  this.defineAction = function (action, method = action, options) {
-    this[action] = (...args) => makeAction(method, options)(...args).then(r => r.data)
+  /**
+   * @param {string} action
+   * @param {string} method
+   * @return Action
+   */
+  this.defineAction = function (action, method = action) {
+    /**
+     * @param {Element} element
+     * @param {Object} params
+     * @param {Object} overrides
+     * @return Action
+     */
+    this[action] = (element, params = {}, overrides = {}) => makeAction(method)(element, params, overrides).then(r => r.data)
   }
 
   this.key = params => toUrl(params)
@@ -56,7 +103,7 @@ const JsonApi = function JsonApi (urlExp, {
   this.defineAction('get')
   this.show = this.get
 
-  this.index = (...args) => makeAction('get')(...args)
+  this.index = (element, params = {}, overrides = {}) => makeAction('get')(element, params, overrides)
 }
 
 JsonApi.config = {
