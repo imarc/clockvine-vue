@@ -159,7 +159,7 @@ const defineApiStore = function defineApiStore (
         }
 
         if (!(id in elementState) || elementState[id] === INVALID) {
-          elements[id] = elements[id] || undefined
+          elements[id] = undefined
           elementState[id] = LOADING
           api.get({ [idField]: id }).then((element) => {
             const newElement = mergeElement(id, element)
