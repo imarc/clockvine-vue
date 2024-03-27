@@ -220,9 +220,7 @@ const defineApiStore = function defineApiStore (
      * @param {ref|Object} paramsRef
      * @return {ref<reactive>}  computed reference to elements[id]
      */
-    const indexAsRef = (paramsRef = {}) => {
-      return computed(() => getIndex(paramsRef))
-    }
+    const indexAsRef = (paramsRef = {}) => computed(() => getIndex(paramsRef))
 
     /**
      * @param {ref|Object} paramsRef
