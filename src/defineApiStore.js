@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { shallowReactive, reactive, ref, toRef, computed, toValue, isRef, isReactive } from 'vue'
+import { reactive, ref, toRef, computed, toValue } from 'vue'
 import JsonApi from './JsonApi'
 
 /**
@@ -199,7 +199,11 @@ const defineApiStore = function defineApiStore (
       const key = api.key(params)
 
       if (!(key in indexState) || indexState[key] === INVALID) {
-        indexes[key] = indexes[key] || reactive({})
+        if (key in indexes) {
+          indexes[key] = { [indexDataField]: [...indexes[key][indexDataField]] }
+        } else {
+          indexes[key] = {}
+        }
         indexState[key] = LOADING
         api.index({}, params).then(index => {
           setIndex(key, index)
@@ -248,7 +252,7 @@ const defineApiStore = function defineApiStore (
      * Returns an object of computed references for destructuring. They are computed references
      * to make the properties depend upon paramsRef.
      *
-     * @param {ref|Object} paramsRef
+     * @param {ref|Object<String,ref>|Object<String,any>} paramsRef
      * @return Proxy
      */
     const index = (paramsRef = {}) => {
@@ -256,10 +260,7 @@ const defineApiStore = function defineApiStore (
         {},
         {
           get (_, prop) {
-            return computed(() => {
-              const index = getIndex(paramsRef)
-              return index[prop]
-            })
+            return computed(() => getIndex(paramsRef)[prop])
           }
         }
       )
