@@ -140,7 +140,7 @@ const defineApiStore = function defineApiStore (
       // TODO uncomment
       //index[indexDataField] = mergeElements(index[indexDataField]).map(toValue)
 
-      indexes[key] = index
+      Object.assign(indexes[key], index)
     }
 
     // =========================================================================
@@ -199,10 +199,9 @@ const defineApiStore = function defineApiStore (
       const key = api.key(params)
 
       if (!(key in indexState) || indexState[key] === INVALID) {
-        if (key in indexes) {
-          indexes[key] = { [indexDataField]: [...indexes[key][indexDataField]] }
-        } else {
-          indexes[key] = {}
+        if (!(key in indexes)) {
+          console.log('adding key to index', key)
+          indexes[key] = { key }
         }
         indexState[key] = LOADING
         api.index({}, params).then(index => {
