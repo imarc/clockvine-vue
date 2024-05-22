@@ -200,7 +200,6 @@ const defineApiStore = function defineApiStore (
 
       if (!(key in indexState) || indexState[key] === INVALID) {
         if (!(key in indexes)) {
-          console.log('adding key to index', key)
           indexes[key] = { key }
         }
         indexState[key] = LOADING
