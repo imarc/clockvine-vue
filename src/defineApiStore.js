@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { reactive, ref, toRef, computed, toValue } from 'vue'
+import { reactive, toRef, computed, toValue } from 'vue'
 import JsonApi from './JsonApi'
 
 /**
@@ -199,9 +199,7 @@ const defineApiStore = function defineApiStore (
       const key = api.key(params)
 
       if (!(key in indexState) || indexState[key] === INVALID) {
-        if (!(key in indexes)) {
-          indexes[key] = { key }
-        }
+        indexes[key] = { key }
         indexState[key] = LOADING
         api.index({}, params).then(index => {
           setIndex(key, index)
