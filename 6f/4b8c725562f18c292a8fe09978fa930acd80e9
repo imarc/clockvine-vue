@@ -1,0 +1,14 @@
+package.json
+  h_fa30cb431001ee 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "6f4b8c725562f18c292a8fe09978fa930acd80e9",
+  "prompts": {},
+  "humans": {
+    "h_fa30cb431001ee": {
+      "author": "Kevin Hamer <kevin@imarc.com>"
+    }
+  }
+}
